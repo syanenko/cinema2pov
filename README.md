@@ -1,6 +1,8 @@
 # POV Utilities
 
 Set of tools for exporting data from different sources to [POV-Ray](http://www.povray.org/)'s SDL format.\
+To preserve flexibility, exported data stored in an array that can be processed by macros, see examples in 'c4d\export2pov\examples'.
+
 Supported sources and entities:
 1. Cinema4D
    - Splines
