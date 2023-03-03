@@ -1,5 +1,5 @@
 //----------------------------------------------------------
-// Data exporter from C4D to POV-Ray format
+// Data exporter from C4D to POV-Ray (SDL) format
 // Based on Cineware SDK 22.008 Commandline Tool
 //
 // Author: Sergey Yanenko 'Yesbird', 2023
@@ -10,8 +10,15 @@
 // Supported entities: splines
 //----------------------------------------------------------
 
-#declare points_num = 101;
-#declare points = array mixed [101][2] {
+//
+// Spline point array
+//
+// SplineType: 0
+// SegmentCount: 1
+// PointCount: 101
+//
+#declare helix_size = 101;
+#declare helix = array mixed [helix_size][2] {
   { 0.000000, <0.000000, 0.000000, 0.000000>}
   { 0.009901, <0.019336, -0.035000, 0.005109>}
   { 0.019802, <0.034780, -0.070000, 0.019758>}

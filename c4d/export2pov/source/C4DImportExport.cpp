@@ -1,9 +1,14 @@
+//----------------------------------------------------------");
+// Data exporter from C4D to POV-Ray (SDL) format
+// Based on Cineware SDK 22.008 Commandline Tool
 //
-// POV-Ray export utility
+// Author: Sergey Yanenko 'Yesbird', 2023
+// e-mail: See posts in news.povray.org
+// Sorces: github.com/syanenko/pov-utils
+// POV-Ray site: www.povray.org
 //
-// Author: Sergey Yanenko
-// Date: 03.03.2023
-//
+// Supported entities: splines
+//----------------------------------------------------------
 #include "C4DImportExport.h"
 #include "c4d_browsecontainer.h"
 #include "parameter_ids/material/mbase.h"
@@ -18,7 +23,6 @@ Int32 g_tempmatid = 0;										// also only for demonstration purposes, used to
 Char* versionStr;
 // POV export globals
 FILE* file = 0;
-double radius = 0.1;
 
 // memory allocation functions inside cineware namespace (if you have your own memory management you can overload these functions)
 namespace cineware
@@ -2581,7 +2585,7 @@ Bool AlienCameraObjectData::Execute()
 // Execute function for the self defined Spline object
 Bool AlienSplineObject::Execute()
 {
-	Char *pChar = GetName().GetCStringCopy();
+	Char* pChar = GetName().GetCStringCopy();
 	if (pChar)
 	{
 		printf("\n - AlienSplineObject (%d): %s\n", (int)GetType(), pChar);
@@ -2617,27 +2621,34 @@ Bool AlienSplineObject::Execute()
 			break;
 	}
 
-	// Wrtite spline data
-	if (GetParameter(SPLINEOBJECT_TYPE, data))
-		printf("   - SplineType: %d\n", (int)data.GetInt32());
-	printf("   - PointCount: %d\n",   (int)GetPointCount());
-	printf("   - SegmentCount: %d\n", (int)GetSegmentCount());
-
-	fprintf(file, "//----------------------------------------------------------");
-	fprintf(file, "\n// Data exporter from C4D to POV-Ray format");
-	fprintf(file, "\n// Based on %s Commandline Tool", versionStr);
-	fprintf(file, "\n//");
-	fprintf(file, "\n// Author: Sergey Yanenko 'Yesbird', 2023");
-	fprintf(file, "\n// e-mail: See posts in news.povray.org");
-	fprintf(file, "\n// Sorces: github.com/syanenko/pov-utils");
-	fprintf(file, "\n// POV-Ray site: www.povray.org");
-	fprintf(file, "\n//");
-	fprintf(file, "\n// Supported entities: splines");
-	fprintf(file, "\n//----------------------------------------------------------\n\n");
-	
+	// Write spline data
 	int pc = GetPointCount();
-	fprintf(file, "#declare points_num = %d;\n\
-#declare points = array mixed [%d][2] {\n", pc, pc);
+	int type;
+	int sc = (int)GetSegmentCount();
+
+	if (GetParameter(SPLINEOBJECT_TYPE, data))
+	{
+		type = (int)data.GetInt32();
+		printf("   - SplineType: %d\n", type);
+	}
+
+	printf("   - PointCount: %d\n", pc);
+	printf("   - SegmentCount: %d\n", sc);
+
+	Char* objName = GetName().GetCStringCopy();
+	if (!objName)
+		objName = "points";
+
+	fprintf(file, "//\n");
+	fprintf(file, "// Spline point array\n");
+	fprintf(file, "//\n");
+	fprintf(file, "// SplineType: %d\n", type);
+	fprintf(file, "// SegmentCount: %d\n", sc);
+	fprintf(file, "// PointCount: %d\n", pc);
+	fprintf(file, "//\n");
+	
+	fprintf(file, "#declare %s_size = %d;\n\
+#declare %s = array mixed [%s_size][2] {\n", objName, pc, objName, objName);
 
 	printf("\n # Writing data ... \n");
 	const Vector* p = GetPointR();
@@ -2650,6 +2661,9 @@ Bool AlienSplineObject::Execute()
 
 	// Tags
 	// PrintTagInfo(this);
+	if (objName)
+		DeleteMem(objName);
+
 	return true;
 }
 
@@ -3381,7 +3395,7 @@ int main(int argc, Char* argv[])
 	versionStr = GetLibraryVersion().GetCStringCopy();
 
 	printf("\n//----------------------------------------------------------");
-	printf("\n// Data exporter from C4D to POV-Ray format");
+	printf("\n// Data exporter from C4D to POV-Ray (SDL) format");
 	printf("\n// Based on %s Commandline Tool", versionStr);
 	printf("\n//");
 	printf("\n// Author: Sergey Yanenko 'Yesbird', 2023");
@@ -3403,6 +3417,18 @@ int main(int argc, Char* argv[])
 	const char* fnSave = argv[2];
 
 	file = fopen(fnSave, "w");
+	fprintf(file, "//----------------------------------------------------------");
+	fprintf(file, "\n// Data exporter from C4D to POV-Ray (SDL) format");
+	fprintf(file, "\n// Based on %s Commandline Tool", versionStr);
+	fprintf(file, "\n//");
+	fprintf(file, "\n// Author: Sergey Yanenko 'Yesbird', 2023");
+	fprintf(file, "\n// e-mail: See posts in news.povray.org");
+	fprintf(file, "\n// Sorces: github.com/syanenko/pov-utils");
+	fprintf(file, "\n// POV-Ray site: www.povray.org");
+	fprintf(file, "\n//");
+	fprintf(file, "\n// Supported entities: splines");
+	fprintf(file, "\n//----------------------------------------------------------\n\n");
+
 	Bool res = LoadSaveC4DScene(fnLoad, nullptr);
 	fclose(file);
 

@@ -23,9 +23,9 @@ global_settings { assumed_gamma 1 }
 #include "colormaps.inc"
 
 //
-// Use include exported 'points' array
+// Use include exported 'helix' array
 //
-#include "../data/helix.inc"
+#include "helix.inc"
 
 // Axis
 // axis (4,4,4,0.05)
@@ -72,9 +72,9 @@ background {color srgb<13,17,23> / 256}
 #if (1)
 sphere_sweep {
     cubic_spline // b_spline, linear_spline 
-    points_num  
-        #for (i,0,points_num-1)
-          points[i][1], points[i][0] / 3.5 // center, radius                      
+    helix_size
+        #for (i,0,helix_size-1)
+          helix[i][1], helix[i][0] / 3.5 // center, radius                      
         #end
   
     pigment { gradient -y
@@ -91,8 +91,8 @@ sphere_sweep {
 #declare _spline =
   spline {
     natural_spline
-      #for (i,0,points_num-1)
-          points[i][0], points[i][1] // val_n, <point_n>
+      #for (i,0,helix_size-1)
+          helix[i][0], helix[i][1] // val_n, <point_n>
       #end
   }
 #end // if
