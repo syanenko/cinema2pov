@@ -1,11 +1,13 @@
 # POV Utilities
 
 Set of tools for exporting data from different sources to [POV-Ray](http://www.povray.org/)'s SDL format.\
-To preserve flexibility, exported data stored in an array that can be processed by macros, see examples in 'c4d\export2pov\examples'.
+Compiled by Microsoft Visual Studio 2019.
 
 Supported sources and entities:
 1. Cinema4D
-   - Splines
+   - Splines\
+   To preserve flexibility, exported spline data stored in an array that can be processed by macros,\
+   see examples in 'c4d\export2pov\examples'.
 
 ![data_usage](https://user-images.githubusercontent.com/6688301/222774955-c665690e-13a9-4862-aec0-bf9a59f1994e.png)
 #
