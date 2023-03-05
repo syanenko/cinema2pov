@@ -171,6 +171,7 @@ class AlienPrimitiveObjectData : public NodeData
 	INSTANCEOF(AlienPrimitiveObjectData, NodeData)
 
 	Int32 type_id;
+	Int32 matid;
 public:
 	AlienPrimitiveObjectData(Int32 id) : type_id(id) {}
 	virtual Bool Execute();

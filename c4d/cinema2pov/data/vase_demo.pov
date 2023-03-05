@@ -18,24 +18,27 @@ global_settings { assumed_gamma 1 }
 
 #include "math.inc"
 
-#declare luminosity = 1.3;
+#declare luminosity = 1;
 #include "playground.inc"
 #include "colormaps.inc"
 
-//
-// Use include exported 'helix' array
-//
-#include "helix.inc"
-
 // Axis
-// axis (4,4,4,0.05)
+axis (400,400,400,4)
 
 //
 // Camera
 //
-// camo (<0,10,0>, <0,0,0>, 45)  // +Y
-// camo (<8,-2,0>, <0,-2,0>, 45) // +X
-camo (<8,-1,-3>/1.1, <0,-2.2,0>, 45) // +XYZ
+// camo (<0,10,0>, <0,0,0>,  45)   // +Y
+// camo (<0,-8,0>, <0,0,0>,  45)   // -Y
+// camo (<8,0,0>, <0,0,0>, 45)     // +X
+// camo (<-8,0,0>, <0,0,0>, 45)    // -X
+// camo (<8,8,8>,  <0,0,0>,  45)   // +XYZ
+camo (<1700,900,0>,  <0,400,0>,  45) // -X+YZ
+
+light_source {<1700,900,0>,  rgb <1,1,1> * luminosity }
+light_source {<1000,1500,0>, rgb <1,1,1> * luminosity }
+
+light_source {<0,0,700>, rgb <1,1,1> * luminosity * 4 }
 
 //
 // Background
@@ -45,15 +48,15 @@ background {color srgb<13,17,23> / 256}
 //
 // Colormap
 //
-#declare _f = 0;
+#declare _f = 0.8;
 #declare _t = 0;
-#declare jet              = make_colormap (jet,              _f, _t);
+// #declare jet              = make_colormap (jet,              _f, _t);
 // #declare spring           = make_colormap (spring,           _f, _t);
 // #declare hot              = make_colormap (hot,              _f, _t);
 // #declare winter           = make_colormap (winter,           _f, _t);
 // #declare hsv              = make_colormap (hsv,              _f, _t);
-// #declare autumn           = make_colormap (autumn,           _f, _t);
-// #declare parula           = make_colormap (parula,           _f, _t);
+#declare autumn           = make_colormap (autumn,           0, _t);
+#declare parula           = make_colormap (parula,           _f, _t);
 // #declare summer           = make_colormap (summer,           _f, _t);
 // #declare turbo            = make_colormap (turbo,            _f, _t);
 // #declare cool             = make_colormap (cool,             _f, _t);
@@ -63,65 +66,37 @@ background {color srgb<13,17,23> / 256}
 #declare ext_kindlmann    = make_colormap (ext_kindlmann,    0.6, _t);
 // #declare kindlmann        = make_colormap (kindlmann,        _f, _t);
 // #declare inferno          = make_colormap (inferno,          _f, _t);
-
 //------------------------------------------------------------------------
 
 //
-// Sweep sphere
-//     
-#if (1)
-sphere_sweep {
-    cubic_spline // b_spline, linear_spline 
-    helix_size
-        #for (i,0,helix_size-1)
-          helix[i][1], helix[i][0] / 3.5 // center, radius                      
-        #end
-  
+// Default material
+//
+#declare mat_default = material {
+  texture {
     pigment { gradient -y
-              color_map  { jet }
-              scale 4 
-              translate 0.3}
-}
-#end // if
-
+              color_map  { parula }
+              scale 1000
+              translate -0.1}}}
 //
-// Make spline (need to draw spheres)
+// Vase bottom material
 //
-#if (1)
-#declare _spline =
-  spline {
-    natural_spline
-      #for (i,0,helix_size-1)
-          helix[i][0], helix[i][1] // val_n, <point_n>
-      #end
-  }
-#end // if
-
+#declare mat_bottom = material {
+  texture {
+    pigment { gradient x
+              color_map  { autumn }
+              scale 280
+              translate 150}}}
 //
-// Draw spheres
+// Vase body material
 //
-#if (1)
-#declare r_max = 0.35;
-#declare c_step = 0.014;
-declare  length = 1 - c_step;
-#declare c = 0;
-
-#while (c < length)
-  #local R = c / 2.5;
-  #local center = _spline(c);
-  
-  #debug concat("----- DEBUG: center=<", vstr(3, center,",", 0,1), ">\n")  
-  #debug concat("----- DEBUG: R=", str(R,5,3), "\n\n")
-
-  sphere {
-    center, R
+#declare mat_vase = material {
+  texture {
     pigment { gradient -y
               color_map  { ext_kindlmann }
-              scale 6.7
-              translate c}
-   }
+              scale 1000
+              translate -0.1}}}
 
-  #declare c = c + c_step;
-#end
-
-#end // if
+//
+// Include exported data
+//
+#include "vase.inc"

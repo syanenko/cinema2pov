@@ -1,4 +1,4 @@
-//----------------------------------------------------------");
+//---------------------------------------------------------------
 // Data exporter from C4D to POV-Ray (SDL) format
 // Based on Cineware SDK 22.008 Commandline Tool
 //
@@ -7,8 +7,8 @@
 // Sorces: github.com/syanenko/pov-utils
 // POV-Ray site: www.povray.org
 //
-// Supported entities: splines
-//----------------------------------------------------------
+// Supported objects: sphere, cube, cone, cylinder, spline, mesh
+//---------------------------------------------------------------
 #include "C4DImportExport.h"
 #include "c4d_browsecontainer.h"
 #include "parameter_ids/material/mbase.h"
@@ -20,44 +20,87 @@ using namespace cineware;
 BaseDocument* g_myInternalDoc = nullptr;	// pointer to the imported C4D document use to demonstrate the export, this should your own type of document
 Int32 g_tempLayID = 0;										// also only for demonstration purposes, used to enumerate IDs and to assign as Layer IDs
 Int32 g_tempmatid = 0;										// also only for demonstration purposes, used to enumerate IDs and to assign as Material IDs
-Char* versionStr;
+Char* version;
+
+///
 // POV export globals
+//
 FILE* file = 0;
+
+//
+// Wtite matrix
+// 
+void WriteMatrix(BaseObject* op)
+{
+	Matrix m = op->GetMg();
+	fprintf(file, "  matrix\n\
+ <%lf, %lf, %lf,\n\
+  %lf, %lf, %lf,\n\
+  %lf, %lf, %lf,\n\
+  %lf, %lf, %lf>\n\n",
+	m.v1.x, m.v1.y, m.v1.z,
+	m.v2.x, m.v2.y, m.v2.z,
+	m.v3.x, m.v3.y, m.v3.z,
+	m.off.x, m.off.y, m.off.z);
+}
+
+//
+// Wtite material
+// 
+void WriteMaterial(BaseObject* op)
+{
+	BaseTag* pTex = op->GetTag(Ttexture);
+	if (pTex)
+	{
+		GeData data;
+		AlienMaterial* pMat = nullptr;
+		if (pTex->GetParameter(TEXTURETAG_MATERIAL, data))
+			pMat = (AlienMaterial*)data.GetLink();
+
+		Char* pChar = pMat->GetName().GetCStringCopy();
+		fprintf(file, "  material { %s }\n\}\n\n", pChar);
+		DeleteMem(pChar);
+	}
+	else
+	{
+		fprintf(file, "  material { mat_default }\n\}\n\n");
+	}
+}
 
 // memory allocation functions inside cineware namespace (if you have your own memory management you can overload these functions)
 namespace cineware
 {
-// alloc memory no clear
-void* MemAllocNC(Int size)
-{
-	void *mem = malloc(size);
-	return mem;
-}
+	// alloc memory no clear
+	void* MemAllocNC(Int size)
+	{
+		void *mem = malloc(size);
+		return mem;
+	}
 
-// alloc memory set to 0
-void* MemAlloc(Int size)
-{
-	void *mem = MemAllocNC(size);
-	memset(mem, 0, size);
-	return mem;
-}
+	// alloc memory set to 0
+	void* MemAlloc(Int size)
+	{
+		void *mem = MemAllocNC(size);
+		memset(mem, 0, size);
+		return mem;
+	}
 
-// realloc existing memory
-void* MemRealloc(void* orimem, Int size)
-{
-	void *mem = realloc(orimem, size);
-	return mem;
-}
+	// realloc existing memory
+	void* MemRealloc(void* orimem, Int size)
+	{
+		void *mem = realloc(orimem, size);
+		return mem;
+	}
 
-// free memory and set pointer to null
-void MemFree(void*& mem)
-{
-	if (!mem)
-		return;
+	// free memory and set pointer to null
+	void MemFree(void*& mem)
+	{
+		if (!mem)
+			return;
 
-	free(mem);
-	mem = nullptr;
-}
+		free(mem);
+		mem = nullptr;
+	}
 }
 
 // overload this function and fill in your own unique data
@@ -2382,21 +2425,23 @@ Bool AlienXRefObjectData::Execute()
 	return true;
 }
 
+// 
 // Execute function for the self defined Polygon object
+// 
 Bool AlienPolygonObjectData::Execute()
 {
-	// get object pointer
+	// Get object pointer
 	PolygonObject *op = (PolygonObject*)GetNode();
 
 	GeData data;
 
-	// get point and polygon array pointer and counts
+	// Get point and polygon array pointer and counts
 	const Vector *vAdr = op->GetPointR();
-	Int32 pointcnt = op->GetPointCount();
+	Int32 pc = op->GetPointCount();
 	const CPolygon *polyAdr = op->GetPolygonR();
-	Int32 polycnt = op->GetPolygonCount();
+	Int32 fc = op->GetPolygonCount();
 
-	// get name of object as string copy (free it after usage!)
+	// Get name of object as string copy (free it after usage!)
 	Char *pChar = op->GetName().GetCStringCopy();
 	if (pChar)
 	{
@@ -2404,27 +2449,43 @@ Bool AlienPolygonObjectData::Execute()
 		DeleteMem(pChar);
 	}
 	else
+	{
 		printf("\n - AlienPolygonObjectData (%d): <noname>\n", (int)op->GetType());
+	}
 
 	PrintUniqueIDs(this);
-
-	printf("   - PointCount: %d PolygonCount: %d\n", (int)pointcnt, (int)polycnt);
-
+	printf("   - PointCount: %d PolygonCount: %d\n", (int)pc, (int)fc);
 	PrintMatrix(op->GetMg());
-
 	PrintUserData(op);
 
-	// polygon object with no points/polys allowed
-	if (pointcnt == 0 && polycnt == 0)
+	// Polygon object with no points/polys allowed
+	if (pc == 0 && fc == 0)
 		return true;
 
-	if (!vAdr || (!polyAdr && polycnt > 0))
+	if (!vAdr || (!polyAdr && fc > 0))
 		return false;
 
-	// print 4 points
-	for (Int32 p = 0; p < pointcnt && p < 4; p++)
-		printf("     P %d: %.1f / %.1f / %.1f\n",(int)p, vAdr[p].x, vAdr[p].y, vAdr[p].z);
+	// Vertices
+	fprintf(file, "mesh2 {\nvertex_vectors{ %d,\n", pc);
+	for (int i = 0; i < pc; ++i)
+	{
+		fprintf(file, "<%f, %f, %f>\n", vAdr[i].x, vAdr[i].y, vAdr[i].z);
+	}
+	fprintf(file, "}\n\n");
 
+	// Faces
+	fprintf(file, "face_indices { %d,\n", fc * 2);
+	for (int i = 0; i < fc; ++i)
+	{
+		fprintf(file, "<%d, %d, %d>\n", polyAdr[i].a, polyAdr[i].b, polyAdr[i].c);
+		fprintf(file, "<%d, %d, %d>\n", polyAdr[i].a, polyAdr[i].c, polyAdr[i].d);
+	}
+	fprintf(file, "}\n\n");
+
+	WriteMatrix(op);
+	WriteMaterial(op);
+
+	/*----------------------- Preserved for future use ------------------------
 	// Ngons
 	Int32 ncnt = op->GetNgonCount();
 	if (ncnt > 0)
@@ -2433,7 +2494,7 @@ Bool AlienPolygonObjectData::Execute()
 		for (Int32 n = 0; n < ncnt && n < 3; n++) // show only 3
 		{
 			printf("     Ngon %d with %d Edges\n", (int)n, (int)op->GetNgonBase()->GetNgons()[n].GetCount());
-			for (Int32 p = 0; p < polycnt && p < 3; p++)
+			for (Int32 p = 0; p < fc && p < 3; p++)
 			{
 				Int32 polyid = op->GetNgonBase()->FindPolygon(p);
 				if (polyid != NOTOK)
@@ -2459,17 +2520,6 @@ Bool AlienPolygonObjectData::Execute()
 	// tag info
 	PrintTagInfo(op);
 
-	// detect the assigned material (it only supports the single material of the first found texture tag, there can be more materials/texture tags assigned to an object)
-	BaseTag *pTex = op->GetTag(Ttexture);
-	if (pTex)
-	{
-		AlienMaterial *pMat = nullptr;
-		if (pTex->GetParameter(TEXTURETAG_MATERIAL, data))
-			pMat = (AlienMaterial*)data.GetLink();
-		if (pMat)
-			matid = pMat->matId;
-	}
-
 	// detect the assigned layer
 	AlienLayer *pLay = (AlienLayer*)op->GetLayerObject();
 	if (pLay)
@@ -2484,11 +2534,11 @@ Bool AlienPolygonObjectData::Execute()
 		else
 			printf("   - Layer (%d): <noname>\n", (int)pLay->GetType());
 	}
-
+	
 	if (op->GetFirstCTrack())
 		PrintAnimInfo(this->GetNode());
+	-------------------------------------------------------------------------*/
 
-	// here we return true in any case, there is no simpler description of an object than geometry
 	return true;
 }
 
@@ -2596,8 +2646,6 @@ Bool AlienSplineObject::Execute()
 
 	PrintUniqueIDs(this);
 
-	PrintMatrix(GetMg());
-
 	Int32 iType = -1;
 	GeData data;
 	if (GetParameter(SPLINEOBJECT_INTERPOLATION, data))
@@ -2621,6 +2669,9 @@ Bool AlienSplineObject::Execute()
 			break;
 	}
 
+	// Matrix
+	PrintMatrix(GetMg());
+
 	// Write spline data
 	int pc = GetPointCount();
 	int type;
@@ -2637,7 +2688,7 @@ Bool AlienSplineObject::Execute()
 
 	Char* objName = GetName().GetCStringCopy();
 	if (!objName)
-		objName = "points";
+		objName = String("points").GetCStringCopy();;
 
 	fprintf(file, "//\n");
 	fprintf(file, "// Spline point array\n");
@@ -2650,14 +2701,12 @@ Bool AlienSplineObject::Execute()
 	fprintf(file, "#declare %s_size = %d;\n\
 #declare %s = array mixed [%s_size][2] {\n", objName, pc, objName, objName);
 
-	printf("\n # Writing data ... \n");
 	const Vector* p = GetPointR();
 	for (int i = 0; i < pc; ++i)
 	{
 		fprintf(file, "  { %f, <%f, %f, %f>}\n", (double)i / (double)pc, p[i].x, p[i].z, p[i].y);
 	}
 	fprintf(file, "}\n");
-	printf(" # Done\n");
 
 	// Tags
 	// PrintTagInfo(this);
@@ -2667,34 +2716,90 @@ Bool AlienSplineObject::Execute()
 	return true;
 }
 
+//
 // Execute function for the self defined Primitive objects
+//
 Bool AlienPrimitiveObjectData::Execute()
 {
-	BaseObject* op = (BaseObject*)GetNode();
-	Char *pChar = op->GetName().GetCStringCopy();
-	if (pChar)
-	{
-		printf("\n - AlienPrimitiveObjectData (%d): %s\n", (int)op->GetType(), pChar);
-		DeleteMem(pChar);
-	}
-	else
-		printf("\n - AlienPrimitiveObjectData (%d): <noname>\n", (int)op->GetType());
+  BaseObject* op = (BaseObject*)GetNode();
+
+	Char* objName = op->GetName().GetCStringCopy();
+	if (!objName)
+		objName = String("noname").GetCStringCopy();;
 
 	PrintUniqueIDs(this);
 
 	GeData data;
-	if (this->type_id == Ocube)
+	if (this->type_id == Ocube) // Cube
 	{
-		if (op->GetParameter(PRIM_CUBE_LEN, data))
-			printf("   - Type: Cube - Len = %f / %f / %f\n", data.GetVector().x,  data.GetVector().y, data.GetVector().z);
+		op->GetParameter(PRIM_CUBE_LEN, data);
+		Vector size = data.GetVector();
+
+		printf("   - Type: Cube - Size: x=%lf, y=%lf, z=%lf\n", size.x, size.y, size.z);
+		Matrix m = op->GetMg();
+		size.x /= 2;
+		size.y /= 2;
+		size.z /= 2;
+		fprintf(file, "#declare %s = box { <%lf, %lf, %lf>, <%lf, %lf, %lf>\n", objName, -size.x, -size.y, -size.z, size.x, size.y, size.z);
+
+		WriteMatrix(op);
+		WriteMaterial(op);
+	}
+	else if (this->type_id == Osphere) { // Sphere
+		op->GetParameter(PRIM_SPHERE_RAD, data);
+		Float radius = data.GetFloat();
+
+		printf("   - Type: Sphere - Radius = %lf\n", radius);
+		fprintf(file, "#declare %s = sphere { 0, %lf \n", objName, radius);
+		
+		WriteMatrix(op);
+		WriteMaterial(op);
+	}
+	else if (this->type_id == Ocone) { // Cone
+		op->GetParameter(PRIM_CONE_TRAD, data);
+		Float TopRadius = data.GetFloat();
+
+		op->GetParameter(PRIM_CONE_BRAD, data);
+		Float BottomRadius = data.GetFloat();
+
+		op->GetParameter(PRIM_CONE_HEIGHT, data);
+		Float Height = data.GetFloat();
+
+		printf("   - Type: Cone - TopRadius = %lf, BottomRadius = %lf, Height = %lf\n", TopRadius, BottomRadius, Height);
+		Height /= 2;
+		Matrix m = op->GetMg();
+		fprintf(file, "#declare %s = cone { <%lf, %lf, %lf>, %lf, <%lf, %lf, %lf>, %lf\n",
+			objName, -Height, 0, BottomRadius, 0, Height, 0, TopRadius);
+
+		WriteMatrix(op);
+		WriteMaterial(op);
+	}
+	else if (this->type_id == Ocylinder) { // Cylinder
+		op->GetParameter(PRIM_CYLINDER_RADIUS, data);
+		Float Radius = data.GetFloat();
+		
+		op->GetParameter(PRIM_CYLINDER_HEIGHT, data);
+		Float Height = data.GetFloat();
+		
+		printf("   - Type: Cylinder - Radius = %lf, Height = %lf\n", Radius, Height);
+		Height /= 2;
+		fprintf(file, "#declare %s = cylinder { <%lf, %lf, %lf>, <%lf, %lf, %lf>, %lf\n",
+			objName, 0, -Height, 0, 0, Height, 0, Radius);
+		
+		WriteMatrix(op);
+		WriteMaterial(op);
 	}
 
-	PrintMatrix(op->GetMg());
+	if (objName)
+		DeleteMem(objName);
 
-	// tags
+	PrintMatrix(op->GetMg());
+	
+	/*----------------------- Preserved for future use ------------------------
+	// Tags
 	PrintTagInfo(op);
 
-	// detect the layer
+	// Detect the layer
 	AlienLayer *pLay = (AlienLayer*)op->GetLayerObject();
 	if (pLay)
 	{
@@ -2710,10 +2815,9 @@ Bool AlienPrimitiveObjectData::Execute()
 
 	PrintAnimInfo(op);
 	PrintUserData(op);
-
+	-------------------------------------------------------------------------*/
 	return true;
 }
-
 // Execute function for the self defined light objects
 Bool AlienLightObjectData::Execute()
 {
@@ -2896,7 +3000,7 @@ static void PrintMateriaCache(BaseContainer& bc)
 // Execute function for the self defined Material
 Bool AlienMaterial::Execute()
 {
-	Char *pChar = GetName().GetCStringCopy();
+	Char* pChar = GetName().GetCStringCopy();
 	if (pChar)
 	{
 		printf("\n - AlienMaterial (%d): %s\n", (int)GetType(), pChar);
@@ -3381,7 +3485,6 @@ Bool BaseDocument::CreateSceneToC4D(Bool selectedonly)
 	return true;
 }
 
-
 //////////////////////////////////////////////////////////////////////////
 // MAIN FUNCTION
 //////////////////////////////////////////////////////////////////////////
@@ -3390,47 +3493,50 @@ Bool BaseDocument::CreateSceneToC4D(Bool selectedonly)
 #include <uuid/uuid.h>
 #endif
 
+//
+// QQ: TODO
+//  
+// 1. Plane: https://wiki.povray.org/content/Reference:Plane 
+// 2. Prizm: https://www.povray.org/documentation/view/3.7.0/62/ (from spline as sweep)
+// 3. Torus: https://wiki.povray.org/content/Reference:Torus
+//
 int main(int argc, Char* argv[])
 {
-	versionStr = GetLibraryVersion().GetCStringCopy();
-
-	printf("\n//----------------------------------------------------------");
-	printf("\n// Data exporter from C4D to POV-Ray (SDL) format");
-	printf("\n// Based on %s Commandline Tool", versionStr);
-	printf("\n//");
-	printf("\n// Author: Sergey Yanenko 'Yesbird', 2023");
-	printf("\n// e-mail: See posts in news.povray.org");
-	printf("\n// Sorces: github.com/syanenko/pov-utils");
-	printf("\n// POV-Ray site: www.povray.org");
-	printf("\n//");
-	printf("\n// Supported entities: splines");
-	printf("\n//----------------------------------------------------------");
+	version = GetLibraryVersion().GetCStringCopy();
+	
+	char header[800];
+	sprintf(header,
+ "//---------------------------------------------------------------\
+\n// Data exporter from C4D to POV-Ray (SDL) format\
+\n// Based on %s Commandline Tool\
+\n//\
+\n// Author: Sergey Yanenko 'Yesbird', 2023\
+\n// e-mail: See posts in news.povray.org\
+\n// Sorces: github.com/syanenko/pov-utils\
+\n// POV-Ray site: www.povray.org\
+\n//\
+\n// Supported entities: sphere, cube, cone, cylinder, spline, mesh\
+\n//---------------------------------------------------------------\n\n", version);
+  printf(header);
 
 	if (argc < 3)
 	{
 		printf("\n\nUsage: export2pov <infile.c4d> <ouitfile.inc>\n");
-		DeleteMem(versionStr);
+		DeleteMem(version);
 		exit(1);
 	}
 
 	const char* fnLoad = argv[1];
 	const char* fnSave = argv[2];
-
+	
 	file = fopen(fnSave, "w");
-	fprintf(file, "//----------------------------------------------------------");
-	fprintf(file, "\n// Data exporter from C4D to POV-Ray (SDL) format");
-	fprintf(file, "\n// Based on %s Commandline Tool", versionStr);
-	fprintf(file, "\n//");
-	fprintf(file, "\n// Author: Sergey Yanenko 'Yesbird', 2023");
-	fprintf(file, "\n// e-mail: See posts in news.povray.org");
-	fprintf(file, "\n// Sorces: github.com/syanenko/pov-utils");
-	fprintf(file, "\n// POV-Ray site: www.povray.org");
-	fprintf(file, "\n//");
-	fprintf(file, "\n// Supported entities: splines");
-	fprintf(file, "\n//----------------------------------------------------------\n\n");
+	printf(" # Writing data ...");
+	fprintf(file, header);
 
 	Bool res = LoadSaveC4DScene(fnLoad, nullptr);
+
+	printf(" # Done\n");
 	fclose(file);
 
-	DeleteMem(versionStr);
+	DeleteMem(version);
 }
