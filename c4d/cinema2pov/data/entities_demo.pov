@@ -29,7 +29,7 @@ axis (4,4,4,0.03)
 //
 // Camera
 //
-//camo (<0,10,0>, <0,0,0>,  45) // +Y
+// camo (<0,20,0>, <0,0,0>,  45) // +Y
 // camo (<8,0,0>, <0,0,0>, 45)   // +X
 camo (<8,10,8> *1.,  <0,3,0>,  45) // +XYZ
 // camo (<800,200,800> / 3  <0,0,0>,  45) // +XYZ
@@ -110,3 +110,11 @@ background {color srgb<13,17,23> / 256}
 // Include entities 
 //
 #include "entities.inc"
+
+
+object{ Torus   texture {
+    pigment { gradient -y
+              color_map  { ext_kindlmann }
+              scale 3 
+              translate 1}}}
+
