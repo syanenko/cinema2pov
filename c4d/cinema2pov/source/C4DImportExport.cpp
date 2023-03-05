@@ -40,8 +40,25 @@ void MakeValidName(Char* objName)
 	for (int i = 0; i < len; i++)
 		switch (objName[i])
 		{
-			case ' ': objName[i] = '_'; break;
-			case '.': objName[i] = '_'; break;
+			case ' ':  objName[i] = '_'; break;
+			case '.':  objName[i] = '_'; break;
+			case ',':  objName[i] = '_'; break;
+			case '-':  objName[i] = '_'; break;
+			case '=':  objName[i] = '_'; break;
+			case '"':  objName[i] = '_'; break;
+			case '\'': objName[i] = '_'; break;
+			case '\t': objName[i] = '_'; break;
+			case '?':  objName[i] = '_'; break;
+			case '!':  objName[i] = '_'; break;
+			case '#':  objName[i] = '_'; break;
+			case '<':  objName[i] = '_'; break;
+			case '>':  objName[i] = '_'; break;
+			case '{':  objName[i] = '_'; break;
+			case '}':  objName[i] = '_'; break;
+			case '(':  objName[i] = '_'; break;
+			case ')':  objName[i] = '_'; break;
+			case '[':  objName[i] = '_'; break;
+			case ']':  objName[i] = '_'; break;
 		}
 }
 
