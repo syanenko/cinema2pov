@@ -12,8 +12,11 @@
 #include "C4DImportExport.h"
 #include "c4d_browsecontainer.h"
 #include "parameter_ids/material/mbase.h"
+#include <vector>
+#include <string>
 
 // here you should use the cineware namespace
+using namespace std;
 using namespace cineware;
 
 // global temporary variables for this export example of c4d scene file
@@ -25,6 +28,7 @@ Char* version;
 ///
 // POV export globals
 //
+vector<string> objects;
 FILE* file = 0;
 
 //
@@ -2426,14 +2430,12 @@ Bool AlienXRefObjectData::Execute()
 }
 
 // 
-// Execute function for the self defined Polygon object
+// Polygons
 // 
 Bool AlienPolygonObjectData::Execute()
 {
 	// Get object pointer
 	PolygonObject *op = (PolygonObject*)GetNode();
-
-	GeData data;
 
 	// Get point and polygon array pointer and counts
 	const Vector *vAdr = op->GetPointR();
@@ -2442,16 +2444,13 @@ Bool AlienPolygonObjectData::Execute()
 	Int32 fc = op->GetPolygonCount();
 
 	// Get name of object as string copy (free it after usage!)
-	Char *pChar = op->GetName().GetCStringCopy();
-	if (pChar)
-	{
-		printf("\n - AlienPolygonObjectData (%d): %s\n", (int)op->GetType(), pChar);
-		DeleteMem(pChar);
-	}
+	Char* objName = op->GetName().GetCStringCopy();
+	if (!objName)
+		objName = String("noname").GetCStringCopy();
 	else
-	{
-		printf("\n - AlienPolygonObjectData (%d): <noname>\n", (int)op->GetType());
-	}
+		;// QQ:Remove non-valid symbols
+
+	objects.push_back(objName);
 
 	PrintUniqueIDs(this);
 	printf("   - PointCount: %d PolygonCount: %d\n", (int)pc, (int)fc);
@@ -2466,12 +2465,15 @@ Bool AlienPolygonObjectData::Execute()
 		return false;
 
 	// Vertices
-	fprintf(file, "mesh2 {\nvertex_vectors{ %d,\n", pc);
+	fprintf(file, "#declare %s = mesh2 {\nvertex_vectors{ %d,\n", objName, pc);
 	for (int i = 0; i < pc; ++i)
 	{
 		fprintf(file, "<%f, %f, %f>\n", vAdr[i].x, vAdr[i].y, vAdr[i].z);
 	}
 	fprintf(file, "}\n\n");
+	
+	if (objName)
+		DeleteMem(objName);
 
 	// Faces
 	fprintf(file, "face_indices { %d,\n", fc * 2);
@@ -2632,17 +2634,15 @@ Bool AlienCameraObjectData::Execute()
 	return true;
 }
 
-// Execute function for the self defined Spline object
+//
+// Spline
+//
 Bool AlienSplineObject::Execute()
 {
-	Char* pChar = GetName().GetCStringCopy();
-	if (pChar)
-	{
-		printf("\n - AlienSplineObject (%d): %s\n", (int)GetType(), pChar);
-		DeleteMem(pChar);
-	}
-	else
-		printf("\n - AlienSplineObject (%d): <noname>\n", (int)GetType());
+	Char* objName = GetName().GetCStringCopy();
+	if (!objName)
+		objName = String("points").GetCStringCopy();;
+	printf("\n - AlienSplineObject (%d): %s\n", (int)GetType(), objName);
 
 	PrintUniqueIDs(this);
 
@@ -2686,10 +2686,6 @@ Bool AlienSplineObject::Execute()
 	printf("   - PointCount: %d\n", pc);
 	printf("   - SegmentCount: %d\n", sc);
 
-	Char* objName = GetName().GetCStringCopy();
-	if (!objName)
-		objName = String("points").GetCStringCopy();;
-
 	fprintf(file, "//\n");
 	fprintf(file, "// Spline point array\n");
 	fprintf(file, "//\n");
@@ -2717,19 +2713,17 @@ Bool AlienSplineObject::Execute()
 }
 
 //
-// Execute function for the self defined Primitive objects
+// Primitives
 //
 Bool AlienPrimitiveObjectData::Execute()
 {
-	BaseObject* op = (BaseObject*)GetNode();
-	Char* pChar = op->GetName().GetCStringCopy();
-	if (pChar)
-	{
-		printf("\n - AlienPrimitiveObjectData (%d): %s\n", (int)op->GetType(), pChar);
-		DeleteMem(pChar);
-	}
+  BaseObject* op = (BaseObject*)GetNode();
+
+	Char* objName = op->GetName().GetCStringCopy();
+	if (!objName)
+		objName = String("noname").GetCStringCopy();
 	else
-		printf("\n - AlienPrimitiveObjectData (%d): <noname>\n", (int)op->GetType());
+		;// QQ:Remove non-valid symbols
 
 	PrintUniqueIDs(this);
 
@@ -2744,20 +2738,24 @@ Bool AlienPrimitiveObjectData::Execute()
 		size.x /= 2;
 		size.y /= 2;
 		size.z /= 2;
-		fprintf(file, "box { <%lf, %lf, %lf>, <%lf, %lf, %lf>\n", -size.x, -size.y, -size.z, size.x, size.y, size.z);
+		fprintf(file, "#declare %s = box { <%lf, %lf, %lf>, <%lf, %lf, %lf>\n", objName, -size.x, -size.y, -size.z, size.x, size.y, size.z);
 
 		WriteMatrix(op);
 		WriteMaterial(op);
+
+		objects.push_back(objName);
 	}
 	else if (this->type_id == Osphere) { // Sphere
 		op->GetParameter(PRIM_SPHERE_RAD, data);
 		Float radius = data.GetFloat();
 
 		printf("   - Type: Sphere - Radius = %lf\n", radius);
-		fprintf(file, "sphere { 0, %lf \n", radius);
+		fprintf(file, "#declare %s = sphere { 0, %lf \n", objName, radius);
 		
 		WriteMatrix(op);
 		WriteMaterial(op);
+
+		objects.push_back(objName);
 	}
 	else if (this->type_id == Ocone) { // Cone
 		op->GetParameter(PRIM_CONE_TRAD, data);
@@ -2772,11 +2770,13 @@ Bool AlienPrimitiveObjectData::Execute()
 		printf("   - Type: Cone - TopRadius = %lf, BottomRadius = %lf, Height = %lf\n", TopRadius, BottomRadius, Height);
 		Height /= 2;
 		Matrix m = op->GetMg();
-		fprintf(file, "cone { <%lf, %lf, %lf>, %lf, <%lf, %lf, %lf>, %lf\n",
-			0, -Height, 0, BottomRadius, 0, Height, 0, TopRadius);
+		fprintf(file, "#declare %s = cone { <%lf, %lf, %lf>, %lf, <%lf, %lf, %lf>, %lf\n",
+			objName, -Height, 0, BottomRadius, 0, Height, 0, TopRadius);
 
 		WriteMatrix(op);
 		WriteMaterial(op);
+
+		objects.push_back(objName);
 	}
 	else if (this->type_id == Ocylinder) { // Cylinder
 		op->GetParameter(PRIM_CYLINDER_RADIUS, data);
@@ -2787,15 +2787,17 @@ Bool AlienPrimitiveObjectData::Execute()
 		
 		printf("   - Type: Cylinder - Radius = %lf, Height = %lf\n", Radius, Height);
 		Height /= 2;
-		fprintf(file, "cylinder { <%lf, %lf, %lf>, <%lf, %lf, %lf>, %lf\n",
-			0, -Height, 0, 0, Height, 0, Radius);
+		fprintf(file, "#declare %s = cylinder { <%lf, %lf, %lf>, <%lf, %lf, %lf>, %lf\n",
+			objName, 0, -Height, 0, 0, Height, 0, Radius);
 		
 		WriteMatrix(op);
 		WriteMaterial(op);
+
+		objects.push_back(objName);
 	}
 
-	if (pChar)
-		DeleteMem(pChar);
+	if (objName)
+		DeleteMem(objName);
 
 	PrintMatrix(op->GetMg());
 	
@@ -3538,6 +3540,10 @@ int main(int argc, Char* argv[])
 	fprintf(file, header);
 
 	Bool res = LoadSaveC4DScene(fnLoad, nullptr);
+
+	// Write objects instances 
+	for (string name : objects)
+		fprintf(file, "object{ %s }\n", name.c_str());
 
 	printf(" # Done\n");
 	fclose(file);

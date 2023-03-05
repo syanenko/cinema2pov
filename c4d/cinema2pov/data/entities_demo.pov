@@ -24,7 +24,7 @@ global_settings { assumed_gamma 1 }
 #include "textures.inc"
 
 // Axis
-axis (4,6,4,0.03)
+axis (4,4,4,0.03)
 
 //
 // Camera
@@ -109,165 +109,10 @@ background {color srgb<13,17,23> / 256}
 //
 // Include entities 
 //
-// #include "entities.inc"
+#include "entities.inc"
 
 
-//--- pipe and flange parts
-//--- miller 3.2.23
-#include "shapes3.inc"
-
-
-#macro pm_lathe_pipe (w,h)
-    lathe{
-        linear_spline
-        4,
-        <0, 0>,
-        <0, h>,
-        <w, h>,
-        <w, 0>
-    }
-#end
-
-
-#declare fill_object  = 1;
-#declare merge_object = 1;
-
-#declare pipe_height = 5;
-#declare pipe_rad = 1;
-#declare flange_height = 4.7;
-#declare flange_rad = 2;
-#declare edge_rad = .05;
-#declare double_flange = 1;
-#declare flange_collar = true;
-#declare collar_height = .5;
-#declare collar_rad = pipe_rad + .1;
-
-#declare bolt_count = 12;
-#declare bolt_sides = 7;
-#declare bolt_rad = .2;
-#declare bolt_height = .25;
-#declare bolt_position = <pipe_rad + ((flange_rad-pipe_rad)/2),
-flange_height-bolt_height, 0>  ;
-
-#declare pipe_ribs = 7;
-#declare pipe_rib_rad = .08;
-
-
-//--- bolt prototype
-#declare bolt =
-Round_Pyramid_N_in(
-    bolt_sides,
-    <0,0,0>,
-    bolt_rad,
-    <0,bolt_height,0>,
-    bolt_rad,
-    edge_rad,
-    fill_object,
-    merge_object )
-
-//--- bolt prototype
-#declare bolt_end =
-Round_Pyramid_N_in(
-    bolt_sides,
-    <0,0,0>,
-    pipe_rad*.6,
-    <0,-.25,0>,
-    pipe_rad*.55,
-    edge_rad,
-    fill_object,
-    merge_object )
-
-
-
-#macro pipe_with_flange()
-union{
-    Round_Cylinder_Tube(
-        <0,0,0>,
-        <0,pipe_height,0>,
-        pipe_rad,
-        edge_rad,
-        fill_object,
-        merge_object )  //-- main vertical pipe
-
-    Round_Cylinder_Tube(
-        <0,flange_height,0>,
-        <0,pipe_height,0>,
-        flange_rad,
-        edge_rad,
-        fill_object,
-        merge_object )  //--- top flange
-
-
-
-    #if (double_flange = 1)
-         Round_Cylinder_Tube(
-            <0,pipe_height,0>,
-            <0,pipe_height + (pipe_height-flange_height),0>,
-            flange_rad,
-            edge_rad,
-            fill_object,
-            merge_object )  //--- double flange
-
-            #if (bolt_count > 0)
-                #declare c=0;
-                #declare inc=360/bolt_count;
-                #while (c < bolt_count)
-                    #declare r_y = inc*c;
-                    #declare n_x = bolt_position.x ;
-                    #declare n_y = bolt_position.y +
-(pipe_height-flange_height)*2 + bolt_height;
-                    #declare n_z = bolt_position.z ;
-                    object {bolt translate <n_x, n_y, n_z> rotate y*r_y}
-                    #declare c = c + 1;
-                #end
-            #end
-    #end
-
-    bolt_end
-
-    #if (bolt_count > 0)
-        #declare c=0;
-        #declare inc=360/bolt_count;
-        #while (c < bolt_count)
-            #declare new_y = inc*c;
-            object {bolt translate bolt_position rotate y*new_y}
-            #declare c = c + 1;
-
-        #end
-    #end
-
-
-    #if (pipe_ribs> 0)
-        #declare c=0;
-        #declare inc=flange_height/pipe_ribs;
-        #while (c < pipe_ribs)
-            #declare new_y = inc*c;
-            torus { pipe_rad ,pipe_rib_rad translate <0,new_y,0>}
-            #declare c = c + 1;
-
-        #end
-     #end
-
-    #if (flange_collar = true)
-        #declare n_y = (pipe_height -(pipe_height-flange_height)) -
-collar_height ;
-        Round_Cylinder_Tube(
-            <0,n_y,0>,
-            <0,n_y + collar_height ,0>,
-            collar_rad,
-            edge_rad,
-            fill_object,
-            merge_object )  //-- collar
-     #end
-
-      }
-#end
-
-
-object { pipe_with_flange() material {
-  texture { Polished_Chrome
-    //pigment { rgb <0,0.1,0> }
-}}
-
-scale 1 }
-
+//
+// Objects instances
+//
+// object { Cylinder }
