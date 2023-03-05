@@ -2763,8 +2763,8 @@ Bool AlienPrimitiveObjectData::Execute()
 		WriteMaterial(op);
 
 		objects.push_back(objName);
-	}
-	else if (this->type_id == Osphere) { // Sphere
+
+	} else if (this->type_id == Osphere) { // Sphere
 		op->GetParameter(PRIM_SPHERE_RAD, data);
 		Float radius = data.GetFloat();
 
@@ -2775,8 +2775,8 @@ Bool AlienPrimitiveObjectData::Execute()
 		WriteMaterial(op);
 
 		objects.push_back(objName);
-	}
-	else if (this->type_id == Ocone) { // Cone
+
+	} else if (this->type_id == Ocone) { // Cone
 		op->GetParameter(PRIM_CONE_TRAD, data);
 		Float TopRadius = data.GetFloat();
 
@@ -2796,8 +2796,8 @@ Bool AlienPrimitiveObjectData::Execute()
 		WriteMaterial(op);
 
 		objects.push_back(objName);
-	}
-	else if (this->type_id == Ocylinder) { // Cylinder
+
+	} else if (this->type_id == Ocylinder) { // Cylinder
 		op->GetParameter(PRIM_CYLINDER_RADIUS, data);
 		Float Radius = data.GetFloat();
 		
@@ -2813,7 +2813,25 @@ Bool AlienPrimitiveObjectData::Execute()
 		WriteMaterial(op);
 
 		objects.push_back(objName);
+
+	} else if (this->type_id == Oplane) { // Plane
+		op->GetParameter(PRIM_PLANE_WIDTH, data);
+		Float width = data.GetFloat();
+
+		op->GetParameter(PRIM_PLANE_HEIGHT, data);
+		Float height = data.GetFloat();
+
+		printf("   - Type: Plane - width = %lf, height = %lf\n", width, height);
+		width  /= 2;
+		height /= 2;
+		fprintf(file, "#declare %s = plane { <0,1,0> 0 clipped_by {box {<%f, %f, %f>, <%f, %f, %f>}}\n", objName, -width, -0.01, -height, width, 0.01, height);
+
+		WriteMatrix(op);
+		WriteMaterial(op);
+
+		objects.push_back(objName);
 	}
+
 
 	if (objName)
 		DeleteMem(objName);
@@ -3568,3 +3586,17 @@ int main(int argc, Char* argv[])
 
 	DeleteMem(version);
 }
+
+/*
+
+enum
+{
+	PRIM_TORUS_OUTERRAD				   = 1150, // REAL	 - Outer Radius [>=0.0]
+	PRIM_TORUS_INNERRAD				   = 1151, // REAL   - Inner Radius [>=0.0,<=Outer Radius]
+	PRIM_TORUS_CSUB						   = 1152, // LONG	 - Cross Section Segments [>2]
+	PRIM_TORUS_SEG						   = 1153, // LONG   - Rotational Segments [>2]
+	PRIM_TORUS_USE_NEW_VERSION   = 1154, // BOOL   - Use migrated generator if true (R20). In the BaseContainer but not in the UI.
+	PRIM_TORUS_SWITCH_TO_UPDATED = 1155  // BUTTON - To switch from legacy to migrated generator.
+};
+
+*/
