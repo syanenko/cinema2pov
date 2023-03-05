@@ -2464,13 +2464,15 @@ Bool AlienPolygonObjectData::Execute()
 	else
 		MakeValidName(objName);
 
-	objects.push_back(objName);
-
+	printf("\n - AlienPolygonObject (%d): %s\n", (int)op->GetType(), objName);
 	PrintUniqueIDs(this);
+	
 	printf("   - PointCount: %d PolygonCount: %d\n", (int)pc, (int)fc);
 	PrintMatrix(op->GetMg());
 	PrintUserData(op);
-
+	
+	objects.push_back(objName);
+	
 	// Polygon object with no points/polys allowed
 	if (pc == 0 && fc == 0)
 		return true;
@@ -2658,8 +2660,8 @@ Bool AlienSplineObject::Execute()
 		objName = String("points").GetCStringCopy();
 	else
 		MakeValidName(objName);
-	printf("\n - AlienSplineObject (%d): %s\n", (int)GetType(), objName);
 
+	printf("\n - AlienSplineObject (%d): %s\n", (int)GetType(), objName);
 	PrintUniqueIDs(this);
 
 	Int32 iType = -1;
@@ -2718,7 +2720,7 @@ Bool AlienSplineObject::Execute()
 	{
 		fprintf(file, "  { %f, <%f, %f, %f>}\n", (double)i / (double)pc, p[i].x, p[i].z, p[i].y);
 	}
-	fprintf(file, "}\n");
+	fprintf(file, "}\n\n");
 
 	// Tags
 	// PrintTagInfo(this);
@@ -2729,7 +2731,7 @@ Bool AlienSplineObject::Execute()
 }
 
 //
-// Primitives
+// Primitive
 //
 Bool AlienPrimitiveObjectData::Execute()
 {
@@ -2741,6 +2743,7 @@ Bool AlienPrimitiveObjectData::Execute()
 	else
 		MakeValidName(objName);
 
+	printf("\n - AlienPrimitiveObject (%d): %s\n", (int)op->GetType(), objName);
 	PrintUniqueIDs(this);
 
 	GeData data;
@@ -3519,8 +3522,7 @@ Bool BaseDocument::CreateSceneToC4D(Bool selectedonly)
 // QQ: TODO
 //  
 // 1. Plane: https://wiki.povray.org/content/Reference:Plane 
-// 2. Prizm: https://www.povray.org/documentation/view/3.7.0/62/ (from spline as sweep)
-// 3. Torus: https://wiki.povray.org/content/Reference:Torus
+// 2. Torus: https://wiki.povray.org/content/Reference:Torus
 //
 int main(int argc, Char* argv[])
 {
@@ -3537,7 +3539,7 @@ int main(int argc, Char* argv[])
 \n// Sorces: github.com/syanenko/pov-utils\
 \n// POV-Ray site: www.povray.org\
 \n//\
-\n// Supported entities: sphere, cube, cone, cylinder, spline, mesh\
+\n// Supported primitives: sphere, cube, cone, cylinder, spline, mesh\
 \n//---------------------------------------------------------------\n\n", version);
   printf(header);
 

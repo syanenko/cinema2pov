@@ -31,7 +31,7 @@ axis (4,4,4,0.03)
 //
 //camo (<0,10,0>, <0,0,0>,  45) // +Y
 // camo (<8,0,0>, <0,0,0>, 45)   // +X
-camo (<8,10,8>,  <0,3,0>,  45) // +XYZ
+camo (<8,10,8> *1.,  <0,3,0>,  45) // +XYZ
 // camo (<800,200,800> / 3  <0,0,0>,  45) // +XYZ
 
 //
@@ -89,7 +89,7 @@ background {color srgb<13,17,23> / 256}
 #declare cone_mat = material {
   texture {
     pigment { gradient -y
-              color_map  { hsv }
+              color_map  { hot }
               scale 3 
               translate 1.1}}}
 
@@ -110,9 +110,3 @@ background {color srgb<13,17,23> / 256}
 // Include entities 
 //
 #include "entities.inc"
-
-
-//
-// Objects instances
-//
-// object { Cylinder }
