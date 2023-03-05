@@ -32,6 +32,20 @@ vector<string> objects;
 FILE* file = 0;
 
 //
+// Make valid object name
+// 
+void MakeValidName(Char* objName)
+{
+	size_t len = strlen(objName);
+	for (int i = 0; i < len; i++)
+		switch (objName[i])
+		{
+			case ' ': objName[i] = '_'; break;
+			case '.': objName[i] = '_'; break;
+		}
+}
+
+//
 // Wtite matrix
 // 
 void WriteMatrix(BaseObject* op)
@@ -2448,7 +2462,7 @@ Bool AlienPolygonObjectData::Execute()
 	if (!objName)
 		objName = String("noname").GetCStringCopy();
 	else
-		;// QQ:Remove non-valid symbols
+		MakeValidName(objName);
 
 	objects.push_back(objName);
 
@@ -2641,7 +2655,9 @@ Bool AlienSplineObject::Execute()
 {
 	Char* objName = GetName().GetCStringCopy();
 	if (!objName)
-		objName = String("points").GetCStringCopy();;
+		objName = String("points").GetCStringCopy();
+	else
+		MakeValidName(objName);
 	printf("\n - AlienSplineObject (%d): %s\n", (int)GetType(), objName);
 
 	PrintUniqueIDs(this);
@@ -2723,7 +2739,7 @@ Bool AlienPrimitiveObjectData::Execute()
 	if (!objName)
 		objName = String("noname").GetCStringCopy();
 	else
-		;// QQ:Remove non-valid symbols
+		MakeValidName(objName);
 
 	PrintUniqueIDs(this);
 
@@ -2771,7 +2787,7 @@ Bool AlienPrimitiveObjectData::Execute()
 		Height /= 2;
 		Matrix m = op->GetMg();
 		fprintf(file, "#declare %s = cone { <%lf, %lf, %lf>, %lf, <%lf, %lf, %lf>, %lf\n",
-			objName, -Height, 0, BottomRadius, 0, Height, 0, TopRadius);
+			objName, 0, -Height, 0, BottomRadius, 0, Height, 0, TopRadius);
 
 		WriteMatrix(op);
 		WriteMaterial(op);
