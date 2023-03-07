@@ -64,7 +64,7 @@ background {color srgb<13,17,23> / 256}
 #declare viridis          = make_colormap (viridis,          _f, _t);
 // #declare smooth_cool_warm = make_colormap (smooth_cool_warm, _f, _t);
 // #declare plasma           = make_colormap (plasma,           _f, _t);
-#declare ext_kindlmann    = make_colormap (ext_kindlmann,    0.6, _t);
+#declare ext_kindlmann    = make_colormap (ext_kindlmann,    0, _t);
 // #declare kindlmann        = make_colormap (kindlmann,        _f, _t);
 // #declare inferno          = make_colormap (inferno,          _f, _t);
 //----------------------------------------------------------------------
@@ -76,31 +76,31 @@ background {color srgb<13,17,23> / 256}
   texture {
     pigment { gradient y
               color_map  { ext_kindlmann }
-              scale 150
-              translate 60}}}
+              scale 18
+              translate 12}}}
 
-#declare cyl_mat = material {
+#declare mat_cylinder = material {
   texture {
     pigment { gradient -y
               color_map  { hot }
               scale 3 
               translate 1.1}}}
 
-#declare cone_mat = material {
+#declare mat_cone = material {
   texture {
     pigment { gradient -y
               color_map  { hot }
               scale 3 
               translate 1.1}}}
 
-#declare cube_mat = material {
+#declare mat_cube = material {
   texture {
     pigment { gradient -y
               color_map  { cool }
               scale 3 
               translate 2.1}}}
 
-#declare sphere_mat = material {
+#declare mat_sphere = material {
   texture {
     pigment { gradient -y
               color_map  { autumn }
@@ -111,10 +111,11 @@ background {color srgb<13,17,23> / 256}
 //
 #include "entities.inc"
 
-
+/*
 object{ Torus   texture {
     pigment { gradient -y
               color_map  { ext_kindlmann }
               scale 3 
               translate 1}}}
 
+*/

@@ -102,6 +102,42 @@ void WriteMaterial(BaseObject* op)
 	}
 }
 
+//
+// Check for POV Sweep tag on spline
+//
+bool CheckPovSweep(BaseObject* obj, Float& shadow, Float& transp, Float& depth)
+{
+	GeData data;
+	BaseTag* btag = obj->GetFirstTag();
+	for (; btag; btag = (BaseTag*)btag->GetNext())
+	{
+		// EXAMPLE TAG
+		if (btag->GetType() == TEXAMPLE)
+		{
+			if (btag->GetParameter(2000, data))
+			{
+				shadow = data.GetFloat();
+				printf("\nQQ:SHADOW=%f", shadow);
+			}
+
+			if (btag->GetParameter(2001, data))
+			{
+				transp = data.GetFloat();
+				printf("\nQQ:TRANSPARENCY=%f", transp);
+			}
+
+			if (btag->GetParameter(2002, data))
+			{
+				depth = data.GetFloat();
+				printf("\nQQ:DEPTH=%f\n", depth);
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+
 // memory allocation functions inside cineware namespace (if you have your own memory management you can overload these functions)
 namespace cineware
 {
@@ -298,7 +334,7 @@ static void PrintUserData(BaseList2D* bl)
 }
 
 // prints tag infos to the console
-static void PrintTagInfo(BaseObject *obj)
+static void PrintTagInfo(BaseObject* obj)
 {
 	if (!obj)
 		return;
@@ -320,6 +356,25 @@ static void PrintTagInfo(BaseObject *obj)
 		else
 		{
 			printf("   - %s \"\"", GetObjectTypeName(btag->GetType()));
+		}
+
+		// EXAMPLE TAG
+		if (btag->GetType() == TEXAMPLE)
+		{
+			if (btag->GetParameter(2000, data))
+			{
+				printf("\nQQ:SHADOW=%f", data.GetFloat());
+			}
+
+			if (btag->GetParameter(2001, data))
+			{
+				printf("\nQQ:TRANSPARENCY=%f", data.GetFloat());
+			}
+
+			if (btag->GetParameter(2002, data))
+			{
+				printf("\nQQ:DEPTH=%f", data.GetFloat());
+			}
 		}
 
 		// compositing tag
@@ -2741,6 +2796,14 @@ Bool AlienSplineObject::Execute()
 
 	// Tags
 	// PrintTagInfo(this);
+	Float shadow;
+	Float transp;
+	Float depth;
+	bool res = CheckPovSweep(this, shadow, transp, depth);
+	
+	// User data
+	// PrintUserData(this);
+
 	if (objName)
 		DeleteMem(objName);
 
@@ -2869,6 +2932,7 @@ Bool AlienPrimitiveObjectData::Execute()
 		DeleteMem(objName);
 
 	PrintMatrix(op->GetMg());
+	PrintUserData(op);
 	
 	/*----------------------- Preserved for future use ------------------------
 	// Tags
@@ -2889,7 +2953,6 @@ Bool AlienPrimitiveObjectData::Execute()
 	}
 
 	PrintAnimInfo(op);
-	PrintUserData(op);
 	-------------------------------------------------------------------------*/
 	return true;
 }

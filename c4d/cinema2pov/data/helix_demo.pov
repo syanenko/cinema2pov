@@ -25,7 +25,7 @@ global_settings { assumed_gamma 1 }
 //
 // Use include exported 'helix' array
 //
-#include "spline.inc"
+#include "helix.inc"
 
 // Axis
 axis (4,4,4,0.05)
@@ -87,7 +87,7 @@ sphere_sweep {
 //
 // Make spline (need to draw spheres)
 //
-#if (0)
+#if (1)
 #declare _spline =
   spline {
     natural_spline
@@ -100,7 +100,7 @@ sphere_sweep {
 //
 // Draw spheres
 //
-#if (0)
+#if (1)
 #declare r_max = 0.35;
 #declare c_step = 0.014;
 declare  length = 1 - c_step;
