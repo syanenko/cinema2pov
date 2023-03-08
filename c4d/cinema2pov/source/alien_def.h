@@ -256,6 +256,16 @@ public:
 	virtual Bool Execute();
 };
 
+// self-defined instance object data with own functions and members
+class AlienSweepObjectData : public NodeData
+{
+	INSTANCEOF(AlienSweepObjectData, NodeData)
+
+public:
+
+	virtual Bool Execute();
+};
+
 // self-defined deformer object data with own functions and members
 class AlienDeformerObjectData : public NodeData
 {

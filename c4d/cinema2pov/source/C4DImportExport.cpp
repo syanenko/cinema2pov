@@ -105,15 +105,19 @@ void WriteMaterial(BaseObject* op)
 //
 // Check for POV Sweep tag on spline
 //
-bool CheckPovSweep(BaseObject* obj, Float& shadow, Float& transp, Float& depth)
+// Params will alter
+//bool CheckPovTag(BaseObject* obj, Float& shadow = 0, Float& transp = 0, Float& depth = 0)
+//
+bool CheckPovTag(BaseObject* obj)
 {
 	GeData data;
 	BaseTag* btag = obj->GetFirstTag();
 	for (; btag; btag = (BaseTag*)btag->GetNext())
 	{
-		// EXAMPLE TAG
-		if (btag->GetType() == TEXAMPLE)
+		// POV exprt tag (#define ID_POV_PRISM 1018985)
+		if (btag->GetType() == 1018985)
 		{
+			/*
 			if (btag->GetParameter(2000, data))
 			{
 				shadow = data.GetFloat();
@@ -130,7 +134,8 @@ bool CheckPovSweep(BaseObject* obj, Float& shadow, Float& transp, Float& depth)
 			{
 				depth = data.GetFloat();
 				printf("\nQQ:DEPTH=%f\n", depth);
-			}
+			}*/
+
 			return true;
 		}
 	}
@@ -1952,6 +1957,9 @@ NodeData *AllocAlienObjectData(Int32 id, Bool &known, BaseList2D* node)
 		case Oextrude:
 			m_data = NewObj(AlienExtrudeObjectData);
 			break;
+		case Osweep:
+			m_data = NewObj(AlienSweepObjectData);
+			break;
 
 		case Oxref:
 			m_data = NewObj(AlienXRefObjectData);
@@ -2382,15 +2390,38 @@ Bool AlienBoolObjectData::Execute()
 	else
 		printf("\n - AlienBoolObjectData (%d): <noname>", (int)op->GetType());
 
+	// Get params
 	GeData data;
 	Int32 boolType = 0;
 	if (op->GetParameter(BOOLEOBJECT_TYPE, data))
 	{
 		boolType = data.GetInt32();
-		printf(" - Boolean Type: %d", (int)boolType);
+		printf(" - Boolean Type: %d\n", (int)boolType);
 	}
 
-	printf("\n");
+	// Children
+	BaseObject* ch1 = (BaseObject*)op->GetDown();
+	pChar = ch1->GetName().GetCStringCopy();
+	if (pChar)
+	{
+		printf("\nQQ:Ch1 - AlienBoolObjectData (%d): %s\n", (int)ch1->GetType(), pChar);
+		DeleteMem(pChar);
+	}
+
+	BaseObject* ch2 = (BaseObject*)op->GetDownLast();
+	pChar = ch2->GetName().GetCStringCopy();
+	if (pChar)
+	{
+		printf("\nQQ:Ch2 - AlienBoolObjectData (%d): %s\n", (int)ch2->GetType(), pChar);
+		DeleteMem(pChar);
+	}
+
+	// Check tag
+	bool has_tag = CheckPovTag(op);
+	if (has_tag)
+	{
+		printf("^--------------- TO EXPORT -----------------^\n");
+	}
 
 	PrintUniqueIDs(this);
 
@@ -2435,8 +2466,77 @@ Bool AlienExtrudeObjectData::Execute()
 
 	PrintUniqueIDs(this);
 
+	BaseObject* ch = (BaseObject*)op->GetDown();
+	pChar = ch->GetName().GetCStringCopy();
+	if (pChar)
+	{
+		printf("\nQQ:Ch1 - AlienExtrudeObjectData (%d): %s\n", (int)ch->GetType(), pChar);
+		DeleteMem(pChar);
+	}
+
+	bool has_tag = CheckPovTag(op);
+	if (has_tag)
+	{
+		printf("^--------------- TO EXPORT -----------------^\n");
+	}
+
 	// returning false means we couldn't tranform the object to our own objects
 	// we will be called again in AlienPolygonObjectData::Execute() to get the same objects as mesh (only if the scene was written with polygon caches of course)
+	return false;
+}
+
+// Execute function for the self defined Environment object
+Bool AlienSweepObjectData::Execute()
+{
+	BaseObject* op = (BaseObject*)GetNode();
+	Char* pChar = op->GetName().GetCStringCopy();
+	if (pChar)
+	{
+		printf("\n - AlienSweepObjectData (%d): %s\n", (int)op->GetType(), pChar);
+		DeleteMem(pChar);
+	}
+	else
+		printf("\n - AlienSweepObjectData (%d): <noname>\n", (int)op->GetType());
+
+	BaseObject* ch1 = (BaseObject*)op->GetDown();
+	pChar = ch1->GetName().GetCStringCopy();
+	if (pChar)
+	{
+		printf("\nQQ:Ch1 - AlienSweepObjectData (%d): %s\n", (int)ch1->GetType(), pChar);
+		DeleteMem(pChar);
+	}
+
+	BaseObject* ch2 = (BaseObject*)op->GetDownLast();
+	pChar = ch2->GetName().GetCStringCopy();
+	if (pChar)
+	{
+		printf("\nQQ:Ch2 - AlienSweepObjectData (%d): %s\n", (int)ch2->GetType(), pChar);
+		DeleteMem(pChar);
+	}
+
+/* Get sweep params, including spline
+	GeData data;
+	Vector movement = Vector(0.0, 0.0, 0.0);
+	if (op->GetParameter(EXTRUDEOBJECT_MOVE, data))
+		movement = data.GetVector();
+	printf("\n   - GetMovement(): %.2f / %.2f / %.2f \n", movement.x, movement.y, movement.z);
+
+	Int32 endSteps = 0;
+	if (op->GetParameter(CAP_ENDSTEPS, data))
+		endSteps = data.GetInt32();
+	printf("\n   - GetEndCapSteps(): %d \n", (int)endSteps);
+
+	PrintUniqueIDs(this);
+
+	// returning false means we couldn't tranform the object to our own objects
+	// we will be called again in AlienPolygonObjectData::Execute() to get the same objects as mesh (only if the scene was written with polygon caches of course)
+*/
+	bool has_tag = CheckPovTag(op);
+	if (has_tag)
+	{
+		printf("^--------------- TO EXPORT -----------------^\n");
+	}
+
 	return false;
 }
 
@@ -2799,8 +2899,12 @@ Bool AlienSplineObject::Execute()
 	Float shadow;
 	Float transp;
 	Float depth;
-	bool res = CheckPovSweep(this, shadow, transp, depth);
-	
+	bool has_tag = CheckPovTag(this);
+	if (has_tag)
+	{
+		printf("^--------------- TO EXPORT -----------------^\n");
+	}
+
 	// User data
 	// PrintUserData(this);
 
@@ -3634,9 +3738,13 @@ Bool BaseDocument::CreateSceneToC4D(Bool selectedonly)
 //
 // QQ: TODO
 //  
-// 1. Plane: https://wiki.povray.org/content/Reference:Plane 
-// 2. Torus: https://wiki.povray.org/content/Reference:Torus
+// 1. Export spline as array
+// 2. Export spline as spline
+// 3. Export extrude as prism
+// 4. Export sweep as sphere_sweep
+// 5. Mark export with tags
 //
+
 int main(int argc, Char* argv[])
 {
 	version = GetLibraryVersion().GetCStringCopy();
