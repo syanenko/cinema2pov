@@ -8,10 +8,6 @@
 // Number of colormaps: 10
 // Number of colors in each: 256
 //
-// Sources:
-// MathWorks: https://www.mathworks.com/help/matlab/ref/colormap.html
-// Kenneth Moreland: https://www.kennethmoreland.com/color-advice/
-//
 // File: colormaps.inc
 // Version: 1.0
 // Last updated: 13-Feb-2023
@@ -34,7 +30,6 @@
   		[_arr [I][0], rgbft _color]
 		#end
 	}
-	
 	_color_map
 #end
 

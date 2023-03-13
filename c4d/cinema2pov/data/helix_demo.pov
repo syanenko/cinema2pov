@@ -28,14 +28,14 @@ global_settings { assumed_gamma 1 }
 #include "helix.inc"
 
 // Axis
-// axis (4,4,4,0.05)
+axis (4,4,4,0.05)
 
 //
 // Camera
 //
-// camo (<0,10,0>, <0,0,0>, 45)  // +Y
+camo (<0,10,0>, <0,0,0>, 45)  // +Y
 // camo (<8,-2,0>, <0,-2,0>, 45) // +X
-camo (<8,-1,-3>/1.1, <0,-2.2,0>, 45) // +XYZ
+// camo (<8,-1,-3>/1.1, <0,-2.2,0>, 45) // +XYZ
 
 //
 // Background
@@ -103,7 +103,7 @@ sphere_sweep {
 #if (1)
 #declare r_max = 0.35;
 #declare c_step = 0.014;
-#declare  length = 1 - c_step;
+declare  length = 1 - c_step;
 #declare c = 0;
 
 #while (c < length)

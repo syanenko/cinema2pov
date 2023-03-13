@@ -158,7 +158,7 @@ public:
 class AlienCameraObjectData : public CameraObjectData
 {
 	INSTANCEOF(AlienCameraObjectData, CameraObjectData)
-
+  bool exported = false;
 public:
 	float horizontalFieldOfView;
 
@@ -172,6 +172,7 @@ class AlienPrimitiveObjectData : public NodeData
 
 	Int32 type_id;
 	Int32 matid;
+	bool exported = false;
 public:
 	AlienPrimitiveObjectData(Int32 id) : type_id(id) {}
 	virtual Bool Execute();
@@ -181,10 +182,10 @@ public:
 class AlienSplineObject : public SplineObject
 {
 	INSTANCEOF(AlienSplineObject, SplineObject)
-
+		bool exported = false;
 public:
-
 	virtual Bool Execute();
+	void SetExported() { exported = true; }
 };
 
 // self-defined light object data with own functions and members
@@ -241,6 +242,7 @@ class AlienBoolObjectData : public NodeData
 {
 	INSTANCEOF(AlienBoolObjectData, NodeData)
 
+	bool exported = false;
 public:
 
 	virtual Bool Execute();
@@ -251,6 +253,7 @@ class AlienExtrudeObjectData : public NodeData
 {
 	INSTANCEOF(AlienExtrudeObjectData, NodeData)
 
+	bool exported = false;
 public:
 
 	virtual Bool Execute();
@@ -261,6 +264,7 @@ class AlienSweepObjectData : public NodeData
 {
 	INSTANCEOF(AlienSweepObjectData, NodeData)
 
+	bool exported = false;
 public:
 
 	virtual Bool Execute();

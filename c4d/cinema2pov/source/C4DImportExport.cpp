@@ -28,6 +28,8 @@ Char* version;
 ///
 // POV export globals
 //
+const size_t MAX_OBJ_NAME = 64;
+
 vector<string> objects;
 FILE* file = 0;
 
@@ -98,17 +100,15 @@ void WriteMaterial(BaseObject* op)
 	}
 	else
 	{
-		fprintf(file, "  material { mat_default }\n\}\n\n");
+		fprintf(file, "  material { mat_default }\n\}\n\n"); // Closes object here 
 	}
 }
 
 //
-// Check for POV Sweep tag on spline
+// Check for POV tag on spline
 //
 // Params will alter
-//bool CheckPovTag(BaseObject* obj, Float& shadow = 0, Float& transp = 0, Float& depth = 0)
-//
-bool CheckPovTag(BaseObject* obj)
+bool HasPovTag(BaseObject* obj, Float& from, Float& to, Int32& type)
 {
 	GeData data;
 	BaseTag* btag = obj->GetFirstTag();
@@ -117,24 +117,23 @@ bool CheckPovTag(BaseObject* obj)
 		// POV exprt tag (#define ID_POV_PRISM 1018985)
 		if (btag->GetType() == 1018985)
 		{
-			/*
-			if (btag->GetParameter(2000, data))
+			if (btag->GetParameter(2001, data)) // SWEEP_FROM
 			{
-				shadow = data.GetFloat();
-				printf("\nQQ:SHADOW=%f", shadow);
+				from = data.GetFloat();
+				printf("\nQQ:SHADOW=%f", from);
 			}
 
-			if (btag->GetParameter(2001, data))
+			if (btag->GetParameter(2002, data)) // SWEEP_TO
 			{
-				transp = data.GetFloat();
-				printf("\nQQ:TRANSPARENCY=%f", transp);
+				to = data.GetFloat();
+				printf("\nQQ:TRANSPARENCY=%f", to);
 			}
 
-			if (btag->GetParameter(2002, data))
+			if (btag->GetParameter(2000, data)) // SPLINE_TYPE
 			{
-				depth = data.GetFloat();
-				printf("\nQQ:DEPTH=%f\n", depth);
-			}*/
+				type = data.GetInt32();
+				printf("\nQQ:DEPTH=%f\n", type);
+			}
 
 			return true;
 		}
@@ -361,25 +360,6 @@ static void PrintTagInfo(BaseObject* obj)
 		else
 		{
 			printf("   - %s \"\"", GetObjectTypeName(btag->GetType()));
-		}
-
-		// EXAMPLE TAG
-		if (btag->GetType() == TEXAMPLE)
-		{
-			if (btag->GetParameter(2000, data))
-			{
-				printf("\nQQ:SHADOW=%f", data.GetFloat());
-			}
-
-			if (btag->GetParameter(2001, data))
-			{
-				printf("\nQQ:TRANSPARENCY=%f", data.GetFloat());
-			}
-
-			if (btag->GetParameter(2002, data))
-			{
-				printf("\nQQ:DEPTH=%f", data.GetFloat());
-			}
 		}
 
 		// compositing tag
@@ -1727,6 +1707,7 @@ RenderData *AlienRootRenderData::AllocObject()
 }
 
 // allocate a object/element for the root/list (this is fileformat related, to support/load all objects you should not change this function)
+
 BaseObject *AlienRootObject::AllocObject(Int32 id)
 {
 	BaseObject *baseobject = nullptr;
@@ -1986,7 +1967,6 @@ NodeData *AllocAlienObjectData(Int32 id, Bool &known, BaseList2D* node)
 			known = false;
 			break;
 	}
-
 	return m_data;
 }
 
@@ -2381,14 +2361,21 @@ Bool AlienEnvironmentObjectData::Execute()
 Bool AlienBoolObjectData::Execute()
 {
 	BaseObject* op = (BaseObject*)GetNode();
-	Char *pChar = op->GetName().GetCStringCopy();
-	if (pChar)
+	Char* objName = op->GetName().GetCStringCopy();
+	if (objName)
 	{
-		printf("\n - AlienBoolObjectData (%d): \"%s\"", (int)op->GetType(), pChar);
-		DeleteMem(pChar);
+		printf("\n - AlienBoolObjectData (%d): \"%s\"", (int)op->GetType(), objName);
 	}
 	else
 		printf("\n - AlienBoolObjectData (%d): <noname>", (int)op->GetType());
+
+	if (exported)
+	{
+		printf("\n^---------------- BOOL: Already exported -----------------^\n");
+		return true;
+	}
+
+	printf("\n--------------- BOOL: EXPORT START ------------------\n");
 
 	// Get params
 	GeData data;
@@ -2401,32 +2388,50 @@ Bool AlienBoolObjectData::Execute()
 
 	// Children
 	BaseObject* ch1 = (BaseObject*)op->GetDown();
-	pChar = ch1->GetName().GetCStringCopy();
-	if (pChar)
+	Char* op1Name = ch1->GetName().GetCStringCopy();
+	if (op1Name)
 	{
-		printf("\nQQ:Ch1 - AlienBoolObjectData (%d): %s\n", (int)ch1->GetType(), pChar);
-		DeleteMem(pChar);
+		printf("\nQQ:Ch1 - AlienBoolObjectData (%d): %s\n", (int)ch1->GetType(), op1Name);
 	}
 
 	BaseObject* ch2 = (BaseObject*)op->GetDownLast();
-	pChar = ch2->GetName().GetCStringCopy();
-	if (pChar)
+	Char* op2Name = ch2->GetName().GetCStringCopy();
+	if (op2Name)
 	{
-		printf("\nQQ:Ch2 - AlienBoolObjectData (%d): %s\n", (int)ch2->GetType(), pChar);
-		DeleteMem(pChar);
+		printf("\nQQ:Ch2 - AlienBoolObjectData (%d): %s\n", (int)ch2->GetType(), op2Name);
 	}
 
-	// Check tag
-	bool has_tag = CheckPovTag(op);
-	if (has_tag)
+	// Operation
+	string boolTypeStr = "";
+	switch (boolType)
 	{
-		printf("^--------------- TO EXPORT -----------------^\n");
+		case BOOLEOBJECT_TYPE_UNION:     boolTypeStr = "union";        break;
+		case BOOLEOBJECT_TYPE_SUBTRACT:  boolTypeStr = "difference";   break;
+		case BOOLEOBJECT_TYPE_INTERSECT: boolTypeStr = "intersection"; break;
+		case BOOLEOBJECT_TYPE_WITHOUT:   boolTypeStr = "difference";   break;
+		default: boolTypeStr = "union";
 	}
+
+	char declare[MAX_OBJ_NAME] = { 0 };
+	if (op->GetUp() == NULL)
+	{
+		sprintf(declare, "#declare %s = ", objName);
+		objects.push_back(objName);
+	}
+
+	fprintf(file, "%s%s {\n\n", declare, boolTypeStr.c_str());
+
+	ch1->Execute();
+	ch2->Execute();
+
+	fprintf(file, "}\n\n");
+	DeleteMem(op1Name);
+	DeleteMem(op2Name);
 
 	PrintUniqueIDs(this);
 
-	// if you KNOW a "bool object" you have to handle the necessary children by yourself (this is for all generator object!)
 	/*
+	// if you KNOW a "bool object" you have to handle the necessary children by yourself (this is for all generator object!)
 	// you have to delete the control bit of the 2 first children to get a execute() call of these objects!
 	BaseObject *op1 = op ? op->GetDown() : nullptr;
 	BaseObject *op2 = op1 ? op1->GetNext() : nullptr;
@@ -2435,24 +2440,36 @@ Bool AlienBoolObjectData::Execute()
 	return true;
 	*/
 
+	printf("\n^--------------- BOOL: EXPORT END ------------------^\n");
+	exported = true;
+
+	DeleteMem(objName);
 	// returning false means we couldn't tranform the object to our own objects
 	// we will be called again in AlienPolygonObjectData::Execute() to get the same objects as mesh (only if the scene was written with polygon caches of course)
-	return false;
+	return true;
 }
 
 // Execute function for the self defined Environment object
 Bool AlienExtrudeObjectData::Execute()
 {
 	BaseObject* op = (BaseObject*)GetNode();
-	Char *pChar = op->GetName().GetCStringCopy();
-	if (pChar)
+	Char* objName = op->GetName().GetCStringCopy();
+	if (objName)
 	{
-		printf("\n - AlienExtrudeObjectData (%d): %s\n", (int)op->GetType(), pChar);
-		DeleteMem(pChar);
+		printf("\n - AlienExtrudeObjectData (%d): %s\n", (int)op->GetType(), objName);
 	}
 	else
 		printf("\n - AlienExtrudeObjectData (%d): <noname>\n", (int)op->GetType());
 
+	if (exported)
+	{
+		printf("\n^--------------- EXTRUDE: '%s' already exported -----------------^\n, objName");
+		return true;
+	}
+
+	printf("--------------- EXTRUDE: '%s' EXPORT START ------------------\n", objName);
+
+	// Extrude params
 	GeData data;
 	Vector movement = Vector(0.0, 0.0, 0.0);
 	if (op->GetParameter(EXTRUDEOBJECT_MOVE, data))
@@ -2462,27 +2479,103 @@ Bool AlienExtrudeObjectData::Execute()
 	Int32 endSteps = 0;
 	if (op->GetParameter(CAP_ENDSTEPS, data))
 		endSteps = data.GetInt32();
-	printf("\n   - GetEndCapSteps(): %d \n", (int)endSteps);
+	printf("   - GetEndCapSteps(): %d \n", (int)endSteps);
 
 	PrintUniqueIDs(this);
 
-	BaseObject* ch = (BaseObject*)op->GetDown();
-	pChar = ch->GetName().GetCStringCopy();
-	if (pChar)
+	char declare[MAX_OBJ_NAME] = { 0 };
+	if (op->GetUp() == NULL)
 	{
-		printf("\nQQ:Ch1 - AlienExtrudeObjectData (%d): %s\n", (int)ch->GetType(), pChar);
-		DeleteMem(pChar);
+		sprintf(declare, "#declare %s = ", objName);
+		objects.push_back(objName);
 	}
 
-	bool has_tag = CheckPovTag(op);
-	if (has_tag)
+	// Children info
+	AlienSplineObject* ch1 = (AlienSplineObject*)op->GetDown();
+	Char* ch1n = ch1->GetName().GetCStringCopy();
+	if (ch1n)
 	{
-		printf("^--------------- TO EXPORT -----------------^\n");
+		printf("\n   - Child_1: type='%d', name='%s'\n", (int)ch1->GetType(), ch1n);
+		DeleteMem(ch1n);
+	}
+	
+	// Spline data
+	// Spline type: linear_spline | cubic_spline | bezier_spline | quadratic_spline (?)
+	/*
+	SPLINEOBJECT_TYPE = 1000,
+		SPLINEOBJECT_TYPE_LINEAR = 0,
+		SPLINEOBJECT_TYPE_CUBIC = 1,
+		SPLINEOBJECT_TYPE_AKIMA = 2, (?)
+		SPLINEOBJECT_TYPE_BSPLINE = 3, (?)
+		SPLINEOBJECT_TYPE_BEZIER = 4,
+ */
+
+	float height = movement.y;
+
+	string spline_type = "";
+	Int32 spType = -1;
+	if (ch1->GetParameter(SPLINEOBJECT_TYPE, data))
+		spType = data.GetInt32();
+
+	int pc = ch1->GetPointCount();
+	const Vector* p = ch1->GetPointR();
+
+	int tc = ch1->GetTangentCount();
+	const Tangent* tg = ch1->GetTangentR();
+	
+	if (spType == SPLINEOBJECT_TYPE_CUBIC)
+	{
+		// CUBIC spline
+		fprintf(file, "%sprism { linear_sweep cubic_spline 0, %lf, %d\n\n", declare, height, pc + 3);
+
+		// Write points
+		fprintf(file, "  <%f, %f>\n", 0.0, 0.0); // TODO: Find control point
+
+		for (int i = 0; i < pc; ++i)
+			fprintf(file, "  <%f, %f>\n", p[i].x, p[i].z);
+
+		fprintf(file, "  <%f, %f>\n", p[0].x, p[0].z); // Close spline
+		fprintf(file, "  <%f, %f>\n\n", 0.0, 0.0);     // TODO: Find control point
+	} if (spType == SPLINEOBJECT_TYPE_BEZIER)
+	{
+		// BEZIER spline
+		fprintf(file, "%sprism { linear_sweep bezier_spline 0, %lf, %d\n\n", declare, height, pc + 3);
+
+		// Write points
+		fprintf(file, "  <%f, %f>\n", 0.0, 0.0); // TODO: Find control point
+
+		for (int i = 0; i < pc; ++i)
+		{
+			fprintf(file, "  <%f, %f>\n", p[i].x, p[i].z);
+		}
+
+		fprintf(file, "  <%f, %f>\n", p[0].x, p[0].z); // Close spline
+		fprintf(file, "  <%f, %f>\n\n", 0.0, 0.0);     // TODO: Find control point
+	}	else
+	{
+		// LINEAR spline 
+		fprintf(file, "%sprism { linear_sweep linear_spline 0, %lf, %d\n\n", declare, height, pc + 1);
+
+		// Write points
+		for (int i = 0; i < pc; ++i)
+		{
+			fprintf(file, "  <%f, %f>\n", p[i].x, p[i].z);
+		}
+		fprintf(file, "  <%f, %f>\n", p[0].x, p[0].z); // Close spline
+		fprintf(file, "\n");
 	}
 
+	ch1->SetExported();
+	WriteMatrix(op);
+	WriteMaterial(op);
+
+	printf("^-------------- EXTRUDE: '%s' EXPORT END -------------------^\n", objName);
+	exported = true;
+
+	DeleteMem(objName);
 	// returning false means we couldn't tranform the object to our own objects
 	// we will be called again in AlienPolygonObjectData::Execute() to get the same objects as mesh (only if the scene was written with polygon caches of course)
-	return false;
+	return true;
 }
 
 // Execute function for the self defined Environment object
@@ -2498,23 +2591,34 @@ Bool AlienSweepObjectData::Execute()
 	else
 		printf("\n - AlienSweepObjectData (%d): <noname>\n", (int)op->GetType());
 
-	BaseObject* ch1 = (BaseObject*)op->GetDown();
+	if (exported)
+	{
+		printf("\n^--------------- SWEEP: Already exported -----------------^\n");
+		return true;
+	}
+
+	printf("--------------- SWEEP: EXPORT START ------------------\n");
+
+	//BaseObject* ch1 = (BaseObject*)op->GetDown();
+	AlienSplineObject* ch1 = (AlienSplineObject*)op->GetDown();
 	pChar = ch1->GetName().GetCStringCopy();
 	if (pChar)
 	{
 		printf("\nQQ:Ch1 - AlienSweepObjectData (%d): %s\n", (int)ch1->GetType(), pChar);
 		DeleteMem(pChar);
 	}
+	ch1->SetExported();
 
-	BaseObject* ch2 = (BaseObject*)op->GetDownLast();
+	AlienSplineObject* ch2 = (AlienSplineObject*)op->GetDownLast();
 	pChar = ch2->GetName().GetCStringCopy();
 	if (pChar)
 	{
 		printf("\nQQ:Ch2 - AlienSweepObjectData (%d): %s\n", (int)ch2->GetType(), pChar);
 		DeleteMem(pChar);
 	}
+	ch2->SetExported();
 
-/* Get sweep params, including spline
+/* Get sweep params from children here
 	GeData data;
 	Vector movement = Vector(0.0, 0.0, 0.0);
 	if (op->GetParameter(EXTRUDEOBJECT_MOVE, data))
@@ -2531,13 +2635,10 @@ Bool AlienSweepObjectData::Execute()
 	// returning false means we couldn't tranform the object to our own objects
 	// we will be called again in AlienPolygonObjectData::Execute() to get the same objects as mesh (only if the scene was written with polygon caches of course)
 */
-	bool has_tag = CheckPovTag(op);
-	if (has_tag)
-	{
-		printf("^--------------- TO EXPORT -----------------^\n");
-	}
+	printf("\n^-------------- SWEEP: EXPORT END ------------------^\n");
+	exported = true;
 
-	return false;
+	return true;
 }
 
 // Execute function for the self defined instance object
@@ -2784,40 +2885,68 @@ Bool AlienLayer::Execute()
 Bool AlienCameraObjectData::Execute()
 {
 	BaseObject* op = (BaseObject*)GetNode();
-	Char *pChar = op->GetName().GetCStringCopy();
-	if (pChar)
+	Char* objName = op->GetName().GetCStringCopy();
+	if (objName)
 	{
-		printf("\n - AlienCameraObjectData (%d): \"%s\"\n", (int)op->GetType(), pChar);
-		DeleteMem(pChar);
+		printf("\n - AlienCameraObjectData (%d): \"%s\"", (int)op->GetType(), objName);
 	}
 	else
-		printf("\n - AlienCameraObjectData (%d): <nonema>\n", (int)op->GetType());
+		printf("\n - AlienCameraObjectData (%d): <noname>", (int)op->GetType());
 
+	if (exported)
+	{
+		printf("\n^---------------- CAMERA: Already exported -----------------^\n");
+		return true;
+	}
+
+	printf("\n--------------- CAMERA: EXPORT START ------------------\n");
+
+	// Print common info
 	PrintUniqueIDs(this);
-
 	PrintAnimInfo(op);
-
-	// tags
 	PrintTagInfo(op);
-
 	PrintMatrix(op->GetMg());
 
-	// stereo camera
 	GeData camData;
-	if (op->GetParameter(CAMERAOBJECT_STEREO_MODE, camData) && camData.GetInt32() != CAMERAOBJECT_STEREO_MODE_MONO)
-		printf("   STEREO mode: %d \n", (int)camData.GetInt32());
+  // Projection
+	int proj = -1;
+	if (op->GetParameter(CAMERA_PROJECTION, camData))
+		proj = (int)camData.GetInt32();
+	printf("   Projection: %f \n", proj);
 
-	// white balance
-	if (op->GetParameter(CAMERAOBJECT_WHITE_BALANCE, camData))
-		printf("   White Balance Preset: %d \n", (int)camData.GetInt32());
+	// FOV
+	Float fov = -1;
+	if (op->GetParameter(CAMERAOBJECT_FOV, camData))
+		fov = RadToDeg(camData.GetFloat());
+	printf("   FOV: %f \n", fov);
 
-	// target ?
-	if (op->GetParameter(CAMERAOBJECT_USETARGETOBJECT, camData) && camData.GetInt32() != 0)
-		printf("   Target object is used!\n");
+	// Zoom
+	Float zoom = -1;
+	if (op->GetParameter(CAMERA_ZOOM, camData))
+		zoom = camData.GetFloat();
+	printf("   Zoom: %f \n", zoom);
 
-	// vert. FOV
-	if (op->GetParameter(CAMERAOBJECT_FOV_VERTICAL, camData))
-		printf("   Vertical FOV: %f \n", RadToDeg(camData.GetFloat()));
+	const Float ZOOM_FACTOR = 1.2; // Check this for more accurate zooming
+	Float angle = fov;
+
+	// Only two projections now supported
+	string ptojStr = "perspective";
+	if (proj == Pparallel)
+	{
+		ptojStr = "orthographic";
+		angle = zoom * ZOOM_FACTOR;
+	}
+
+	fprintf(file, "camera{\
+	%s\n\
+	location  <0, 0, 0>\n\
+	angle %f\n\n", ptojStr.c_str(), angle);
+
+	WriteMatrix(op);
+	fprintf(file, "}\n\n");
+
+	printf("\n^--------------- CAMERA: EXPORT END ------------------^\n");
+	exported = true;
 
 	return true;
 }
@@ -2835,6 +2964,23 @@ Bool AlienSplineObject::Execute()
 
 	printf("\n - AlienSplineObject (%d): %s\n", (int)GetType(), objName);
 	PrintUniqueIDs(this);
+
+	// Params will alter
+	Float tag_from;
+	Float tag_to;
+	Int32 tag_type;
+	if (HasPovTag(this, tag_from, tag_to, tag_type))
+	{
+		printf("--------------- SPLINE: '%s' EXPORT START (HAS TAG) --------\n, objName");
+	}
+	else
+	{
+		if (exported)
+		{
+			printf("^-------------- SPLINE: '%s' ALREADY EXPORTED -------------^\n", objName);
+			return true;
+		}
+	}
 
 	Int32 iType = -1;
 	GeData data;
@@ -2877,7 +3023,7 @@ Bool AlienSplineObject::Execute()
 	printf("   - SegmentCount: %d\n", sc);
 
 	fprintf(file, "//\n");
-	fprintf(file, "// Spline point array\n");
+	fprintf(file, "// Spline points array\n");
 	fprintf(file, "//\n");
 	fprintf(file, "// SplineType: %d\n", type);
 	fprintf(file, "// SegmentCount: %d\n", sc);
@@ -2896,14 +3042,6 @@ Bool AlienSplineObject::Execute()
 
 	// Tags
 	// PrintTagInfo(this);
-	Float shadow;
-	Float transp;
-	Float depth;
-	bool has_tag = CheckPovTag(this);
-	if (has_tag)
-	{
-		printf("^--------------- TO EXPORT -----------------^\n");
-	}
 
 	// User data
 	// PrintUserData(this);
@@ -2911,6 +3049,7 @@ Bool AlienSplineObject::Execute()
 	if (objName)
 		DeleteMem(objName);
 
+	printf("^-------------- SPLINE: EXPORT END -----------------^\n");
 	return true;
 }
 
@@ -2930,9 +3069,23 @@ Bool AlienPrimitiveObjectData::Execute()
 	printf("\n - AlienPrimitiveObject (%d): %s\n", (int)op->GetType(), objName);
 	PrintUniqueIDs(this);
 
+	if (exported)
+	{
+		printf("\n^-------------- PRIMITIVE: '%s' Already exported -----------------^\n", objName);
+		return true;
+	}
+	
+	char declare[MAX_OBJ_NAME] = { 0 };
+	if (op->GetUp() == NULL)
+	{
+		sprintf(declare, "#declare %s = ", objName);
+		objects.push_back(objName);
+	}
+
 	GeData data;
 	if (this->type_id == Ocube) // Cube
-	{
+	{	printf("--------------- CUBE: '%s' EXPORT START ------------------\n", objName);
+
 		op->GetParameter(PRIM_CUBE_LEN, data);
 		Vector size = data.GetVector();
 
@@ -2941,26 +3094,19 @@ Bool AlienPrimitiveObjectData::Execute()
 		size.x /= 2;
 		size.y /= 2;
 		size.z /= 2;
-		fprintf(file, "#declare %s = box { <%lf, %lf, %lf>, <%lf, %lf, %lf>\n", objName, -size.x, -size.y, -size.z, size.x, size.y, size.z);
-
-		WriteMatrix(op);
-		WriteMaterial(op);
-
-		objects.push_back(objName);
-
+		fprintf(file, "%sbox { <%lf, %lf, %lf>, <%lf, %lf, %lf>\n", declare, -size.x, -size.y, -size.z, size.x, size.y, size.z);
 	} else if (this->type_id == Osphere) { // Sphere
+		printf("--------------- SPHERE: '%s' EXPORT START ------------------\n", objName);
+
 		op->GetParameter(PRIM_SPHERE_RAD, data);
 		Float radius = data.GetFloat();
 
 		printf("   - Type: Sphere - Radius = %lf\n", radius);
-		fprintf(file, "#declare %s = sphere { 0, %lf \n", objName, radius);
+		fprintf(file, "%ssphere { 0, %lf \n", declare, radius);
 		
-		WriteMatrix(op);
-		WriteMaterial(op);
-
-		objects.push_back(objName);
-
 	} else if (this->type_id == Ocone) { // Cone
+		printf("--------------- CONE: '%s' EXPORT START ------------------\n", objName);
+
 		op->GetParameter(PRIM_CONE_TRAD, data);
 		Float TopRadius = data.GetFloat();
 
@@ -2973,15 +3119,12 @@ Bool AlienPrimitiveObjectData::Execute()
 		printf("   - Type: Cone - TopRadius = %lf, BottomRadius = %lf, Height = %lf\n", TopRadius, BottomRadius, Height);
 		Height /= 2;
 		Matrix m = op->GetMg();
-		fprintf(file, "#declare %s = cone { <%lf, %lf, %lf>, %lf, <%lf, %lf, %lf>, %lf\n",
-			objName, 0, -Height, 0, BottomRadius, 0, Height, 0, TopRadius);
-
-		WriteMatrix(op);
-		WriteMaterial(op);
-
-		objects.push_back(objName);
+		fprintf(file, "%scone { <%lf, %lf, %lf>, %lf, <%lf, %lf, %lf>, %lf\n",
+			declare, 0, -Height, 0, BottomRadius, 0, Height, 0, TopRadius);
 
 	} else if (this->type_id == Ocylinder) { // Cylinder
+		printf("--------------- CYLINDER: '%s' EXPORT START ------------------\n", objName);
+
 		op->GetParameter(PRIM_CYLINDER_RADIUS, data);
 		Float Radius = data.GetFloat();
 		
@@ -2990,15 +3133,12 @@ Bool AlienPrimitiveObjectData::Execute()
 		
 		printf("   - Type: Cylinder - Radius = %lf, Height = %lf\n", Radius, Height);
 		Height /= 2;
-		fprintf(file, "#declare %s = cylinder { <%lf, %lf, %lf>, <%lf, %lf, %lf>, %lf\n",
-			objName, 0, -Height, 0, 0, Height, 0, Radius);
+		fprintf(file, "%scylinder { <%lf, %lf, %lf>, <%lf, %lf, %lf>, %lf\n",
+			declare, 0, -Height, 0, 0, Height, 0, Radius);
 		
-		WriteMatrix(op);
-		WriteMaterial(op);
-
-		objects.push_back(objName);
-
 	} else if (this->type_id == Oplane) { // Plane
+		printf("--------------- PLANE: '%s' EXPORT START ------------------\n", objName);
+
 		op->GetParameter(PRIM_PLANE_WIDTH, data);
 		Float width = data.GetFloat();
 
@@ -3008,15 +3148,12 @@ Bool AlienPrimitiveObjectData::Execute()
 		printf("   - Type: Plane - width = %lf, height = %lf\n", width, height);
 		width /= 2;
 		height /= 2;
-		fprintf(file, "#declare %s = plane { <0,1,0> 0\n  bounded_by { box {<%f, %f, %f>, <%f, %f, %f>} }\n  clipped_by { bounded_by }\n",
-			             objName, -width, -0.01, -height, width, 0.01, height);
-
-		WriteMatrix(op);
-		WriteMaterial(op);
-
-		objects.push_back(objName);
+		fprintf(file, "%splane { <0,1,0> 0\n  bounded_by { box {<%f, %f, %f>, <%f, %f, %f>} }\n  clipped_by { bounded_by }\n",
+						declare, -width, -0.01, -height, width, 0.01, height);
 
 	} else if (this->type_id == Otorus) { // Torus
+		printf("--------------- TORUS: '%s' EXPORT START ------------------\n", objName);
+
 		op->GetParameter(PRIM_TORUS_OUTERRAD, data);
 		Float r_out = data.GetFloat();
 
@@ -3024,20 +3161,21 @@ Bool AlienPrimitiveObjectData::Execute()
 		Float r_in = data.GetFloat();
 
 		printf("   - Type: Torus - Outer radius = %lf, Inner radius = %lf\n", r_out, r_in);
-		fprintf(file, "#declare %s = torus { %f, %f\n", objName, r_out, r_in);
-
-		WriteMatrix(op);
-		WriteMaterial(op);
-
-		objects.push_back(objName);
+		fprintf(file, "%storus { %f, %f\n", declare, r_out, r_in);
 	}
+
+	WriteMatrix(op);
+	WriteMaterial(op);
+
+	PrintMatrix(op->GetMg());
+	PrintUserData(op);
+
+	printf("^----------- PRIMITIVE: '%s' EXPORT END -----------------^\n", objName);
+	exported = true;
 
 	if (objName)
 		DeleteMem(objName);
 
-	PrintMatrix(op->GetMg());
-	PrintUserData(op);
-	
 	/*----------------------- Preserved for future use ------------------------
 	// Tags
 	PrintTagInfo(op);
@@ -3740,9 +3878,15 @@ Bool BaseDocument::CreateSceneToC4D(Bool selectedonly)
 //  
 // 1. Export spline as array
 // 2. Export spline as spline
-// 3. Export extrude as prism
+// 3. Check if object enabled on export
 // 4. Export sweep as sphere_sweep
-// 5. Mark export with tags
+// 5. Null object as union (Execute() for earch child)
+// 6. Bool - process > 2 operands
+// 7. Camera: projection_type, matrix, FOV Hor. angle = K * Zoon; (0:179.999)
+// 8. Remove default matrixes
+// 
+// -- Errors
+// 1. Empty extrude
 //
 
 int main(int argc, Char* argv[])
