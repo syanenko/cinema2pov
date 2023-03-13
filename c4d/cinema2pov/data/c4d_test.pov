@@ -24,15 +24,15 @@ global_settings { assumed_gamma 1 }
 #include "textures.inc"
 
 // Axis
-// axis (4,4,4,0.03)
+// axis (2,2,2,0.03)
 
 //
 // Camera
 //
 // camo (<0,20,0>, <0,0,0>,  45)     // +Y
 // camo (<8,0,0> * 1, <0,0,0>, 45)   // +X
-// camo (<0,8,0> * 2.5, <0,0,0>, 45) // +Y
-// camp (<8,8,8>/1.5, <0,0,0>,  45) // +XYZ
+camo (<0,8,0>, <0,0,0>, 45) // +Y
+// camp (<8,8,8> * 4 , <0,0,0>,  45) // +XYZ
 
 //
 // Light
@@ -105,16 +105,50 @@ background {color srgb<13,17,23> / 256}
     pigment { gradient y
               color_map  { ext_kindlmann }
               scale 2
-              translate 1}}}
+              translate 1.3}}}
 
 //
 // Include exported data
 //
 // #include "c4d_test.inc"
-// #include "extrude_test.inc"
-#include "global_test.inc"
+#include "extrude_test.inc"
+// #include "global_test.inc"
 
-/*  Works
+/* Works - fix shape
+#declare Extrude = prism { linear_sweep cubic_spline 0, 3.000000, 7
+
+  // Points  
+  <15.000000, 0.000000> 
+  <0.000000, 10.000000>
+  <-15.000000, 0.000000>
+  <0.000000, -10.000000>
+  
+  // Tangents
+  <0.000000, -3.750000>
+  <0.000000, 3.750000>
+
+  <5.625000, -0.000000>
+  <-5.625000, 0.000000>
+
+  <-0.000000, 3.750000>
+  <0.000000, -3.750000>
+
+  <-5.625000, -0.000000>
+  <5.625000, 0.000000>
+
+  matrix
+ <0.100000, 0.000000, 0.000000,
+  0.000000, 0.100000, 0.000000,
+  0.000000, 0.000000, 0.100000,
+  -0.005274, 0.030602, -0.017559>
+
+  material { mat_default }
+}
+
+object{ Extrude }
+
+*/
+/*
 prism {
     cubic_spline
     0, // sweep the following shape from here ...
@@ -127,6 +161,6 @@ prism {
     < 3,  5>, // point#5 ... MUST MATCH THIS POINT
     <-5,  0>  // point#6 (control point... not on curve)
 
-    pigment { rgb <0,1,0> }
+    material { mat_default }
   }
 */

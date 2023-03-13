@@ -2510,7 +2510,7 @@ Bool AlienExtrudeObjectData::Execute()
 	const Vector* p = ch1->GetPointR();
 
 	int tc = ch1->GetTangentCount();
-	const Tangent* tg = ch1->GetTangentR();
+	const Tangent* t = ch1->GetTangentR();
 	
 	if (spType == SPLINEOBJECT_TYPE_CUBIC)
 	{
@@ -2518,28 +2518,43 @@ Bool AlienExtrudeObjectData::Execute()
 		fprintf(file, "%sprism { linear_sweep cubic_spline 0, %lf, %d\n\n", declare, height, pc + 3);
 
 		// Write points
-		fprintf(file, "  <%f, %f>\n", 0.0, 0.0); // TODO: Find control point
-
-		for (int i = 0; i < pc; ++i)
-			fprintf(file, "  <%f, %f>\n", p[i].x, p[i].z);
-
-		fprintf(file, "  <%f, %f>\n", p[0].x, p[0].z); // Close spline
-		fprintf(file, "  <%f, %f>\n\n", 0.0, 0.0);     // TODO: Find control point
-	} if (spType == SPLINEOBJECT_TYPE_BEZIER)
-	{
-		// BEZIER spline
-		fprintf(file, "%sprism { linear_sweep bezier_spline 0, %lf, %d\n\n", declare, height, pc + 3);
-
-		// Write points
-		fprintf(file, "  <%f, %f>\n", 0.0, 0.0); // TODO: Find control point
-
+		fprintf(file, "  <%f, %f>\n", p[pc - 1].x, p[pc - 1].z);  // Control 1
 		for (int i = 0; i < pc; ++i)
 		{
 			fprintf(file, "  <%f, %f>\n", p[i].x, p[i].z);
 		}
+		fprintf(file, "  <%f, %f>\n", p[0].x, p[0].z); // Close
+		fprintf(file, "  <%f, %f>\n", p[1].x, p[1].z);  // Control 2
 
-		fprintf(file, "  <%f, %f>\n", p[0].x, p[0].z); // Close spline
-		fprintf(file, "  <%f, %f>\n\n", 0.0, 0.0);     // TODO: Find control point
+		// DEBUG: Points
+		/*
+		for (int i = 0; i < pc; ++i)
+		{
+		  fprintf(file, "  <%f, %f>\n", p[i].x, p[i].z);
+		}
+		// Tangents
+		for (int i = 0; i < tc; ++i)
+		{
+			fprintf(file, "  <%f, %f>\n", t[i].vl.x, t[i].vl.z);
+			fprintf(file, "  <%f, %f>\n", t[i].vr.x, t[i].vr.z);
+		}*/
+
+		// fprintf(file, "  <%f, %f>\n", p[0].x, p[0].z); // Close spline
+
+	} else if (spType == SPLINEOBJECT_TYPE_BEZIER)
+	{
+		// BEZIER spline TODO: Fix point amount
+		fprintf(file, "%sprism { linear_sweep bezier_spline 0, %lf, %d\n\n", declare, height, pc + 3);
+
+		// Write points
+		fprintf(file, "  <%f, %f>\n", p[pc - 1].x, p[pc - 1].z);  // Control 1
+		for (int i = 0; i < pc; ++i)
+		{
+			fprintf(file, "  <%f, %f>\n", p[i].x, p[i].z);
+		}
+		fprintf(file, "  <%f, %f>\n", p[0].x, p[0].z); // Close
+		fprintf(file, "  <%f, %f>\n", p[1].x, p[1].z);  // Control 2
+
 	}	else
 	{
 		// LINEAR spline 
