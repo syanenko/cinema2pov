@@ -2360,24 +2360,24 @@ Bool AlienEnvironmentObjectData::Execute()
 // Execute function for the self defined Environment object
 Bool AlienBoolObjectData::Execute()
 {
-	BaseObject* op = (BaseObject*)GetNode();
-	Char* objName = op->GetName().GetCStringCopy();
-	if (objName)
-	{
-		printf("\n - AlienBoolObjectData (%d): \"%s\"", (int)op->GetType(), objName);
-	}
-	else
-		printf("\n - AlienBoolObjectData (%d): <noname>", (int)op->GetType());
-
+	printf("\n----------------- BOOL: EXPORT START ------------------\n");
 	if (exported)
 	{
 		printf("\n^---------------- BOOL: Already exported -----------------^\n");
 		return true;
 	}
+	BaseObject* op = (BaseObject*)GetNode();
+	Char* objName = op->GetName().GetCStringCopy();
+	if (objName)
+	{
+		printf("\n - AlienBoolObjectData (%d): \"%s\"\n", (int)op->GetType(), objName);
+	}
+	else
+		printf("\n - AlienBoolObjectData (%d): <noname>\n", (int)op->GetType());
 
-	printf("\n--------------- BOOL: EXPORT START ------------------\n");
+	PrintUniqueIDs(this);
 
-	// Get params
+	// Bool operation
 	GeData data;
 	Int32 boolType = 0;
 	if (op->GetParameter(BOOLEOBJECT_TYPE, data))
@@ -2386,22 +2386,6 @@ Bool AlienBoolObjectData::Execute()
 		printf(" - Boolean Type: %d\n", (int)boolType);
 	}
 
-	// Children
-	BaseObject* ch1 = (BaseObject*)op->GetDown();
-	Char* op1Name = ch1->GetName().GetCStringCopy();
-	if (op1Name)
-	{
-		printf("\nQQ:Ch1 - AlienBoolObjectData (%d): %s\n", (int)ch1->GetType(), op1Name);
-	}
-
-	BaseObject* ch2 = (BaseObject*)op->GetDownLast();
-	Char* op2Name = ch2->GetName().GetCStringCopy();
-	if (op2Name)
-	{
-		printf("\nQQ:Ch2 - AlienBoolObjectData (%d): %s\n", (int)ch2->GetType(), op2Name);
-	}
-
-	// Operation
 	string boolTypeStr = "";
 	switch (boolType)
 	{
@@ -2412,6 +2396,7 @@ Bool AlienBoolObjectData::Execute()
 		default: boolTypeStr = "union";
 	}
 
+	// Write header 
 	char declare[MAX_OBJ_NAME] = { 0 };
 	if (op->GetUp() == NULL)
 	{
@@ -2421,14 +2406,19 @@ Bool AlienBoolObjectData::Execute()
 
 	fprintf(file, "%s%s {\n\n", declare, boolTypeStr.c_str());
 
-	ch1->Execute();
-	ch2->Execute();
+	// Children
+	BaseObject* ch = op->GetDown();
+	while (ch != NULL)
+	{
+		Char* chName = ch->GetName().GetCStringCopy();
+		printf("\n   - Child - AlienBoolObjectData (%d): %s\n", (int)ch->GetType(), chName);
+		DeleteMem(chName);
+		ch->Execute();
+		ch = ch->GetNext();
+	}
 
 	fprintf(file, "}\n\n");
-	DeleteMem(op1Name);
-	DeleteMem(op2Name);
-
-	PrintUniqueIDs(this);
+	DeleteMem(objName);
 
 	/*
 	// if you KNOW a "bool object" you have to handle the necessary children by yourself (this is for all generator object!)
@@ -2452,6 +2442,7 @@ Bool AlienBoolObjectData::Execute()
 // Execute function for the self defined Environment object
 Bool AlienExtrudeObjectData::Execute()
 {
+	printf("--------------- EXTRUDE: EXPORT START ------------------\n");
 	BaseObject* op = (BaseObject*)GetNode();
 	Char* objName = op->GetName().GetCStringCopy();
 	if (objName)
@@ -2463,11 +2454,9 @@ Bool AlienExtrudeObjectData::Execute()
 
 	if (exported)
 	{
-		printf("\n^--------------- EXTRUDE: '%s' already exported -----------------^\n, objName");
+		printf("\n^--------------- EXTRUDE: ALREADY EXPORTED -----------------^\n, objName");
 		return true;
 	}
-
-	printf("--------------- EXTRUDE: '%s' EXPORT START ------------------\n", objName);
 
 	// Extrude params
 	GeData data;
@@ -2569,7 +2558,7 @@ Bool AlienExtrudeObjectData::Execute()
 	WriteMatrix(op);
 	WriteMaterial(op);
 
-	printf("^-------------- EXTRUDE: '%s' EXPORT END -------------------^\n", objName);
+	printf("^-------------- EXTRUDE: EXPORT END -------------------^\n", objName);
 	exported = true;
 
 	DeleteMem(objName);
@@ -2926,7 +2915,8 @@ Bool AlienCameraObjectData::Execute()
 		zoom = camData.GetFloat();
 	printf("   Zoom: %f \n", zoom);
 
-	const Float ZOOM_FACTOR = 1.2; // Check this for more accurate zooming
+	const Float ZOOM_FACTOR = 1.3;   // Check this for more accurate zooming (!)
+	const Float MAX_ANGLE = 179.999; 
 	Float angle = fov;
 
 	// Only two projections now supported
@@ -2935,6 +2925,7 @@ Bool AlienCameraObjectData::Execute()
 	{
 		ptojStr = "orthographic";
 		angle = zoom * ZOOM_FACTOR;
+		angle > MAX_ANGLE ? angle = MAX_ANGLE : 0;
 	}
 
 	fprintf(file, "camera{\
@@ -3880,10 +3871,9 @@ Bool BaseDocument::CreateSceneToC4D(Bool selectedonly)
 // 2. Export spline as spline
 // 3. Check if object enabled on export
 // 4. Export sweep as sphere_sweep
-// 5. Null object as union (Execute() for earch child)
 // 6. Bool - process > 2 operands
 // 7. Camera: projection_type, matrix, FOV Hor. angle = K * Zoon; (0:179.999)
-// 8. Remove default matrixes
+// 8. Remove default matrixes (?)
 // 
 // -- Errors
 // 1. Empty extrude
