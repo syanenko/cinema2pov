@@ -4,7 +4,7 @@
 
 This leads me to starting this project - set of exporting plugins for most popular 3D modelling software.
 
-## Cinema4D
+## Cinema 4D
 
 **cinema2pov** - is a command line tool for exporting data from C4D format to POV Ray SDL, code is based on [Cineware SDK](https://developers.maxon.net/docs/CinewareSDK/html/index.html), now supports following objects:
 
