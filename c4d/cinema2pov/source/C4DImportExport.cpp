@@ -2479,7 +2479,7 @@ Bool AlienExtrudeObjectData::Execute()
 		objects.push_back(objName);
 	}
 
-	// Children info
+	// Child
 	AlienSplineObject* ch1 = (AlienSplineObject*)op->GetDown();
 	Char* ch1n = ch1->GetName().GetCStringCopy();
 	if (ch1n)
@@ -2488,23 +2488,15 @@ Bool AlienExtrudeObjectData::Execute()
 		DeleteMem(ch1n);
 	}
 	
-	// Spline data
-	// Spline type: linear_spline | cubic_spline | bezier_spline | quadratic_spline (?)
-	/*
-	SPLINEOBJECT_TYPE = 1000,
-		SPLINEOBJECT_TYPE_LINEAR  = 0,
-		SPLINEOBJECT_TYPE_CUBIC   = 1,
-		SPLINEOBJECT_TYPE_AKIMA   = 2, (-)
-		SPLINEOBJECT_TYPE_BSPLINE = 3, (-)
-		SPLINEOBJECT_TYPE_BEZIER  = 4,
- */
 	float height = movement.y;
 
+	// Spline type
 	string spline_type = "";
 	Int32 spType = -1;
 	if (ch1->GetParameter(SPLINEOBJECT_TYPE, data))
 		spType = data.GetInt32();
 
+	// Points
 	int pc = ch1->GetPointCount();
 	const Vector* p = ch1->GetPointR();
 
@@ -2516,7 +2508,6 @@ Bool AlienExtrudeObjectData::Execute()
 		// CUBIC spline
 		fprintf(file, "%sprism { linear_sweep cubic_spline 0, %lf, %d\n\n", declare, height, pc + 3);
 
-		// Write points
 		fprintf(file, "  <%f, %f>\n", p[pc - 1].x, p[pc - 1].z);  // Control 1
 		for (int i = 0; i < pc; ++i)
 		{
@@ -2529,52 +2520,52 @@ Bool AlienExtrudeObjectData::Execute()
 	{
 		// BEZIER spline
 		/*
-			<15.000000, 0.000000>   // P1
-			<15.000000, 3.750000>   // T2
-			<5.625000, 10.000000>   // T3
-			<0.000000, 10.000000>   // P2
-			// -----------
-			<0.000000, 10.000000>   // P2
-			<-5.625000, 10.000000>  // T4
-			<-15.000000, 3.750000>  // T5
-			<-15.000000, 0.000000>  // P3
-			// -----------
-			<-15.000000, 0.000000>  // P3
-			<-15.000000, -3.750000> // T6
-			<-5.625000, -10.000000> // T7
-			<0.000000, -10.000000>  // P4
-			// -----------
-			<0.000000, -10.000000>  // P4
-			<5.625000, -10.000000>  // T8
-			<15.000000, -3.750000>  // T1
-			<15.000000, 0.000000>   // P1
-			// -----------
+		<15.000000, 0.000000>   // P1
+		<15.000000, 3.750000>   // T2
+		<5.625000, 10.000000>   // T3
+		<0.000000, 10.000000>   // P2
+		// -----------
+		<0.000000, 10.000000>   // P2
+		<-5.625000, 10.000000>  // T4
+		<-15.000000, 3.750000>  // T5
+		<-15.000000, 0.000000>  // P3
+		// -----------
+		<-15.000000, 0.000000>  // P3
+		<-15.000000, -3.750000> // T6
+		<-5.625000, -10.000000> // T7
+		<0.000000, -10.000000>  // P4
+		// -----------
+		<0.000000, -10.000000>  // P4
+		<5.625000, -10.000000>  // T8
+		<15.000000, -3.750000>  // T1
+		<15.000000, 0.000000>   // P1
+		// -----------
 
-			//<15.000000, -3.750000>  // T1
-			//<15.000000, 3.750000>   // T2
-			//<5.625000, 10.000000>   // T3
-			//<-5.625000, 10.000000>  // T4
-			//<-15.000000, 3.750000>  // T5
-			//<-15.000000, -3.750000> // T6
-			//<-5.625000, -10.000000> // T7
-			//<5.625000, -10.000000>  // T8
-			*/
+		//<15.000000, -3.750000>  // T1
+		//<15.000000, 3.750000>   // T2
+		//<5.625000, 10.000000>   // T3
+		//<-5.625000, 10.000000>  // T4
+		//<-15.000000, 3.750000>  // T5
+		//<-15.000000, -3.750000> // T6
+		//<-5.625000, -10.000000> // T7
+		//<5.625000, -10.000000>  // T8
+		*/
 
-			// DEBUG: Points
-			/*
-			for (int i = 0; i < pc; ++i)
-			{
-				fprintf(file, "  <%f, %f>\n", p[i].x, p[i].z);
-			}
-			// Tangents
-			for (int i = 0; i < tc; ++i)
-			{
-				fprintf(file, "  <%f, %f>\n", t[i].vl.x + p[i].x, t[i].vl.z + p[i].z);
-				fprintf(file, "  <%f, %f>\n", t[i].vr.x + p[i].x, t[i].vr.z + p[i].z);
-			}*/
+		// DEBUG: Points
+		/*
+		for (int i = 0; i < pc; ++i)
+		{
+			fprintf(file, "  <%f, %f>\n", p[i].x, p[i].z);
+		}
+		// Tangents
+		for (int i = 0; i < tc; ++i)
+		{
+			fprintf(file, "  <%f, %f>\n", t[i].vl.x + p[i].x, t[i].vl.z + p[i].z);
+			fprintf(file, "  <%f, %f>\n", t[i].vr.x + p[i].x, t[i].vr.z + p[i].z);
+		}*/
 
+		// Write
 		fprintf(file, "%sprism { linear_sweep bezier_spline 0, %lf, %d\n\n", declare, height, pc * 4);
-		// Write points
 		pc--;
 		for (int i = 0; i < pc; ++i)
 		{
@@ -2594,7 +2585,6 @@ Bool AlienExtrudeObjectData::Execute()
 		// LINEAR spline 
 		fprintf(file, "%sprism { linear_sweep linear_spline 0, %lf, %d\n\n", declare, height, pc + 1);
 
-		// Write points
 		for (int i = 0; i < pc; ++i)
 		{
 			fprintf(file, "  <%f, %f>\n", p[i].x, p[i].z);
@@ -2616,7 +2606,9 @@ Bool AlienExtrudeObjectData::Execute()
 	return true;
 }
 
-// Execute function for the self defined Environment object
+// 
+// Sweep
+//
 Bool AlienSweepObjectData::Execute()
 {
 	printf("--------------- SWEEP: EXPORT START ------------------\n");
@@ -2644,11 +2636,14 @@ Bool AlienSweepObjectData::Execute()
 	}
 	DeleteMem(objName);
 
+	// Sweep scale profile
+	op->get
+
 	AlienSplineObject* ch1 = (AlienSplineObject*)op->GetDown();
 	Char* pChar = ch1->GetName().GetCStringCopy();
 	if (pChar)
 	{
-		printf("\nQQ:Ch1 - AlienSweepObjectData (%d): %s\n", (int)ch1->GetType(), pChar);
+		printf("\nCh1 - AlienSweepObjectData (%d): %s\n", (int)ch1->GetType(), pChar);
 		DeleteMem(pChar);
 	}
 
@@ -2666,14 +2661,14 @@ Bool AlienSweepObjectData::Execute()
 	if (ch1->GetParameter(PRIM_CIRCLE_RADIUS, data))
 	{
 		radius = data.GetFloat();
-		printf("\nQQ:Ch1: radius: %d\n", radius);
+		printf("\nCh1: radius: %d\n", radius);
 	}
 
 	AlienSplineObject* ch2 = (AlienSplineObject*)op->GetDownLast();
 	pChar = ch2->GetName().GetCStringCopy();
 	if (pChar)
 	{
-		printf("\nQQ:Ch2 - AlienSweepObjectData (%d): %s\n", (int)ch2->GetType(), pChar);
+		printf("\nCh2 - AlienSweepObjectData (%d): %s\n", (int)ch2->GetType(), pChar);
 		DeleteMem(pChar);
 	}
 

@@ -104,8 +104,8 @@ background {color srgb<13,17,23> / 256}
   texture {
     pigment { gradient y
               color_map  { ext_kindlmann }
-              scale 3
-              translate 2}}}
+              scale 23
+              translate -2}}}
 
 //
 // Include exported data
