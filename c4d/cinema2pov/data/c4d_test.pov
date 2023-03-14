@@ -24,7 +24,7 @@ global_settings { assumed_gamma 1 }
 #include "textures.inc"
 
 // Axis
-axis (2,2,2,0.03)
+axis (15,15,14,0.1)
 
 //
 // Camera
@@ -104,15 +104,16 @@ background {color srgb<13,17,23> / 256}
   texture {
     pigment { gradient y
               color_map  { ext_kindlmann }
-              scale 2
-              translate 1.3}}}
+              scale 3
+              translate 2}}}
 
 //
 // Include exported data
 //
 // #include "c4d_test.inc"
-#include "extrude_test.inc"
 // #include "global_test.inc"
+// #include "extrude_test.inc"
+#include "sweep_test.inc"
 
 
 /* Works - fix shape

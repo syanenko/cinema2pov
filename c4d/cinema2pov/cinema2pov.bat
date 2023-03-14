@@ -6,7 +6,8 @@ REM cinema2pov.exe data\bool_test.c4d data\bool_test.inc > cinema2pov.log
 REM cinema2pov.exe data\global_test.c4d data\global_test.inc > cinema2pov.log
 REM cinema2pov.exe data\global_test_error.c4d data\global_test.inc > cinema2pov.log
 REM cinema2pov.exe data\clone_test.c4d data\c4d_test.inc > cinema2pov.log
-cinema2pov.exe data\extrude_test.c4d data\extrude_test.inc > cinema2pov.log
+cinema2pov.exe data\sweep_test.c4d data\sweep_test.inc > cinema2pov.log
+
 
 
 

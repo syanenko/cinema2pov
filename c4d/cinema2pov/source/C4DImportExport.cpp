@@ -67,7 +67,7 @@ void MakeValidName(Char* objName)
 //
 // Wtite matrix
 // 
-void WriteMatrix(BaseObject* op)
+void WriteMatrix(BaseObject* op, Float zoom = 1)
 {
 	Matrix m = op->GetMg();
 	fprintf(file, "  matrix\n\
@@ -78,7 +78,7 @@ void WriteMatrix(BaseObject* op)
 	m.v1.x, m.v1.y, m.v1.z,
 	m.v2.x, m.v2.y, m.v2.z,
 	m.v3.x, m.v3.y, m.v3.z,
-	m.off.x, m.off.y, m.off.z);
+	m.off.x / zoom, m.off.y / zoom, m.off.z / zoom);
 }
 
 //
@@ -2492,13 +2492,12 @@ Bool AlienExtrudeObjectData::Execute()
 	// Spline type: linear_spline | cubic_spline | bezier_spline | quadratic_spline (?)
 	/*
 	SPLINEOBJECT_TYPE = 1000,
-		SPLINEOBJECT_TYPE_LINEAR = 0,
-		SPLINEOBJECT_TYPE_CUBIC = 1,
-		SPLINEOBJECT_TYPE_AKIMA = 2, (?)
-		SPLINEOBJECT_TYPE_BSPLINE = 3, (?)
-		SPLINEOBJECT_TYPE_BEZIER = 4,
+		SPLINEOBJECT_TYPE_LINEAR  = 0,
+		SPLINEOBJECT_TYPE_CUBIC   = 1,
+		SPLINEOBJECT_TYPE_AKIMA   = 2, (-)
+		SPLINEOBJECT_TYPE_BSPLINE = 3, (-)
+		SPLINEOBJECT_TYPE_BEZIER  = 4,
  */
-
 	float height = movement.y;
 
 	string spline_type = "";
@@ -2620,12 +2619,13 @@ Bool AlienExtrudeObjectData::Execute()
 // Execute function for the self defined Environment object
 Bool AlienSweepObjectData::Execute()
 {
+	printf("--------------- SWEEP: EXPORT START ------------------\n");
+
 	BaseObject* op = (BaseObject*)GetNode();
-	Char* pChar = op->GetName().GetCStringCopy();
-	if (pChar)
+	Char* objName = op->GetName().GetCStringCopy();
+	if (objName)
 	{
-		printf("\n - AlienSweepObjectData (%d): %s\n", (int)op->GetType(), pChar);
-		DeleteMem(pChar);
+		printf("\n - AlienSweepObjectData (%d): %s\n", (int)op->GetType(), objName);
 	}
 	else
 		printf("\n - AlienSweepObjectData (%d): <noname>\n", (int)op->GetType());
@@ -2636,17 +2636,38 @@ Bool AlienSweepObjectData::Execute()
 		return true;
 	}
 
-	printf("--------------- SWEEP: EXPORT START ------------------\n");
+	char declare[MAX_OBJ_NAME] = { 0 };
+	if (op->GetUp() == NULL)
+	{
+		sprintf(declare, "#declare %s = ", objName);
+		objects.push_back(objName);
+	}
+	DeleteMem(objName);
 
-	//BaseObject* ch1 = (BaseObject*)op->GetDown();
 	AlienSplineObject* ch1 = (AlienSplineObject*)op->GetDown();
-	pChar = ch1->GetName().GetCStringCopy();
+	Char* pChar = ch1->GetName().GetCStringCopy();
 	if (pChar)
 	{
 		printf("\nQQ:Ch1 - AlienSweepObjectData (%d): %s\n", (int)ch1->GetType(), pChar);
 		DeleteMem(pChar);
 	}
-	ch1->SetExported();
+
+	int ch1Type = ch1->GetType();
+	if (ch1Type != Osplinecircle)
+	{
+		printf("\n^----------- SWEEP: cat't sweep object of type '%d' -----------------^\n", ch1Type);
+		ch1->SetExported();
+		exported = true;
+		return true;
+	}
+
+	GeData data;
+	Float radius = 1;
+	if (ch1->GetParameter(PRIM_CIRCLE_RADIUS, data))
+	{
+		radius = data.GetFloat();
+		printf("\nQQ:Ch1: radius: %d\n", radius);
+	}
 
 	AlienSplineObject* ch2 = (AlienSplineObject*)op->GetDownLast();
 	pChar = ch2->GetName().GetCStringCopy();
@@ -2655,27 +2676,52 @@ Bool AlienSweepObjectData::Execute()
 		printf("\nQQ:Ch2 - AlienSweepObjectData (%d): %s\n", (int)ch2->GetType(), pChar);
 		DeleteMem(pChar);
 	}
+
+	int pc = ch2->GetPointCount();
+	const Vector* p = ch2->GetPointR();
+
+	Int32 spType = -1;
+	if (ch2->GetParameter(SPLINEOBJECT_TYPE, data))
+		spType = data.GetInt32();
+
+	string spTypeStr = "linear_spline";
+	switch (spType)
+	{
+		case SPLINEOBJECT_TYPE_LINEAR:  spTypeStr = "linear_spline" ; break;
+		case SPLINEOBJECT_TYPE_CUBIC:   spTypeStr = "cubic_spline"  ; break;
+		case SPLINEOBJECT_TYPE_BSPLINE: spTypeStr = "b_spline"      ; break;
+	}
+
+	if ((spType == SPLINEOBJECT_TYPE_CUBIC) ||
+	    (spType == SPLINEOBJECT_TYPE_BSPLINE))
+	{
+		fprintf(file, "%ssphere_sweep  { %s %d\n\n", declare, spTypeStr.c_str(), pc + 2);
+
+		fprintf(file, "  <%f, %f, %f>, %f,\n", p[0].x, p[0].y, p[0].z, radius); // Control 1
+		for (int i = 0; i < pc; i++)
+		{
+			fprintf(file, "  <%f, %f, %f>, %f,\n", p[i].x, p[i].y, p[i].z, radius);
+		}
+		fprintf(file, "  <%f, %f, %f>, %f,\n", p[pc-1].x, p[pc-1].y, p[pc-1].z, radius); // Control 2
+
+	} else // Export all other types as 'linear_spline'
+	{
+		fprintf(file, "%ssphere_sweep  { %s %d\n\n", declare, spTypeStr.c_str(), pc);
+
+		for (int i = 0; i < pc; i++)
+		{
+			fprintf(file, "  <%f, %f, %f>, %f,\n", p[i].x, p[i].y, p[i].z, radius);
+		}
+	}
+
+	WriteMatrix(op);
+	WriteMaterial(op);
+
+	ch1->SetExported();
 	ch2->SetExported();
-
-/* Get sweep params from children here
-	GeData data;
-	Vector movement = Vector(0.0, 0.0, 0.0);
-	if (op->GetParameter(EXTRUDEOBJECT_MOVE, data))
-		movement = data.GetVector();
-	printf("\n   - GetMovement(): %.2f / %.2f / %.2f \n", movement.x, movement.y, movement.z);
-
-	Int32 endSteps = 0;
-	if (op->GetParameter(CAP_ENDSTEPS, data))
-		endSteps = data.GetInt32();
-	printf("\n   - GetEndCapSteps(): %d \n", (int)endSteps);
-
-	PrintUniqueIDs(this);
-
-	// returning false means we couldn't tranform the object to our own objects
-	// we will be called again in AlienPolygonObjectData::Execute() to get the same objects as mesh (only if the scene was written with polygon caches of course)
-*/
-	printf("\n^-------------- SWEEP: EXPORT END ------------------^\n");
 	exported = true;
+
+	printf("\n^-------------- SWEEP: EXPORT END ------------------^\n");
 
 	return true;
 }
@@ -2959,23 +3005,20 @@ Bool AlienCameraObjectData::Execute()
 		fov = RadToDeg(camData.GetFloat());
 	printf("   FOV: %f \n", fov);
 
-	// Zoom
-	Float zoom = -1;
-	if (op->GetParameter(CAMERA_ZOOM, camData))
-		zoom = camData.GetFloat();
-	printf("   Zoom: %f \n", zoom);
+	Float zoom = 1;
+	const Float ZOOM_FACTOR = 100;   // Check this for more accurate zooming (!) // 14400:
+ 	Float angle = fov;
 
-	const Float ZOOM_FACTOR = 1.3;   // Check this for more accurate zooming (!)
-	const Float MAX_ANGLE = 179.999; 
-	Float angle = fov;
-
-	// Only two projections now supported
+	// Projections supported: perspective, orthographic
 	string ptojStr = "perspective";
 	if (proj == Pparallel)
 	{
 		ptojStr = "orthographic";
-		angle = zoom * ZOOM_FACTOR;
-		angle > MAX_ANGLE ? angle = MAX_ANGLE : 0;
+		// Zoom
+		if (op->GetParameter(CAMERA_ZOOM, camData))
+			zoom = camData.GetFloat();
+		printf("   Zoom: %f \n", zoom);
+		zoom = zoom / ZOOM_FACTOR;
 	}
 
 	fprintf(file, "camera{\
@@ -2983,7 +3026,7 @@ Bool AlienCameraObjectData::Execute()
 	location  <0, 0, 0>\n\
 	angle %f\n\n", ptojStr.c_str(), angle);
 
-	WriteMatrix(op);
+	WriteMatrix(op, zoom);
 	fprintf(file, "}\n\n");
 
 	printf("\n^--------------- CAMERA: EXPORT END ------------------^\n");
