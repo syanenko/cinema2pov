@@ -1,16 +1,18 @@
 # POV Utilities
 
-[POV Ray](http://www.povray.org) is a great rendering tool with support of solids [CSG](https://wiki.povray.org/content/Reference:Constructive_Solid_Geometry), can produce hight-qality realistic images, by processing scenes, described on [SDL](https://wiki.povray.org/content/Documentation:Tutorial_Section_3.9) lanuage, wich is simple and flexible. The one seriuuse drwback is lack of seriouse modelling tools, for effective working with objects and scene composing.
-This leads me to start this project - set of exporting plugins for most popular modellers. 
+[POV Ray](http://www.povray.org) is a great rendering tool with support of solids ([CSG](https://wiki.povray.org/content/Reference:Constructive_Solid_Geometry)), can produce hight-qality realistic images, by processing scenes, described on [SDL](https://wiki.povray.org/content/Documentation:Tutorial_Section_3.9) lanuage, wich is simple and flexible. The one seriouse drwback is lack of good modelling tools, for effective working with objects and scene composing.
+
+This leads me to start this project - set of exporting plugins for most popular 3D modelling software.
 
 ## Cinema4D
 
 **cinema2pov** - is a command line tool for exporting data from C4D format to POV Ray SDL, code is based on [Cineware SDK](https://developers.maxon.net/docs/CinewareSDK/html/index.html), now supports following objects:
 
-1. Primitives: [Sphere](https://wiki.povray.org/content/Reference:Sphere), Cube([Box](https://wiki.povray.org/content/Reference:Box)), [Cone](https://wiki.povray.org/content/Reference:Cone), [Cylinder](https://wiki.povray.org/content/Reference:Cylinder), [Plane](https://wiki.povray.org/content/Reference:Plane), [Spline](https://wiki.povray.org/content/Reference:Spline), Mesh (as [Mesh2](https://wiki.povray.org/content/Reference:Mesh2)).
-2. Constructive operations: Extrude (Prism), Sweep (Sphere sweep) 
-3. Boolean (CSG) operations: Union, Difference, Intersection.
+1. Primitives: [Sphere](https://wiki.povray.org/content/Reference:Sphere), Cube ([Box](https://wiki.povray.org/content/Reference:Box)), [Cone](https://wiki.povray.org/content/Reference:Cone), [Cylinder](https://wiki.povray.org/content/Reference:Cylinder), [Plane](https://wiki.povray.org/content/Reference:Plane), [Spline](https://wiki.povray.org/content/Reference:Spline), Mesh (as [Mesh2](https://wiki.povray.org/content/Reference:Mesh2)).
+2. Constructive operations: Extrude ([Prism](https://wiki.povray.org/content/Reference:Prism)), Sweep ([Sphere sweep](https://wiki.povray.org/content/Reference:Sphere_Sweep)) 
+3. Boolean ([CSG](https://wiki.povray.org/content/Reference:Constructive_Solid_Geometry)) operations: [Union](https://wiki.povray.org/content/Reference:Union), [Difference](https://wiki.povray.org/content/Reference:Difference), [Intersection](https://wiki.povray.org/content/Reference:Intersection).
 
+**Examples**
 - Splines\
 To preserve flexibility, exported spline data stored in an array that can be processed by macros,\
 see examples in 'c4d\export2pov\examples'.
