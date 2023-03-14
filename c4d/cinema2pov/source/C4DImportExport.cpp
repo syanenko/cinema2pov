@@ -2526,34 +2526,69 @@ Bool AlienExtrudeObjectData::Execute()
 		fprintf(file, "  <%f, %f>\n", p[0].x, p[0].z); // Close
 		fprintf(file, "  <%f, %f>\n", p[1].x, p[1].z);  // Control 2
 
-		// DEBUG: Points
-		/*
-		for (int i = 0; i < pc; ++i)
-		{
-		  fprintf(file, "  <%f, %f>\n", p[i].x, p[i].z);
-		}
-		// Tangents
-		for (int i = 0; i < tc; ++i)
-		{
-			fprintf(file, "  <%f, %f>\n", t[i].vl.x, t[i].vl.z);
-			fprintf(file, "  <%f, %f>\n", t[i].vr.x, t[i].vr.z);
-		}*/
-
-		// fprintf(file, "  <%f, %f>\n", p[0].x, p[0].z); // Close spline
-
 	} else if (spType == SPLINEOBJECT_TYPE_BEZIER)
 	{
-		// BEZIER spline TODO: Fix point amount
-		fprintf(file, "%sprism { linear_sweep bezier_spline 0, %lf, %d\n\n", declare, height, pc + 3);
+		// BEZIER spline
+		/*
+			<15.000000, 0.000000>   // P1
+			<15.000000, 3.750000>   // T2
+			<5.625000, 10.000000>   // T3
+			<0.000000, 10.000000>   // P2
+			// -----------
+			<0.000000, 10.000000>   // P2
+			<-5.625000, 10.000000>  // T4
+			<-15.000000, 3.750000>  // T5
+			<-15.000000, 0.000000>  // P3
+			// -----------
+			<-15.000000, 0.000000>  // P3
+			<-15.000000, -3.750000> // T6
+			<-5.625000, -10.000000> // T7
+			<0.000000, -10.000000>  // P4
+			// -----------
+			<0.000000, -10.000000>  // P4
+			<5.625000, -10.000000>  // T8
+			<15.000000, -3.750000>  // T1
+			<15.000000, 0.000000>   // P1
+			// -----------
 
+			//<15.000000, -3.750000>  // T1
+			//<15.000000, 3.750000>   // T2
+			//<5.625000, 10.000000>   // T3
+			//<-5.625000, 10.000000>  // T4
+			//<-15.000000, 3.750000>  // T5
+			//<-15.000000, -3.750000> // T6
+			//<-5.625000, -10.000000> // T7
+			//<5.625000, -10.000000>  // T8
+			*/
+
+			// DEBUG: Points
+			/*
+			for (int i = 0; i < pc; ++i)
+			{
+				fprintf(file, "  <%f, %f>\n", p[i].x, p[i].z);
+			}
+			// Tangents
+			for (int i = 0; i < tc; ++i)
+			{
+				fprintf(file, "  <%f, %f>\n", t[i].vl.x + p[i].x, t[i].vl.z + p[i].z);
+				fprintf(file, "  <%f, %f>\n", t[i].vr.x + p[i].x, t[i].vr.z + p[i].z);
+			}*/
+
+		fprintf(file, "%sprism { linear_sweep bezier_spline 0, %lf, %d\n\n", declare, height, pc * 4);
 		// Write points
-		fprintf(file, "  <%f, %f>\n", p[pc - 1].x, p[pc - 1].z);  // Control 1
+		pc--;
 		for (int i = 0; i < pc; ++i)
 		{
-			fprintf(file, "  <%f, %f>\n", p[i].x, p[i].z);
+			fprintf(file, "  <%f, %f>\n", p[i].x, p[i].z); // Point 1
+			fprintf(file, "  <%f, %f>\n", t[i].vr.x + p[i].x, t[i].vr.z + p[i].z); // Tangent 1
+			fprintf(file, "  <%f, %f>\n", t[i + 1].vl.x + p[i + 1].x, t[i + 1].vl.z + p[i + 1].z); // Tangent 2
+			fprintf(file, "  <%f, %f>\n", p[i + 1].x, p[i + 1].z); // Point 2
 		}
-		fprintf(file, "  <%f, %f>\n", p[0].x, p[0].z); // Close
-		fprintf(file, "  <%f, %f>\n", p[1].x, p[1].z);  // Control 2
+
+		fprintf(file, "  <%f, %f>\n", p[pc].x, p[pc].z); // Close
+		fprintf(file, "  <%f, %f>\n", t[pc].vr.x + p[pc].x, t[pc].vr.z + p[pc].z); // Tangent 1
+		fprintf(file, "  <%f, %f>\n", t[0].vl.x + p[0].x, t[0].vl.z + p[0].z);     // Tangent 2
+		fprintf(file, "  <%f, %f>\n", p[0].x, p[0].z);
 
 	}	else
 	{
