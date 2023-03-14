@@ -1,13 +1,19 @@
 # POV Utilities
 
-Set of tools for exporting data from different sources to [POV-Ray](http://www.povray.org/)'s SDL format.\
-Compiled by Microsoft Visual Studio 2019.
+[POV Ray](http://www.povray.org) is a great rendering tool with support of solids [CSG](https://wiki.povray.org/content/Reference:Constructive_Solid_Geometry), can produce hight-qality realistic images, by processing scenes, described on [SDL](https://wiki.povray.org/content/Documentation:Tutorial_Section_3.9) lanuage, wich is simple and flexible. The one seriuuse drwback is lack of seriouse modelling tools, for effective working with objects and scene composing.
+This leads me to start this project - set of exporting plugins for most popular modellers. 
 
-Supported sources and entities:
-1. Cinema4D
-   - Splines\
-   To preserve flexibility, exported spline data stored in an array that can be processed by macros,\
-   see examples in 'c4d\export2pov\examples'.
+## Cinema4D
+
+**cinema2pov** - is a command line tool for exporting data from C4D format to POV Ray SDL, code is based on [Cineware SDK](https://developers.maxon.net/docs/CinewareSDK/html/index.html), now supports following objects:
+
+1. Primitives: Sphere ([Sphere](https://wiki.povray.org/content/Reference:Sphere)), Cube[Box](https://wiki.povray.org/content/Reference:Box), Cone, Cylinder, Plane, Spline, Mesh.
+2. Boolean operations: Union, Difference, Intersection.
+3. Constructive operations: Extrude (Prism), Sweep (Sphere sweep) 
+
+- Splines\
+To preserve flexibility, exported spline data stored in an array that can be processed by macros,\
+see examples in 'c4d\export2pov\examples'.
 
 ![data_usage](https://user-images.githubusercontent.com/6688301/222774955-c665690e-13a9-4862-aec0-bf9a59f1994e.png)
 #
