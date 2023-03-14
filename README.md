@@ -7,9 +7,9 @@ This leads me to start this project - set of exporting plugins for most popular 
 
 **cinema2pov** - is a command line tool for exporting data from C4D format to POV Ray SDL, code is based on [Cineware SDK](https://developers.maxon.net/docs/CinewareSDK/html/index.html), now supports following objects:
 
-1. Primitives: Sphere ([Sphere](https://wiki.povray.org/content/Reference:Sphere)), Cube[Box](https://wiki.povray.org/content/Reference:Box), Cone, Cylinder, Plane, Spline, Mesh.
-2. Boolean operations: Union, Difference, Intersection.
-3. Constructive operations: Extrude (Prism), Sweep (Sphere sweep) 
+1. Primitives: [Sphere](https://wiki.povray.org/content/Reference:Sphere), Cube([Box](https://wiki.povray.org/content/Reference:Box)), [Cone](https://wiki.povray.org/content/Reference:Cone), [Cylinder](https://wiki.povray.org/content/Reference:Cylinder), [Plane](https://wiki.povray.org/content/Reference:Plane), [Spline](https://wiki.povray.org/content/Reference:Spline), Mesh (as [Mesh2](https://wiki.povray.org/content/Reference:Mesh2)).
+2. Constructive operations: Extrude (Prism), Sweep (Sphere sweep) 
+3. Boolean (CSG) operations: Union, Difference, Intersection.
 
 - Splines\
 To preserve flexibility, exported spline data stored in an array that can be processed by macros,\
