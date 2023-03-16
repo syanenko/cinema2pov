@@ -2663,7 +2663,7 @@ Bool AlienSweepObjectData::Execute()
 	if (ch1->GetParameter(PRIM_CIRCLE_RADIUS, data))
 	{
 		radius = data.GetFloat();
-		printf("\nCh1: radius: %f\n", radius);
+		printf("\nCh1 - radius: %f\n", radius);
 	}
 
 	// Child 2 - path
@@ -2679,43 +2679,53 @@ Bool AlienSweepObjectData::Execute()
 	Int32 pc = ch2->GetPointCount();
 	const Vector* p = ch2->GetPointR();
 
-	// DEBUG
-	// Get: End scale, Start grow, End grow
+	// End scale TODO: Interpolate on whole length
 	Float scale = 1;
 	if (op->GetParameter(SWEEPOBJECT_SCALE, data))
 		scale = data.GetFloat();
-	Float r_step = ((radius * scale) - radius) / (pc - 1);
+	Float scale_step = (scale - 1.0) / (Float)(pc - 1);
+	scale = 1;
 
-	GeData splineScaleParameter;
-	op->GetParameter(SWEEPOBJECT_SPLINESCALE, splineScaleParameter);
+	// Profile spline
+	std::vector<double> prof_x;
+	std::vector<double> prof_y;
+	tk::spline profile;
+	Float p_step = (Float)1.0 / (Float)(pc - 1);
 
-	SplineData* sd;
-	if (splineScaleParameter.GetType() == CUSTOMDATATYPE_SPLINE)
+  op->GetParameter(SWEEPOBJECT_SPLINESCALE, data);
+	if (data.GetType() == CUSTOMDATATYPE_SPLINE)
 	{
-		SplineData* sd = static_cast<SplineData*>(splineScaleParameter.GetCustomDataType(CUSTOMDATATYPE_SPLINE));
+		SplineData* sd = static_cast<SplineData*>(data.GetCustomDataType(CUSTOMDATATYPE_SPLINE));
 
 		if (sd != nullptr)
 		{
-			// DEBUG
-			//---------------------------------------------------------------
-			//std::vector<double> X = { 0.1, 0.4, 1.2, 1.8, 2.0 }; // must be increasing
-			//std::vector<double> Y = { 0.1, 0.7, 0.6, 1.1, 0.9 };
-			//tk::spline s(X, Y, tk::spline::cspline);
-			// tk::spline s(X, Y, tk::spline::linear);
-			//double x = 1.5, y = s(x), deriv = s.deriv(1, x);
-			//printf("spline at %f is %f with derivative %f\n", x, y, deriv);
-			//---------------------------------------------------------------
-
 			// Knots
 			Int32 kc = sd->GetKnotCount();
-			printf("\n   - number of knots %d \n", (int)kc);
+			printf("\n  - Number of knots %d \n", (int)kc);
+
+			// First
+			CustomSplineKnot* kn = sd->GetKnot(0);
+			prof_x.push_back(-0.0001);
+			prof_y.push_back(kn->vPos.y);
 
 			const CustomSplineKnot* k;
 			for (int i = 0; i < kc; i++)
 			{
 				CustomSplineKnot* k = sd->GetKnot(i);
-				printf("\n Knot %d: x=%f, y=%f\n", i, k->vPos.x, k->vPos.y);
+				prof_x.push_back(k->vPos.x);
+				prof_y.push_back(k->vPos.y);
+				printf("  - Knot %d: x=%f, y=%f\n", i, k->vPos.x, k->vPos.y);
 			}
+
+			// Last
+			kn = sd->GetKnot(kc - 1);
+			prof_x.push_back(1.0001);
+			prof_y.push_back(kn->vPos.y);
+
+			if(kn->interpol == CustomSplineKnotInterpolationCubic)
+				profile.set_points(prof_x, prof_y, tk::spline::linear);
+			else
+			  profile.set_points(prof_x, prof_y, tk::spline::cspline);
 		}
 	}
 
@@ -2731,6 +2741,7 @@ Bool AlienSweepObjectData::Execute()
 		case SPLINEOBJECT_TYPE_BSPLINE: spTypeStr = "b_spline"      ; break;
 	}
 
+	Float r = 0;
 	if ((spType == SPLINEOBJECT_TYPE_CUBIC) ||
 	    (spType == SPLINEOBJECT_TYPE_BSPLINE))
 	{
@@ -2738,18 +2749,25 @@ Bool AlienSweepObjectData::Execute()
 		fprintf(file, "  <%f, %f, %f>, %f,\n", p[0].x, p[0].y, p[0].z, radius); // Control 1
 		for (int i = 0; i < pc; i++)
 		{
-			fprintf(file, "  <%f, %f, %f>, %f,\n", p[i].x, p[i].y, p[i].z, radius);
-			radius += r_step;
+			double pscale = profile(i * p_step);
+			pscale > 1 ? pscale = 1 : pscale;
+			r = radius * scale * pscale;
+			scale += scale_step;
+
+			fprintf(file, "  <%f, %f, %f>, %f,\n", p[i].x, p[i].y, p[i].z, r);
 		}
-		fprintf(file, "  <%f, %f, %f>, %f,\n", p[pc-1].x, p[pc-1].y, p[pc-1].z, radius); // Control 2
+		fprintf(file, "  <%f, %f, %f>, %f\n", p[pc-1].x, p[pc-1].y, p[pc-1].z, r); // Control 2
 
 	} else // Export all other types as 'linear_spline'
 	{
 		fprintf(file, "%ssphere_sweep  { %s %d\n\n", declare, spTypeStr.c_str(), pc);
 		for (int i = 0; i < pc; i++)
 		{
-			fprintf(file, "  <%f, %f, %f>, %f,\n", p[i].x, p[i].y, p[i].z, radius);
-			radius += r_step;
+			double pscale = profile(i * p_step);
+			pscale > 1 ? pscale = 1 : pscale;
+			r = radius * scale * pscale;
+			scale += scale_step;
+			fprintf(file, "  <%f, %f, %f>, %f,\n", p[i].x, p[i].y, p[i].z, r);
 		}
 	}
 
