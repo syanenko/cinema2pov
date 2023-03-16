@@ -2371,6 +2371,7 @@ Bool AlienBoolObjectData::Execute()
 	Char* objName = op->GetName().GetCStringCopy();
 	if (objName)
 	{
+		MakeValidName(objName);
 		printf("\n - AlienBoolObjectData (%d): \"%s\"\n", (int)op->GetType(), objName);
 	}
 	else
@@ -2448,6 +2449,7 @@ Bool AlienExtrudeObjectData::Execute()
 	Char* objName = op->GetName().GetCStringCopy();
 	if (objName)
 	{
+		MakeValidName(objName);
 		printf("\n - AlienExtrudeObjectData (%d): %s\n", (int)op->GetType(), objName);
 	}
 	else
@@ -2618,6 +2620,7 @@ Bool AlienSweepObjectData::Execute()
 	Char* objName = op->GetName().GetCStringCopy();
 	if (objName)
 	{
+		MakeValidName(objName);
 		printf("\n - AlienSweepObjectData (%d): %s\n", (int)op->GetType(), objName);
 	}
 	else
@@ -3007,6 +3010,7 @@ Bool AlienCameraObjectData::Execute()
 	Char* objName = op->GetName().GetCStringCopy();
 	if (objName)
 	{
+		MakeValidName(objName);
 		printf("\n - AlienCameraObjectData (%d): \"%s\"", (int)op->GetType(), objName);
 	}
 	else
@@ -4001,6 +4005,8 @@ Bool BaseDocument::CreateSceneToC4D(Bool selectedonly)
 // 6. Bool - process > 2 operands
 // 7. Camera: projection_type, matrix, FOV Hor. angle = K * Zoon; (0:179.999)
 // 8. Remove default matrixes (?)
+// 9. Check local coordinates 
+
 // 
 // -- Errors
 // 1. Empty extrude
