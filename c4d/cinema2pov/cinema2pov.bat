@@ -7,6 +7,8 @@ REM cinema2pov.exe data\global_test.c4d data\global_test.inc > cinema2pov.log
 REM cinema2pov.exe data\global_test_error.c4d data\global_test.inc > cinema2pov.log
 REM cinema2pov.exe data\clone_test.c4d data\c4d_test.inc > cinema2pov.log
 cinema2pov.exe data\sweep_test.c4d data\sweep_test.inc > cinema2pov.log
+"C:\Program Files\POV-Ray\v3.8-beta\bin\pvengine64.exe" /RENDER C:\Projects\povray_works\pov-tools.local\22.008_RBCinewaresdk22.0_355130\projects\cinema2pov\data\c4d_test.pov
+
 
 
 

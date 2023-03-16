@@ -14,6 +14,7 @@
 #include "parameter_ids/material/mbase.h"
 #include <vector>
 #include <string>
+#include "spline.h"
 
 // here you should use the cineware namespace
 using namespace std;
@@ -2636,9 +2637,7 @@ Bool AlienSweepObjectData::Execute()
 	}
 	DeleteMem(objName);
 
-	// Sweep scale profile
-	op->get
-
+	// Child 1 - profile
 	AlienSplineObject* ch1 = (AlienSplineObject*)op->GetDown();
 	Char* pChar = ch1->GetName().GetCStringCopy();
 	if (pChar)
@@ -2661,9 +2660,10 @@ Bool AlienSweepObjectData::Execute()
 	if (ch1->GetParameter(PRIM_CIRCLE_RADIUS, data))
 	{
 		radius = data.GetFloat();
-		printf("\nCh1: radius: %d\n", radius);
+		printf("\nCh1: radius: %f\n", radius);
 	}
 
+	// Child 2 - path
 	AlienSplineObject* ch2 = (AlienSplineObject*)op->GetDownLast();
 	pChar = ch2->GetName().GetCStringCopy();
 	if (pChar)
@@ -2672,8 +2672,49 @@ Bool AlienSweepObjectData::Execute()
 		DeleteMem(pChar);
 	}
 
-	int pc = ch2->GetPointCount();
+	// Path points
+	Int32 pc = ch2->GetPointCount();
 	const Vector* p = ch2->GetPointR();
+
+	// DEBUG
+	// Get: End scale, Start grow, End grow
+	Float scale = 1;
+	if (op->GetParameter(SWEEPOBJECT_SCALE, data))
+		scale = data.GetFloat();
+	Float r_step = ((radius * scale) - radius) / (pc - 1);
+
+	GeData splineScaleParameter;
+	op->GetParameter(SWEEPOBJECT_SPLINESCALE, splineScaleParameter);
+
+	SplineData* sd;
+	if (splineScaleParameter.GetType() == CUSTOMDATATYPE_SPLINE)
+	{
+		SplineData* sd = static_cast<SplineData*>(splineScaleParameter.GetCustomDataType(CUSTOMDATATYPE_SPLINE));
+
+		if (sd != nullptr)
+		{
+			// DEBUG
+			//---------------------------------------------------------------
+			//std::vector<double> X = { 0.1, 0.4, 1.2, 1.8, 2.0 }; // must be increasing
+			//std::vector<double> Y = { 0.1, 0.7, 0.6, 1.1, 0.9 };
+			//tk::spline s(X, Y, tk::spline::cspline);
+			// tk::spline s(X, Y, tk::spline::linear);
+			//double x = 1.5, y = s(x), deriv = s.deriv(1, x);
+			//printf("spline at %f is %f with derivative %f\n", x, y, deriv);
+			//---------------------------------------------------------------
+
+			// Knots
+			Int32 kc = sd->GetKnotCount();
+			printf("\n   - number of knots %d \n", (int)kc);
+
+			const CustomSplineKnot* k;
+			for (int i = 0; i < kc; i++)
+			{
+				CustomSplineKnot* k = sd->GetKnot(i);
+				printf("\n Knot %d: x=%f, y=%f\n", i, k->vPos.x, k->vPos.y);
+			}
+		}
+	}
 
 	Int32 spType = -1;
 	if (ch2->GetParameter(SPLINEOBJECT_TYPE, data))
@@ -2691,31 +2732,29 @@ Bool AlienSweepObjectData::Execute()
 	    (spType == SPLINEOBJECT_TYPE_BSPLINE))
 	{
 		fprintf(file, "%ssphere_sweep  { %s %d\n\n", declare, spTypeStr.c_str(), pc + 2);
-
 		fprintf(file, "  <%f, %f, %f>, %f,\n", p[0].x, p[0].y, p[0].z, radius); // Control 1
 		for (int i = 0; i < pc; i++)
 		{
 			fprintf(file, "  <%f, %f, %f>, %f,\n", p[i].x, p[i].y, p[i].z, radius);
+			radius += r_step;
 		}
 		fprintf(file, "  <%f, %f, %f>, %f,\n", p[pc-1].x, p[pc-1].y, p[pc-1].z, radius); // Control 2
 
 	} else // Export all other types as 'linear_spline'
 	{
 		fprintf(file, "%ssphere_sweep  { %s %d\n\n", declare, spTypeStr.c_str(), pc);
-
 		for (int i = 0; i < pc; i++)
 		{
 			fprintf(file, "  <%f, %f, %f>, %f,\n", p[i].x, p[i].y, p[i].z, radius);
+			radius += r_step;
 		}
 	}
 
 	WriteMatrix(op);
 	WriteMaterial(op);
 
-	ch1->SetExported();
 	ch2->SetExported();
 	exported = true;
-
 	printf("\n^-------------- SWEEP: EXPORT END ------------------^\n");
 
 	return true;
