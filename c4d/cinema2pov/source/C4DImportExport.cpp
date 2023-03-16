@@ -15,6 +15,7 @@
 #include <vector>
 #include <string>
 #include "spline.h"
+#include "bezier.h"
 
 // here you should use the cineware namespace
 using namespace std;
@@ -2691,6 +2692,7 @@ Bool AlienSweepObjectData::Execute()
 	std::vector<double> prof_y;
 	tk::spline profile;
 	Float p_step = (Float)1.0 / (Float)(pc - 1);
+	CustomSplineKnotInterpolation interpol;
 
   op->GetParameter(SWEEPOBJECT_SPLINESCALE, data);
 	if (data.GetType() == CUSTOMDATATYPE_SPLINE)
@@ -2704,9 +2706,9 @@ Bool AlienSweepObjectData::Execute()
 			printf("\n  - Number of knots %d \n", (int)kc);
 
 			// First
-			CustomSplineKnot* kn = sd->GetKnot(0);
+			CustomSplineKnot* ke = sd->GetKnot(0);
 			prof_x.push_back(-0.0001);
-			prof_y.push_back(kn->vPos.y);
+			prof_y.push_back(ke->vPos.y);
 
 			const CustomSplineKnot* k;
 			for (int i = 0; i < kc; i++)
@@ -2718,16 +2720,27 @@ Bool AlienSweepObjectData::Execute()
 			}
 
 			// Last
-			kn = sd->GetKnot(kc - 1);
+			ke = sd->GetKnot(kc - 1);
 			prof_x.push_back(1.0001);
-			prof_y.push_back(kn->vPos.y);
+			prof_y.push_back(ke->vPos.y);
 
-			if(kn->interpol == CustomSplineKnotInterpolationCubic)
-				profile.set_points(prof_x, prof_y, tk::spline::linear);
-			else
-			  profile.set_points(prof_x, prof_y, tk::spline::cspline);
+			interpol = ke->interpol;
 		}
 	}
+
+	/* TODO: Switch to Bezier for better accuracy
+	Bezier::Bezier<3> cubicBezier({ {120, 160}, {35, 200}, {220, 260}, {220, 40} });
+	// Get coordinates on the curve from a value between 0 and 1 (values outside this range are also valid because of the way bezier curves are defined).
+	Bezier::Point bp;
+	bp = cubicBezier.valueAt(0);   // (120, 160)
+	bp = cubicBezier.valueAt(0.5); // (138.125, 197.5)
+	bp = cubicBezier.valueAt(1.0); // (138.125, 197.5)
+	*/
+	if ((interpol == CustomSplineKnotInterpolationBezier) ||
+		  (interpol == CustomSplineKnotInterpolationCubic))
+		profile.set_points(prof_x, prof_y, tk::spline::cspline);
+	else
+		profile.set_points(prof_x, prof_y, tk::spline::linear);
 
 	Int32 spType = -1;
 	if (ch2->GetParameter(SPLINEOBJECT_TYPE, data))
