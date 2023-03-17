@@ -264,7 +264,18 @@ class AlienSweepObjectData : public NodeData
 {
 	INSTANCEOF(AlienSweepObjectData, NodeData)
 
-	bool exported = false;
+		bool exported = false;
+public:
+
+	virtual Bool Execute();
+};
+
+// self-defined instance object data with own functions and members
+class AlienLatheObjectData : public NodeData
+{
+	INSTANCEOF(AlienLatheObjectData, NodeData)
+
+		bool exported = false;
 public:
 
 	virtual Bool Execute();

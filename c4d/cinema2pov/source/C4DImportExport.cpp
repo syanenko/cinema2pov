@@ -1943,6 +1943,9 @@ NodeData *AllocAlienObjectData(Int32 id, Bool &known, BaseList2D* node)
 		case Osweep:
 			m_data = NewObj(AlienSweepObjectData);
 			break;
+		case Olathe:
+			m_data = NewObj(AlienLatheObjectData);
+			break;
 
 		case Oxref:
 			m_data = NewObj(AlienXRefObjectData);
@@ -2495,7 +2498,6 @@ Bool AlienExtrudeObjectData::Execute()
 	float height = movement.y;
 
 	// Spline type
-	string spline_type = "";
 	Int32 spType = -1;
 	if (ch1->GetParameter(SPLINEOBJECT_TYPE, data))
 		spType = data.GetInt32();
@@ -2784,6 +2786,113 @@ Bool AlienSweepObjectData::Execute()
 	exported = true;
 	printf("\n^-------------- SWEEP: EXPORT END ------------------^\n");
 
+	return true;
+}
+
+//
+// Lathe
+// 
+Bool AlienLatheObjectData::Execute()
+{
+	printf("--------------- LATHE: EXPORT START -------------------\n");
+	BaseObject* op = (BaseObject*)GetNode();
+	Char* objName = op->GetName().GetCStringCopy();
+	if (objName)
+	{
+		MakeValidName(objName);
+		printf("\n - AlienLatheObjectData (%d): %s\n", (int)op->GetType(), objName);
+	}
+	else
+		printf("\n - AlienLatheObjectData (%d): <noname>\n", (int)op->GetType());
+
+	if (exported)
+	{
+		printf("\n^--------------- LATHE: ALREADY EXPORTED -----------------^\n, objName");
+		return true;
+	}
+
+	// Declare
+	char declare[MAX_OBJ_NAME] = { 0 };
+	if (op->GetUp() == NULL)
+	{
+		sprintf(declare, "#declare %s = ", objName);
+		objects.push_back(objName);
+	}
+	DeleteMem(objName);
+
+	// Child
+	AlienSplineObject* ch1 = (AlienSplineObject*)op->GetDown();
+	Char* ch1n = ch1->GetName().GetCStringCopy();
+	if (ch1n)
+	{
+		printf("\n   - Child_1: type='%d', name='%s'\n", (int)ch1->GetType(), ch1n);
+		DeleteMem(ch1n);
+	}
+
+	// Spline type
+	GeData data;
+	Int32 spType = -1;
+	if (ch1->GetParameter(SPLINEOBJECT_TYPE, data))
+		spType = data.GetInt32();
+
+	// Points
+	int pc = ch1->GetPointCount();
+	const Vector* p = ch1->GetPointR();
+
+	int tc = ch1->GetTangentCount();
+	const Tangent* t = ch1->GetTangentR();
+
+	if (spType == SPLINEOBJECT_TYPE_CUBIC)
+	{
+		// CUBIC spline
+		fprintf(file, "%slathe { cubic_spline %d\n\n", declare, pc + 2);
+		fprintf(file, "  <%f, %f>\n", p[0].x, p[0].y);  // Control 1
+		for (int i = 0; i < pc; ++i)
+		{
+			fprintf(file, "  <%f, %f>\n", p[i].x, p[i].y);
+		}
+		fprintf(file, "  <%f, %f>\n", p[pc - 1].x, p[pc - 1].y);  // Control 2
+	}
+	else if (spType == SPLINEOBJECT_TYPE_BEZIER)
+	{
+  	// Write
+		fprintf(file, "%slathe { bezier_spline %d\n\n", declare, pc * 4);
+		pc--;
+		for (int i = 0; i < pc; ++i)
+		{
+			fprintf(file, "  <%f, %f>\n", p[i].x, p[i].y); // Point 1
+			fprintf(file, "  <%f, %f>\n", t[i].vr.x + p[i].x, t[i].vr.y + p[i].y); // Tangent 1
+			fprintf(file, "  <%f, %f>\n", t[i + 1].vl.x + p[i + 1].x, t[i + 1].vl.y + p[i + 1].y); // Tangent 2
+			fprintf(file, "  <%f, %f>\n", p[i + 1].x, p[i + 1].y); // Point 2
+		}
+
+		fprintf(file, "  <%f, %f>\n", p[pc].x, p[pc].y); // Close
+		fprintf(file, "  <%f, %f>\n", t[pc].vr.x + p[pc].x, t[pc].vr.y + p[pc].y); // Tangent 1
+		fprintf(file, "  <%f, %f>\n", t[0].vl.x + p[0].x, t[0].vl.y + p[0].y);     // Tangent 2
+		fprintf(file, "  <%f, %f>\n", p[0].x, p[0].y);
+	}
+	else
+	{
+		// LINEAR spline 
+		fprintf(file, "%slathe { linear_spline %d\n\n", declare, pc);
+
+		for (int i = 0; i < pc; ++i)
+		{
+			fprintf(file, "  <%f, %f>\n", p[i].x, p[i].y);
+		}
+		fprintf(file, "\n");
+	}
+
+	ch1->SetExported();
+	WriteMatrix(op);
+	WriteMaterial(op);
+
+	printf("^-------------- LATHE: EXPORT END -------------------^\n", objName);
+	exported = true;
+
+	DeleteMem(objName);
+	// returning false means we couldn't tranform the object to our own objects
+	// we will be called again in AlienPolygonObjectData::Execute() to get the same objects as mesh (only if the scene was written with polygon caches of course)
 	return true;
 }
 
