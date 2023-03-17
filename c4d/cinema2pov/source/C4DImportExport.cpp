@@ -2792,6 +2792,7 @@ Bool AlienLatheObjectData::Execute()
 	int tc = ch1->GetTangentCount();
 	const Tangent* t = ch1->GetTangentR();
 
+	// TODO: Choose by tag: linear_spline | quadratic_spline | cubic_spline | bezier_spline
 	if (spType == SPLINEOBJECT_TYPE_CUBIC)
 	{
 		// CUBIC spline
@@ -3241,9 +3242,12 @@ Bool AlienSplineObject::Execute()
 	printf("   - PointCount: %d\n", pc);
 	printf("   - SegmentCount: %d\n", sc);
 	
-	// TODO: Choose by tag info
+	//
+	// TODO: CHoose by tag info:
+	// 1. linear_spline | quadratic_spline | cubic_spline | natural_spline
+	// 2. Parameter formula
+	// 3. Export as
 	typedef enum { ARRAY, SPLINE, BOTH } EXPORT_AS;
-	
 	EXPORT_AS export_as = BOTH;
 
 	// Write array
@@ -3265,7 +3269,6 @@ Bool AlienSplineObject::Execute()
 	if ((export_as == SPLINE) ||
 		(export_as == BOTH))
 	{
-		// TODO: CHoose by tag info: linear_spline | quadratic_spline | cubic_spline | natural_spline
 		string sptype = "linear_spline";
 
 		fprintf(file, "#declare %s = spline { %s\n\n", objName, sptype.c_str());
