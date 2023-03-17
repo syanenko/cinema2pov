@@ -7,7 +7,8 @@
 // Sorces: github.com/syanenko/pov-utils
 // POV-Ray site: www.povray.org
 //
-// Supported objects: sphere, cube, cone, cylinder, spline, mesh
+// Supported objects: sphere, cube, cone, cylinder, spline, 
+//                    mesh2, prism, sphere sweep
 //---------------------------------------------------------------
 #include "C4DImportExport.h"
 #include "c4d_browsecontainer.h"
@@ -15,7 +16,6 @@
 #include <vector>
 #include <string>
 #include "spline.h"
-#include "bezier.h"
 
 // here you should use the cineware namespace
 using namespace std;
@@ -2728,14 +2728,6 @@ Bool AlienSweepObjectData::Execute()
 		}
 	}
 
-	/* TODO: Switch to Bezier for better accuracy
-	Bezier::Bezier<3> cubicBezier({ {120, 160}, {35, 200}, {220, 260}, {220, 40} });
-	// Get coordinates on the curve from a value between 0 and 1 (values outside this range are also valid because of the way bezier curves are defined).
-	Bezier::Point bp;
-	bp = cubicBezier.valueAt(0);   // (120, 160)
-	bp = cubicBezier.valueAt(0.5); // (138.125, 197.5)
-	bp = cubicBezier.valueAt(1.0); // (138.125, 197.5)
-	*/
 	if ((interpol == CustomSplineKnotInterpolationBezier) ||
 		  (interpol == CustomSplineKnotInterpolationCubic))
 		profile.set_points(prof_x, prof_y, tk::spline::cspline);
@@ -2780,6 +2772,7 @@ Bool AlienSweepObjectData::Execute()
 			pscale > 1 ? pscale = 1 : pscale;
 			r = radius * scale * pscale;
 			scale += scale_step;
+
 			fprintf(file, "  <%f, %f, %f>, %f,\n", p[i].x, p[i].y, p[i].z, r);
 		}
 	}
