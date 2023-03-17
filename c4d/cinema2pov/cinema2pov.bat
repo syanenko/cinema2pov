@@ -12,7 +12,7 @@ REM cinema2pov.exe data\lathe_test.c4d data\lathe_test.inc > cinema2pov.log
 REM "C:\Program Files\POV-Ray\v3.8-beta\bin\pvengine64.exe" /RENDER C:\Projects\povray_works\pov-tools.local\22.008_RBCinewaresdk22.0_355130\projects\cinema2pov\data\c4d_test.pov
 
 cinema2pov.exe data\spline_test.c4d data\spline_test.inc > cinema2pov.log
-"C:\Program Files\POV-Ray\v3.8-beta\bin\pvengine64.exe" /RENDER C:\Projects\povray_works\pov-tools.local\22.008_RBCinewaresdk22.0_355130\projects\cinema2pov\data\c4d_test.pov
+REM "C:\Program Files\POV-Ray\v3.8-beta\bin\pvengine64.exe" /RENDER C:\Projects\povray_works\pov-tools.local\22.008_RBCinewaresdk22.0_355130\projects\cinema2pov\data\c4d_test.pov
 
 
 

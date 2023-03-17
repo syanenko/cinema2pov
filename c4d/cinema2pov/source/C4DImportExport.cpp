@@ -109,31 +109,40 @@ void WriteMaterial(BaseObject* op)
 //
 // Check for POV tag on object
 //
-bool HasPovTag(BaseObject* obj, Float& from, Float& to, Int32& type)
+enum
+{
+	ID_POV_SPLINE = 1018985,
+
+	POV_SPLINE_SPLINE_TYPE      = 2000,
+	POV_SPLINE_SPLINE_LINEAR    = 1,
+	POV_SPLINE_SPLINE_QUADRATIC = 2,
+	POV_SPLINE_SPLINE_CUBIC     = 3,
+	POV_SPLINE_SPLINE_NATURAL   = 4,
+
+	POV_SPLINE_EXPORT_AS = 2100,
+	POV_SPLINE_AS_SPLINE = 1,
+	POV_SPLINE_AS_ARRAY  = 2,
+	POV_SPLINE_BOTH      = 3,
+};
+
+bool HasPovTag(BaseObject* obj, int& export_as, int& spline_type)
 {
 	GeData data;
 	BaseTag* btag = obj->GetFirstTag();
 	for (; btag; btag = (BaseTag*)btag->GetNext())
 	{
-		// POV exprt tag (#define ID_POV_PRISM 1018985)
-		if (btag->GetType() == 1018985)
+		if (btag->GetType() == ID_POV_SPLINE)
 		{
-			if (btag->GetParameter(2001, data)) // SWEEP_FROM
+			if (btag->GetParameter(POV_SPLINE_EXPORT_AS, data))
 			{
-				from = data.GetFloat();
-				printf("QQ:SHADOW=%f\n", from);
+				export_as = data.GetInt32();
+				printf("- HasPovTag: EXPORT_AS=%d\n", export_as);
 			}
 
-			if (btag->GetParameter(2002, data)) // SWEEP_TO
+			if (btag->GetParameter(POV_SPLINE_SPLINE_TYPE, data))
 			{
-				to = data.GetFloat();
-				printf("QQ:TRANSPARENCY=%f\n", to);
-			}
-
-			if (btag->GetParameter(2000, data)) // SPLINE_TYPE
-			{
-				type = data.GetInt32();
-				printf("QQ:DEPTH=%f\n", type);
+				spline_type = data.GetInt32();
+				printf("- HasPovTag: SPLINE_TYPE=%d\n", spline_type);
 			}
 
 			return true;
@@ -3193,13 +3202,12 @@ Bool AlienSplineObject::Execute()
 	PrintTagInfo(this);
 
 	// POV Tag
-	Float tag_from;
-	Float tag_to;
-	Int32 tag_type;
+	int export_as;
+	int spline_type;
 	printf("-- Check for POV Tag ---\n");
-	if (HasPovTag(this, tag_from, tag_to, tag_type))
+	if (HasPovTag(this, export_as, spline_type))
 	{
-		printf("-- POV Tag: Yes --------\n");
+		printf("-- POV Tag: export_as=%d, spline_type=%d\n", export_as, spline_type);
 	}
 
 	Int32 iType = -1;
@@ -3241,21 +3249,25 @@ Bool AlienSplineObject::Execute()
 
 	printf("   - PointCount: %d\n", pc);
 	printf("   - SegmentCount: %d\n", sc);
-	
-	//
-	// TODO: CHoose by tag info:
-	// 1. linear_spline | quadratic_spline | cubic_spline | natural_spline
-	// 2. Parameter formula
-	// 3. Export as
-	typedef enum { ARRAY, SPLINE, BOTH } EXPORT_AS;
-	EXPORT_AS export_as = BOTH;
+
+	string spline_type_str = "linear_spline";
+	switch (spline_type)
+	{
+		case POV_SPLINE_SPLINE_QUADRATIC: spline_type_str = "quadratic_spline"; break;
+		case POV_SPLINE_SPLINE_CUBIC:     spline_type_str = "cubic_spline";     break;
+		case POV_SPLINE_SPLINE_NATURAL:   spline_type_str = "natural_spline";   break;
+	}
+
+	char name[MAX_OBJ_NAME];
 
 	// Write array
-	if ((export_as == ARRAY) ||
-		(export_as == BOTH))
+	if ((export_as == POV_SPLINE_AS_ARRAY) ||
+		  (export_as == POV_SPLINE_BOTH))
 	{
+		sprintf(name, "arr_%s", objName);
+
 		fprintf(file, "#declare %s_size = %d;\n\
-	#declare %s = array mixed [%s_size][2] {\n\n", objName, pc, objName, objName);
+	#declare %s = array mixed [%s_size][2] {\n\n", objName, pc, name, objName);
 
 		const Vector* p = GetPointR();
 		for (int i = 0; i < pc; ++i)
@@ -3266,12 +3278,12 @@ Bool AlienSplineObject::Execute()
 	}
 	
 	// Wrtie spline
-	if ((export_as == SPLINE) ||
-		(export_as == BOTH))
+	if ((export_as == POV_SPLINE_AS_SPLINE) ||
+		  (export_as == POV_SPLINE_BOTH))
 	{
-		string sptype = "linear_spline";
+		sprintf(name, "spl_%s", objName);
 
-		fprintf(file, "#declare %s = spline { %s\n\n", objName, sptype.c_str());
+		fprintf(file, "#declare %s = spline { %s\n\n", name, spline_type_str.c_str());
 		const Vector* p = GetPointR();
 		for (int i = 0; i < pc; ++i)
 		{
@@ -4107,23 +4119,6 @@ Bool BaseDocument::CreateSceneToC4D(Bool selectedonly)
 #include <uuid/uuid.h>
 #endif
 
-//
-// QQ: TODO
-//  
-// 1. Export spline as array
-// 2. Export spline as spline
-// 3. Check if object enabled on export
-// 4. Export sweep as sphere_sweep
-// 6. Bool - process > 2 operands
-// 7. Camera: projection_type, matrix, FOV Hor. angle = K * Zoon; (0:179.999)
-// 8. Remove default matrixes (?)
-// 9. Check local coordinates 
-
-// 
-// -- Errors
-// 1. Empty extrude
-//
-
 int main(int argc, Char* argv[])
 {
 	version = GetLibraryVersion().GetCStringCopy();
@@ -4139,7 +4134,8 @@ int main(int argc, Char* argv[])
 \n// Sorces: github.com/syanenko/pov-utils\
 \n// POV-Ray site: www.povray.org\
 \n//\
-\n// Supported primitives: sphere, cube, cone, cylinder, spline, mesh\
+\n// Supported primitives: camera, sphere, cube, cone, cylinder, spline\
+\n//                       mesh2, prism, sphere sweep, lathe\
 \n//---------------------------------------------------------------\n\n", version);
   printf(header);
 
@@ -4168,3 +4164,18 @@ int main(int argc, Char* argv[])
 
 	DeleteMem(version);
 }
+
+//////////////////////////////////////////////////
+// QQ: TODO
+// 
+// 1. Pack tag into folder 
+// 2. Check if object enabled on export
+// 3. Null - export all childer in 'union'
+// 4. Check mesh - smooth normals 
+// 5. Metaballs (blobs) 
+// 6. Remove default matrixes (?)
+// 7. Check local coordinates (?)
+// 
+// -- Errors
+// 1. Empty extrude
+//////////////////////////////////////////////////
