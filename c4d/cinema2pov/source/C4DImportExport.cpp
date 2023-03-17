@@ -69,7 +69,7 @@ void MakeValidName(Char* objName)
 //
 // Wtite matrix
 // 
-void WriteMatrix(BaseObject* op, Float zoom = 1)
+void WriteMatrix(BaseObject* op)
 {
 	Matrix m = op->GetMg();
 	fprintf(file, "  matrix\n\
@@ -80,7 +80,7 @@ void WriteMatrix(BaseObject* op, Float zoom = 1)
 	m.v1.x, m.v1.y, m.v1.z,
 	m.v2.x, m.v2.y, m.v2.z,
 	m.v3.x, m.v3.y, m.v3.z,
-	m.off.x / zoom, m.off.y / zoom, m.off.z / zoom);
+	m.off.x, m.off.y, m.off.z);
 }
 
 //
@@ -3086,15 +3086,18 @@ Bool AlienLayer::Execute()
 	return true;
 }
 
-// Execute function for the self defined Camera object
+//
+// Camera
+//
 Bool AlienCameraObjectData::Execute()
 {
+	printf("\n--------------- CAMERA: EXPORT START ------------------\n");
 	BaseObject* op = (BaseObject*)GetNode();
 	Char* objName = op->GetName().GetCStringCopy();
 	if (objName)
 	{
-		MakeValidName(objName);
 		printf("\n - AlienCameraObjectData (%d): \"%s\"", (int)op->GetType(), objName);
+		DeleteMem(objName);
 	}
 	else
 		printf("\n - AlienCameraObjectData (%d): <noname>", (int)op->GetType());
@@ -3104,8 +3107,6 @@ Bool AlienCameraObjectData::Execute()
 		printf("\n^---------------- CAMERA: Already exported -----------------^\n");
 		return true;
 	}
-
-	printf("\n--------------- CAMERA: EXPORT START ------------------\n");
 
 	// Print common info
 	PrintUniqueIDs(this);
@@ -3118,7 +3119,14 @@ Bool AlienCameraObjectData::Execute()
 	int proj = -1;
 	if (op->GetParameter(CAMERA_PROJECTION, camData))
 		proj = (int)camData.GetInt32();
-	printf("   Projection: %f \n", proj);
+
+	printf("\n - Projection type: %d \n", proj);
+
+	if (proj != Pperspective)
+	{
+		printf("\n - CAMERA: Not exported - only perspective projection (type '%d') is supported\n\n", Pperspective);
+		return true;
+	}
 
 	// FOV
 	Float fov = -1;
@@ -3126,12 +3134,13 @@ Bool AlienCameraObjectData::Execute()
 		fov = RadToDeg(camData.GetFloat());
 	printf("   FOV: %f \n", fov);
 
+	// Only perspective supported now
+	string ptojStr = "perspective";
+
+	// TODO: Find Zoom -> angle function
+	/*
 	Float zoom = 1;
 	const Float ZOOM_FACTOR = 100;   // Check this for more accurate zooming (!) // 14400:
- 	Float angle = fov;
-
-	// Projections supported: perspective, orthographic
-	string ptojStr = "perspective";
 	if (proj == Pparallel)
 	{
 		ptojStr = "orthographic";
@@ -3141,13 +3150,14 @@ Bool AlienCameraObjectData::Execute()
 		printf("   Zoom: %f \n", zoom);
 		zoom = zoom / ZOOM_FACTOR;
 	}
+	*/
 
 	fprintf(file, "camera{\
 	%s\n\
 	location  <0, 0, 0>\n\
-	angle %f\n\n", ptojStr.c_str(), angle);
+	angle %f\n\n", ptojStr.c_str(), fov);
 
-	WriteMatrix(op, zoom);
+	WriteMatrix(op);
 	fprintf(file, "}\n\n");
 
 	printf("\n^--------------- CAMERA: EXPORT END ------------------^\n");
@@ -3230,24 +3240,42 @@ Bool AlienSplineObject::Execute()
 
 	printf("   - PointCount: %d\n", pc);
 	printf("   - SegmentCount: %d\n", sc);
-
-	fprintf(file, "//\n");
-	fprintf(file, "// Spline points array\n");
-	fprintf(file, "//\n");
-	fprintf(file, "// SplineType: %d\n", type);
-	fprintf(file, "// SegmentCount: %d\n", sc);
-	fprintf(file, "// PointCount: %d\n", pc);
-	fprintf(file, "//\n");
 	
-	fprintf(file, "#declare %s_size = %d;\n\
-#declare %s = array mixed [%s_size][2] {\n", objName, pc, objName, objName);
+	// TODO: Choose by tag info
+	typedef enum { ARRAY, SPLINE, BOTH } EXPORT_AS;
+	
+	EXPORT_AS export_as = BOTH;
 
-	const Vector* p = GetPointR();
-	for (int i = 0; i < pc; ++i)
+	// Write array
+	if ((export_as == ARRAY) ||
+		(export_as == BOTH))
 	{
-		fprintf(file, "  { %f, <%f, %f, %f>}\n", (double)i / (double)pc, p[i].x, p[i].z, p[i].y);
+		fprintf(file, "#declare %s_size = %d;\n\
+	#declare %s = array mixed [%s_size][2] {\n\n", objName, pc, objName, objName);
+
+		const Vector* p = GetPointR();
+		for (int i = 0; i < pc; ++i)
+		{
+			fprintf(file, "  { %f, <%f, %f, %f>}\n", (double)i / (double)pc, p[i].x, p[i].z, p[i].y);
+		}
+		fprintf(file, "}\n\n");
 	}
-	fprintf(file, "}\n\n");
+	
+	// Wrtie spline
+	if ((export_as == SPLINE) ||
+		(export_as == BOTH))
+	{
+		// TODO: CHoose by tag info: linear_spline | quadratic_spline | cubic_spline | natural_spline
+		string sptype = "linear_spline";
+
+		fprintf(file, "#declare %s = spline { %s\n\n", objName, sptype.c_str());
+		const Vector* p = GetPointR();
+		for (int i = 0; i < pc; ++i)
+		{
+			fprintf(file, "  %f, <%f, %f, %f>\n", (double)i / (double)pc, p[i].x, p[i].z, p[i].y);
+		}
+		fprintf(file, "}\n\n");
+	}
 
 	if (objName)
 		DeleteMem(objName);
