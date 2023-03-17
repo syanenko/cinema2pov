@@ -114,7 +114,8 @@ background {color srgb<13,17,23> / 256}
 // #include "global_test.inc"
 // #include "extrude_test.inc"
 // #include "sweep_test.inc"
-#include "lathe_test.inc"
+// #include "lathe_test.inc"
+#include "spline_test.inc"
 
 
 /* Works - fix shape

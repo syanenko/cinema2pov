@@ -107,9 +107,8 @@ void WriteMaterial(BaseObject* op)
 }
 
 //
-// Check for POV tag on spline
+// Check for POV tag on object
 //
-// Params will alter
 bool HasPovTag(BaseObject* obj, Float& from, Float& to, Int32& type)
 {
 	GeData data;
@@ -122,19 +121,19 @@ bool HasPovTag(BaseObject* obj, Float& from, Float& to, Int32& type)
 			if (btag->GetParameter(2001, data)) // SWEEP_FROM
 			{
 				from = data.GetFloat();
-				printf("\nQQ:SHADOW=%f", from);
+				printf("QQ:SHADOW=%f\n", from);
 			}
 
 			if (btag->GetParameter(2002, data)) // SWEEP_TO
 			{
 				to = data.GetFloat();
-				printf("\nQQ:TRANSPARENCY=%f", to);
+				printf("QQ:TRANSPARENCY=%f\n", to);
 			}
 
 			if (btag->GetParameter(2000, data)) // SPLINE_TYPE
 			{
 				type = data.GetInt32();
-				printf("\nQQ:DEPTH=%f\n", type);
+				printf("QQ:DEPTH=%f\n", type);
 			}
 
 			return true;
@@ -3211,30 +3210,34 @@ Bool AlienCameraObjectData::Execute()
 //
 Bool AlienSplineObject::Execute()
 {
+	printf("--------------- SPLINE: EXPORT START ------------------\n");
+
 	Char* objName = GetName().GetCStringCopy();
-	if (!objName)
-		objName = String("points").GetCStringCopy();
-	else
+	if (objName)
+	{
 		MakeValidName(objName);
+		printf("\n - AlienSplineObject (%d): %s\n", (int)GetType(), objName);
+	}
+	else
+		printf("\n - AlienSplineObject (%d): <noname>\n", (int)GetType());
 
-	printf("\n - AlienSplineObject (%d): %s\n", (int)GetType(), objName);
+	if (exported)
+	{
+		printf("\n^--------------- SPLINE: Already exported -----------------^\n");
+		return true;
+	}
+
 	PrintUniqueIDs(this);
+	PrintTagInfo(this);
 
-	// Params will alter
+	// POV Tag
 	Float tag_from;
 	Float tag_to;
 	Int32 tag_type;
+	printf("-- Check for POV Tag ---\n");
 	if (HasPovTag(this, tag_from, tag_to, tag_type))
 	{
-		printf("--------------- SPLINE: '%s' EXPORT START (HAS TAG) --------\n, objName");
-	}
-	else
-	{
-		if (exported)
-		{
-			printf("^-------------- SPLINE: '%s' ALREADY EXPORTED -------------^\n", objName);
-			return true;
-		}
+		printf("-- POV Tag: Yes --------\n");
 	}
 
 	Int32 iType = -1;
@@ -3294,12 +3297,6 @@ Bool AlienSplineObject::Execute()
 		fprintf(file, "  { %f, <%f, %f, %f>}\n", (double)i / (double)pc, p[i].x, p[i].z, p[i].y);
 	}
 	fprintf(file, "}\n\n");
-
-	// Tags
-	// PrintTagInfo(this);
-
-	// User data
-	// PrintUserData(this);
 
 	if (objName)
 		DeleteMem(objName);
