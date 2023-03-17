@@ -7,8 +7,8 @@
 // Sorces: github.com/syanenko/pov-utils
 // POV-Ray site: www.povray.org
 //
-// Supported objects: sphere, cube, cone, cylinder, spline, 
-//                    mesh2, prism, sphere sweep
+// Supported objects: camera, sphere, cube, cone, cylinder, spline, 
+//                    mesh2, prism, sphere sweep, lathe
 //---------------------------------------------------------------
 #include "C4DImportExport.h"
 #include "c4d_browsecontainer.h"
@@ -2361,7 +2361,9 @@ Bool AlienEnvironmentObjectData::Execute()
 	return true;
 }
 
-// Execute function for the self defined Environment object
+// 
+// Bool
+//
 Bool AlienBoolObjectData::Execute()
 {
 	printf("\n----------------- BOOL: EXPORT START ------------------\n");
@@ -2444,7 +2446,9 @@ Bool AlienBoolObjectData::Execute()
 	return true;
 }
 
-// Execute function for the self defined Environment object
+// 
+// Extrude
+//
 Bool AlienExtrudeObjectData::Execute()
 {
 	printf("--------------- EXTRUDE: EXPORT START ------------------\n");
@@ -2523,52 +2527,6 @@ Bool AlienExtrudeObjectData::Execute()
 
 	} else if (spType == SPLINEOBJECT_TYPE_BEZIER)
 	{
-		// BEZIER spline
-		/*
-		<15.000000, 0.000000>   // P1
-		<15.000000, 3.750000>   // T2
-		<5.625000, 10.000000>   // T3
-		<0.000000, 10.000000>   // P2
-		// -----------
-		<0.000000, 10.000000>   // P2
-		<-5.625000, 10.000000>  // T4
-		<-15.000000, 3.750000>  // T5
-		<-15.000000, 0.000000>  // P3
-		// -----------
-		<-15.000000, 0.000000>  // P3
-		<-15.000000, -3.750000> // T6
-		<-5.625000, -10.000000> // T7
-		<0.000000, -10.000000>  // P4
-		// -----------
-		<0.000000, -10.000000>  // P4
-		<5.625000, -10.000000>  // T8
-		<15.000000, -3.750000>  // T1
-		<15.000000, 0.000000>   // P1
-		// -----------
-
-		//<15.000000, -3.750000>  // T1
-		//<15.000000, 3.750000>   // T2
-		//<5.625000, 10.000000>   // T3
-		//<-5.625000, 10.000000>  // T4
-		//<-15.000000, 3.750000>  // T5
-		//<-15.000000, -3.750000> // T6
-		//<-5.625000, -10.000000> // T7
-		//<5.625000, -10.000000>  // T8
-		*/
-
-		// DEBUG: Points
-		/*
-		for (int i = 0; i < pc; ++i)
-		{
-			fprintf(file, "  <%f, %f>\n", p[i].x, p[i].z);
-		}
-		// Tangents
-		for (int i = 0; i < tc; ++i)
-		{
-			fprintf(file, "  <%f, %f>\n", t[i].vl.x + p[i].x, t[i].vl.z + p[i].z);
-			fprintf(file, "  <%f, %f>\n", t[i].vr.x + p[i].x, t[i].vr.z + p[i].z);
-		}*/
-
 		// Write
 		fprintf(file, "%sprism { linear_sweep bezier_spline 0, %lf, %d\n\n", declare, height, pc * 4);
 		pc--;
@@ -2747,36 +2705,29 @@ Bool AlienSweepObjectData::Execute()
 		case SPLINEOBJECT_TYPE_BSPLINE: spTypeStr = "b_spline"      ; break;
 	}
 
+	// Wrire
 	Float r = 0;
-	if ((spType == SPLINEOBJECT_TYPE_CUBIC) ||
-	    (spType == SPLINEOBJECT_TYPE_BSPLINE))
+	fprintf(file, "%ssphere_sweep  { %s %d\n\n", declare, spTypeStr.c_str(), pc + 2);
+
+	double pscale = profile(0);
+	pscale > 1 ? pscale = 1 : pscale;
+	r = radius * scale * pscale;
+
+	if ((spType == SPLINEOBJECT_TYPE_CUBIC) || (spType == SPLINEOBJECT_TYPE_BSPLINE))
+		fprintf(file, "  <%f, %f, %f>, %f,\n", p[0].x, p[0].y, p[0].z, r); // Control 1
+
+	for (int i = 0; i < pc; i++)
 	{
-		fprintf(file, "%ssphere_sweep  { %s %d\n\n", declare, spTypeStr.c_str(), pc + 2);
-		fprintf(file, "  <%f, %f, %f>, %f,\n", p[0].x, p[0].y, p[0].z, radius); // Control 1
-		for (int i = 0; i < pc; i++)
-		{
-			double pscale = profile(i * p_step);
-			pscale > 1 ? pscale = 1 : pscale;
-			r = radius * scale * pscale;
-			scale += scale_step;
+		pscale = profile(i * p_step);
+		pscale > 1 ? pscale = 1 : pscale;
+		r = radius * scale * pscale;
+		scale += scale_step;
 
-			fprintf(file, "  <%f, %f, %f>, %f,\n", p[i].x, p[i].y, p[i].z, r);
-		}
-		fprintf(file, "  <%f, %f, %f>, %f\n", p[pc-1].x, p[pc-1].y, p[pc-1].z, r); // Control 2
-
-	} else // Export all other types as 'linear_spline'
-	{
-		fprintf(file, "%ssphere_sweep  { %s %d\n\n", declare, spTypeStr.c_str(), pc);
-		for (int i = 0; i < pc; i++)
-		{
-			double pscale = profile(i * p_step);
-			pscale > 1 ? pscale = 1 : pscale;
-			r = radius * scale * pscale;
-			scale += scale_step;
-
-			fprintf(file, "  <%f, %f, %f>, %f,\n", p[i].x, p[i].y, p[i].z, r);
-		}
+		fprintf(file, "  <%f, %f, %f>, %f,\n", p[i].x, p[i].y, p[i].z, r);
 	}
+
+	if ((spType == SPLINEOBJECT_TYPE_CUBIC) || (spType == SPLINEOBJECT_TYPE_BSPLINE))
+		fprintf(file, "  <%f, %f, %f>, %f\n", p[pc-1].x, p[pc-1].y, p[pc-1].z, r); // Control 2
 
 	WriteMatrix(op);
 	WriteMaterial(op);
