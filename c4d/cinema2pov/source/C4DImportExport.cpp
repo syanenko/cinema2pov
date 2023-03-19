@@ -3603,31 +3603,50 @@ Bool AlienLightObjectData::Execute()
 	LIGHT_AREADETAILS_SIZEY
 
   // Looks like 
-		fprintf(o.fh,['#declare Pointlight_Shape =\n'...
-									'         union {sphere { <0, 0, 0>, 0.25 }\n'...
-									'                cone { <0, 0, 0>, 0.15, <0.6,  0, 0>,0 }\n'...
-									'                cone { <0, 0, 0>, 0.15, <-0.6, 0, 0>,0 }\n'...
-									'                cone { <0, 0, 0>, 0.15, <0,  0.6, 0>,0 }\n'...
-									'                cone { <0, 0 ,0>, 0.15, <0, -0.6, 0>,0 }\n'...
-									'                cone { <0, 0, 0>, 0.15, <0,  0, 0.6>,0 }\n'...
-									'                cone { <0, 0, 0>, 0.15, <0,  0,-0.6>,0 }\n'...
-									'                texture { Lightsource_Shape_Tex }\n'...
-									'                scale %0.2f}\n'], shape_scale);
-
+	// TODO: Write them
 	// fprintf(o.fh,'#declare Spotlight_Shape = union { sphere { <0, 0, 0>, 0.25 } cone { <0,0,0>,0,<%0.2f, %0.2f, %0.2f>,0.3 } texture {Lightsource_Shape_Tex}}\n', ...
 	// fprintf(o.fh,'#declare Cylinder_Shape = union { sphere { <0, 0, 0>, 0.25 } cylinder { <0,0,0>,<%0.2f, %0.2f, %0.2f>,0.15 } texture {Lightsource_Shape_Tex}}\n', ...
-  // fprintf(o.fh,'#declare Area_Shape = union { plane { <0,0,1>, 0 clipped_by {box {<-0.5,-0.5,-0.5>, <0.5,0.5,0.5>}}} cylinder { <0,0,0>, <0,0,-0.8>, 0.05 } cone { <0,0,-0.6>,0.1,<0,0,-1>, 0 } texture {Lightsource_Shape_Tex}}\n');
+
+	// TODO: Check parallel
 	*/
+
+	// Icons
+	fprintf(file, "#declare Lightsource_Shape_Tex =\n\
+	texture { pigment{ rgbt <%0.2f, %0.2f, %0.2f, %0.2f>}\n\
+		finish { phong 1 reflection {0.1 metallic 0.2}}}\n\n", 1.0, 1.0, 1.0, 0.9);
+
+	fprintf(file, "#declare Pointlight_Shape =\n\
+	union {sphere { <0, 0, 0>, 0.25 }\n\
+		    cone { <0, 0, 0>, 0.15, <0.6,  0, 0>,0 }\n\
+		    cone { <0, 0, 0>, 0.15, <-0.6, 0, 0>,0 }\n\
+		    cone { <0, 0, 0>, 0.15, <0,  0.6, 0>,0 }\n\
+		    cone { <0, 0 ,0>, 0.15, <0, -0.6, 0>,0 }\n\
+		    cone { <0, 0, 0>, 0.15, <0,  0, 0.6>,0 }\n\
+		    cone { <0, 0, 0>, 0.15, <0,  0,-0.6>,0 }\n\
+		    texture { Lightsource_Shape_Tex }\n\n\
+		    scale %0.2f}\n", 1.0);
+
+	fprintf(file, "#declare Area_Shape =\n\
+	union {\n\
+		plane { <0,0,1>, 0 clipped_by {box {<-0.5,-0.5,-0.5>, <0.5,0.5,0.5>}}}\n\
+		cylinder { <0,0,0>, <0,0,0.8>, 0.05 } cone { <0,0,0.6>,0.1,<0,0,1>, 0 }\n\
+		texture {Lightsource_Shape_Tex}}\n\n");
+
+	char looks_like[MAX_OBJ_NAME];
 
 	if (type == LIGHT_TYPE_OMNI)
 	{
+		// TODO: Check visibility
+		sprintf(looks_like, "looks_like {Pointlight_Shape}");
+
 		fprintf(file, "light_source {<0, 0, 0>\n\
   rgb<%f, %f, %f> * %f%s\n\
-	looks_like{ sphere { 0, 0.3 pigment{rgb <0,1,0>}}}\n",
-			color.x, color.y, color.z, brightness, shadows_str.c_str());
+	%s\n",
+		color.x, color.y, color.z, brightness, shadows_str.c_str(), looks_like);
 
 	} else if (type == LIGHT_TYPE_SPOT)
 	{
+		// TODO: Add icon
 		fprintf(file, "light_source {<0, 0, 0>\n\
   rgb<%f, %f, %f> * %f%s spotlight\n\
   radius %f\n\
@@ -3637,11 +3656,14 @@ Bool AlienLightObjectData::Execute()
 
 	} else if (type == LIGHT_TYPE_AREA)
 	{
+		// TODO: Check visibility
+		sprintf(looks_like, "looks_like {Area_Shape}");
+
 		fprintf(file, "light_source {<0, 0, 0>\n\
   rgb<%f, %f, %f> * %f%s\n\
   area_light <%f, 0, 0>, <0, %f, 0>, %f, %f\n\
-	looks_like{ sphere { 0, 0.3 pigment{rgb <0,1,0>}}}\n",
-			color.x, color.y, color.z, brightness, shadows_str.c_str(), area_axis.x, area_axis.y, area_size.x, area_size.y);
+	%s\n",
+		color.x, color.y, color.z, brightness, shadows_str.c_str(), area_axis.x, area_axis.y, area_size.x, area_size.y, looks_like);
 	}
 
 	WriteMatrix(op);
