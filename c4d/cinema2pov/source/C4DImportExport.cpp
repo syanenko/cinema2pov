@@ -3447,8 +3447,10 @@ Bool AlienPrimitiveObjectData::Execute()
 // Execute function for the self defined light objects
 Bool AlienLightObjectData::Execute()
 {
+	printf("----------------- LIGHT: EXPORT START -----------------\n");
+
 	BaseObject* op = (BaseObject*)GetNode();
-	Char *pChar = op->GetName().GetCStringCopy();
+	Char* pChar = op->GetName().GetCStringCopy();
 	if (pChar)
 	{
 		printf("\n - AlienLightObjectData (%d): \"%s\"\n", (int)op->GetType(), pChar);
@@ -3457,16 +3459,93 @@ Bool AlienLightObjectData::Execute()
 	else
 		printf("\n - AlienLightObjectData (%d): <noname>\n", (int)op->GetType());
 
+	// General info
 	PrintUniqueIDs(this);
-
 	PrintMatrix(op->GetMg());
 
+	// Properties
 	GeData data;
+	// Type
+	Int32 type;
 	if (op->GetParameter(LIGHT_TYPE, data) && data.GetType() == DA_LONG)
-		printf("\n -   Type: (%d)\n", data.GetInt32());
+	{
+		type = data.GetInt32();
+		printf("\n - Type: (%d)\n", type);
+	}
 	else
-		printf("\n -   Error getting light type !\n");
+		printf("\n - Error getting light type !\n");
 
+	// Color
+	Vector color = Vector(1, 1, 1);
+	if (op->GetParameter(LIGHT_COLOR, data) && data.GetType() == DA_VECTOR)
+	{
+		color = data.GetVector();
+		printf("\n - Color: <%f, %f, %f>\n", color.x, color.y, color.z);
+	}
+	else
+		printf("\n - Error getting light color !\n");
+
+	// Brightness
+	Float brightness;
+	if (op->GetParameter(LIGHT_BRIGHTNESS, data) && data.GetType() == DA_REAL)
+	{
+		brightness = data.GetFloat();
+		printf("\n - Brightness: (%f)\n", brightness);
+	}
+	else
+		printf("\n - Error getting light brightness !\n");
+
+	// Shadows
+	Int32 shadows = LIGHT_SHADOWTYPE_HARD;
+	if (op->GetParameter(LIGHT_SHADOWTYPE, data) && data.GetType() == DA_LONG)
+	{
+		shadows = data.GetInt32();
+		printf("\n - Shadows type : (%f)\n", shadows);
+	}
+	else
+		printf("\n - Error getting light shadows type !\n");
+
+	// Write
+	// light_source {<0,  10, 0>, rgb <1,1,1> * luminosity shadowless}
+	/*
+	LIGHT_TYPE = 90002, // LONG
+		LIGHT_TYPE_OMNI = 0,
+		LIGHT_TYPE_SPOT = 1,
+		LIGHT_TYPE_SPOTRECT = 2,
+		LIGHT_TYPE_DISTANT = 3,
+		LIGHT_TYPE_PARALLEL = 4,
+		LIGHT_TYPE_PARSPOT = 5,
+		LIGHT_TYPE_PARSPOTRECT = 6,
+		LIGHT_TYPE_TUBE = 7,
+		LIGHT_TYPE_AREA = 8,
+		LIGHT_TYPE_PHOTOMETRIC = 9,
+	 */
+	 // TODO: Get params from tag
+
+	string shadows_str;
+	if (shadows == LIGHT_SHADOWTYPE_NONE)
+		shadows_str = " shadowless";
+
+	if (type == LIGHT_TYPE_OMNI)
+	{
+		fprintf(file, "light_source {<0, 0, 0>\n\
+  rgb<%f, %f, %f> * %f%s\n\
+	looks_like{ sphere { 0, 0.3 pigment{rgb <0,1,0>}}}\n",
+			color.x, color.y, color.z, brightness, shadows_str.c_str());
+
+	}	else if (type == LIGHT_TYPE_AREA)
+	{
+		fprintf(file, "light_source {<0, 0, 0>\n\
+  rgb<%f, %f, %f> * %f%s\n\
+  area_light <5, 0, 0>, <0, 0, 5>, 2, 2\n\
+	looks_like{ sphere { 0, 0.3 pigment{rgb <0,1,0>}}}\n",
+			color.x, color.y, color.z, brightness, shadows_str.c_str());
+	}
+
+	WriteMatrix(op);
+	fprintf(file, "}\n\n");
+
+	printf("^---------------- LIGHT: EXPORT END ------------------^\n");
 	return true;
 }
 
@@ -4168,13 +4247,13 @@ int main(int argc, Char* argv[])
 //////////////////////////////////////////////////
 // QQ: TODO
 // 
-// 1. Pack tag into folder 
+// 1. Pack tag into folder
 // 2. Check if object enabled on export
 // 3. Null - export all childer in 'union'
 // 4. Check mesh - smooth normals 
-// 5. Metaballs (blobs) 
+// 5. Metaballs (blobs)
 // 6. Remove default matrixes (?)
-// 7. Check local coordinates (?)
+// 7. Check objects's local coordinates (?)
 // 
 // -- Errors
 // 1. Empty extrude

@@ -115,6 +115,10 @@ background {color srgb<13,17,23> / 256}
 // #include "extrude_test.inc"
 // #include "sweep_test.inc"
 // #include "lathe_test.inc"
-#include "spline_test.inc"
+// #include "spline_test.inc"
+
+// looks_like { sphere { 0, 0.3 pigment{rgb <0,1,0>}}}
+//  material { texture {pigment {rgb <1,1,1> }}}
+#include "lights_test.inc"
 
 
