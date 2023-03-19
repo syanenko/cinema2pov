@@ -3585,28 +3585,11 @@ Bool AlienLightObjectData::Execute()
 		LIGHT_TYPE_AREA = 8,
 		LIGHT_TYPE_PHOTOMETRIC = 9,
 
-	LIGHT_DETAILS_FALLOFF = 90014, // LONG
-	LIGHT_DETAILS_FALLOFF_NONE = 0,
-	LIGHT_DETAILS_FALLOFF_STEP = 5,
-	LIGHT_DETAILS_FALLOFF_INVERSE_CLAMPED = 6,
-	LIGHT_DETAILS_FALLOFF_INVERSESQUARE_CLAMPED = 7,
-	LIGHT_DETAILS_FALLOFF_LINEAR = 8,
-	LIGHT_DETAILS_FALLOFF_INVERSE = 9,
-	LIGHT_DETAILS_FALLOFF_INVERSESQUARE = 10,
-
-	// Spot
-	LIGHT_DETAILS_INNERANGLE = 90010, // REAL
-	LIGHT_DETAILS_OUTERANGLE = 90011, // REAL
-
-	// Area
-	LIGHT_AREADETAILS_SIZEX
-	LIGHT_AREADETAILS_SIZEY
-
   // Looks like 
-	// TODO: Write them
-	// fprintf(o.fh,'#declare Spotlight_Shape = union { sphere { <0, 0, 0>, 0.25 } cone { <0,0,0>,0,<%0.2f, %0.2f, %0.2f>,0.3 } texture {Lightsource_Shape_Tex}}\n', ...
+	// TODO: Write it (?)
+	//
 	// fprintf(o.fh,'#declare Cylinder_Shape = union { sphere { <0, 0, 0>, 0.25 } cylinder { <0,0,0>,<%0.2f, %0.2f, %0.2f>,0.15 } texture {Lightsource_Shape_Tex}}\n', ...
-
+	//
 	// TODO: Check parallel
 	*/
 
