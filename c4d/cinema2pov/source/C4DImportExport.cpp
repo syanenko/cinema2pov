@@ -3611,6 +3611,8 @@ Bool AlienLightObjectData::Execute()
 	*/
 
 	// Icons
+	Float icon_scale = 2.0;
+
 	fprintf(file, "#declare Lightsource_Shape_Tex =\n\
 	texture { pigment{ rgbt <%0.2f, %0.2f, %0.2f, %0.2f>}\n\
 		finish { phong 1 reflection {0.1 metallic 0.2}}}\n\n", 1.0, 1.0, 1.0, 0.9);
@@ -3623,16 +3625,21 @@ Bool AlienLightObjectData::Execute()
 		    cone { <0, 0 ,0>, 0.15, <0, -0.6, 0>,0 }\n\
 		    cone { <0, 0, 0>, 0.15, <0,  0, 0.6>,0 }\n\
 		    cone { <0, 0, 0>, 0.15, <0,  0,-0.6>,0 }\n\
-		    texture { Lightsource_Shape_Tex }\n\n\
-		    scale %0.2f}\n", 1.0);
+		    texture { Lightsource_Shape_Tex }\n\
+		    scale %0.2f}\n\n", icon_scale);
 
-	fprintf(file, "#declare Spotlight_Shape = union { sphere { <0, 0, 0>, 0.25 } cone { <0,0,0>,0,<0, 0, 1.5>, 0.3 } texture {Lightsource_Shape_Tex}}\n");
+	fprintf(file, "#declare Spotlight_Shape =\n\
+  union { sphere { <0, 0, 0>, 0.25 }\n\
+		cone { <0,0,0>,0,<0, 0, 1.5>, 0.3 }\n\
+		texture {Lightsource_Shape_Tex}\n\
+    scale %0.2f}\n\n", icon_scale);
 
 	fprintf(file, "#declare Area_Shape =\n\
 	union {\n\
 		plane { <0,0,1>, 0 clipped_by {box {<-0.5,-0.5,-0.5>, <0.5,0.5,0.5>}}}\n\
 		cylinder { <0,0,0>, <0,0,0.8>, 0.05 } cone { <0,0,0.6>,0.1,<0,0,1>, 0 }\n\
-		texture {Lightsource_Shape_Tex}}\n\n");
+		texture {Lightsource_Shape_Tex}\n\
+		scale %0.2f}\n\n", icon_scale);
 
 	char looks_like[MAX_OBJ_NAME];
 
