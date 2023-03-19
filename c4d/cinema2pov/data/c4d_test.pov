@@ -100,12 +100,16 @@ background {color srgb<13,17,23> / 256}
               scale 3 
               translate 1}}}
 
+/*
 #declare mat_default = material {
   texture {
     pigment { gradient y
               color_map  { ext_kindlmann }
               scale 23
               translate -2}}}
+*/
+#declare mat_default = material {
+  texture {pigment {rgb <1,1,1> }}}
 
 //
 // Include exported data
@@ -119,6 +123,7 @@ background {color srgb<13,17,23> / 256}
 
 // looks_like { sphere { 0, 0.3 pigment{rgb <0,1,0>}}}
 //  material { texture {pigment {rgb <1,1,1> }}}
+
 #include "lights_test.inc"
 
 

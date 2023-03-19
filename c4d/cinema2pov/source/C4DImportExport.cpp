@@ -3505,9 +3505,54 @@ Bool AlienLightObjectData::Execute()
 	else
 		printf("\n - Error getting light shadows type !\n");
 
-	// Write
-	// light_source {<0,  10, 0>, rgb <1,1,1> * luminosity shadowless}
+	string shadows_str;
+	if (shadows == LIGHT_SHADOWTYPE_NONE)
+		shadows_str = " shadowless";
+
+	// Radius / falloff
+	Float radius = 0;
+	if (op->GetParameter(LIGHT_DETAILS_INNERANGLE, data) && data.GetType() == DA_REAL)
+	{
+		radius = RadToDeg(data.GetFloat());
+		printf("\n - Radius: %f\n", radius);
+	}
+	else
+		printf("\n - Error getting light radius !\n");
+
+	Float falloff = 0;
+	if (op->GetParameter(LIGHT_DETAILS_OUTERANGLE, data) && data.GetType() == DA_REAL)
+	{
+		falloff = RadToDeg(data.GetFloat());
+		printf("\n - Falloff angle: %f\n", falloff);
+	}
+	else
+		printf("\n - Error getting light falloff angle !\n");
+
+  // Use falloff : QQ
 	/*
+	bool falloff = false;
+	if (op->GetParameter(LIGHT_DETAILS_FALLOFF, data) && data.GetType() == DA_LONG)
+	{
+		falloff = RadToDeg(data.GetFloat());
+		printf("\n - Falloff type: %f\n", falloff);
+	}
+	else
+		printf("\n - Error getting light falloff type !\n");
+  */
+	// Write
+	/* light_source {<0,  10, 0>, rgb <1,1,1> * luminosity shadowless}
+	  falloff   0
+    tightness  0
+
+	LIGHT_DETAILS_FALLOFF = 90014, // LONG
+	LIGHT_DETAILS_FALLOFF_NONE = 0,
+	LIGHT_DETAILS_FALLOFF_STEP = 5,
+	LIGHT_DETAILS_FALLOFF_INVERSE_CLAMPED = 6,
+	LIGHT_DETAILS_FALLOFF_INVERSESQUARE_CLAMPED = 7,
+	LIGHT_DETAILS_FALLOFF_LINEAR = 8,
+	LIGHT_DETAILS_FALLOFF_INVERSE = 9,
+	LIGHT_DETAILS_FALLOFF_INVERSESQUARE = 10,
+
 	LIGHT_TYPE = 90002, // LONG
 		LIGHT_TYPE_OMNI = 0,
 		LIGHT_TYPE_SPOT = 1,
@@ -3519,12 +3564,12 @@ Bool AlienLightObjectData::Execute()
 		LIGHT_TYPE_TUBE = 7,
 		LIGHT_TYPE_AREA = 8,
 		LIGHT_TYPE_PHOTOMETRIC = 9,
+
+	LIGHT_DETAILS_INNERANGLE = 90010, // REAL
+	LIGHT_DETAILS_OUTERANGLE = 90011, // REAL
 	 */
 	 // TODO: Get params from tag
 
-	string shadows_str;
-	if (shadows == LIGHT_SHADOWTYPE_NONE)
-		shadows_str = " shadowless";
 
 	if (type == LIGHT_TYPE_OMNI)
 	{
@@ -3533,7 +3578,16 @@ Bool AlienLightObjectData::Execute()
 	looks_like{ sphere { 0, 0.3 pigment{rgb <0,1,0>}}}\n",
 			color.x, color.y, color.z, brightness, shadows_str.c_str());
 
-	}	else if (type == LIGHT_TYPE_AREA)
+	} else if (type == LIGHT_TYPE_SPOT)
+	{
+		fprintf(file, "light_source {<0, 0, 0>\n\
+  rgb<%f, %f, %f> * %f%s spotlight\n\
+  radius %f\n\
+  falloff %f\n\
+	looks_like{ sphere { 0, 0.3 pigment{rgb <0,1,0>}}}\n",
+			color.x, color.y, color.z, brightness, shadows_str.c_str(), radius, falloff);
+
+	} else if (type == LIGHT_TYPE_AREA)
 	{
 		fprintf(file, "light_source {<0, 0, 0>\n\
   rgb<%f, %f, %f> * %f%s\n\
