@@ -3626,6 +3626,8 @@ Bool AlienLightObjectData::Execute()
 		    texture { Lightsource_Shape_Tex }\n\n\
 		    scale %0.2f}\n", 1.0);
 
+	fprintf(file, "#declare Spotlight_Shape = union { sphere { <0, 0, 0>, 0.25 } cone { <0,0,0>,0,<0, 0, 1.5>, 0.3 } texture {Lightsource_Shape_Tex}}\n");
+
 	fprintf(file, "#declare Area_Shape =\n\
 	union {\n\
 		plane { <0,0,1>, 0 clipped_by {box {<-0.5,-0.5,-0.5>, <0.5,0.5,0.5>}}}\n\
@@ -3638,7 +3640,6 @@ Bool AlienLightObjectData::Execute()
 	{
 		// TODO: Check visibility
 		sprintf(looks_like, "looks_like {Pointlight_Shape}");
-
 		fprintf(file, "light_source {<0, 0, 0>\n\
   rgb<%f, %f, %f> * %f%s\n\
 	%s\n",
@@ -3646,19 +3647,19 @@ Bool AlienLightObjectData::Execute()
 
 	} else if (type == LIGHT_TYPE_SPOT)
 	{
-		// TODO: Add icon
+		// TODO: Check visibility
+		sprintf(looks_like, "looks_like {Spotlight_Shape}");
 		fprintf(file, "light_source {<0, 0, 0>\n\
   rgb<%f, %f, %f> * %f%s spotlight\n\
   radius %f\n\
   falloff %f\n\
-	looks_like{ sphere { 0, 0.3 pigment{rgb <0,1,0>}}}\n",
-			color.x, color.y, color.z, brightness, shadows_str.c_str(), radius, falloff);
+	%s\n",
+			color.x, color.y, color.z, brightness, shadows_str.c_str(), radius, falloff, looks_like);
 
 	} else if (type == LIGHT_TYPE_AREA)
 	{
 		// TODO: Check visibility
 		sprintf(looks_like, "looks_like {Area_Shape}");
-
 		fprintf(file, "light_source {<0, 0, 0>\n\
   rgb<%f, %f, %f> * %f%s\n\
   area_light <%f, 0, 0>, <0, %f, 0>, %f, %f\n\
