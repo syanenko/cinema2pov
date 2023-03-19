@@ -3514,16 +3514,17 @@ Bool AlienLightObjectData::Execute()
 	if (shadows == LIGHT_SHADOWTYPE_NONE)
 		shadows_str = " shadowless";
 
-	// Radius / falloff
+	// Radius
 	Float radius = 0;
 	if (op->GetParameter(LIGHT_DETAILS_INNERANGLE, data) && data.GetType() == DA_REAL)
 	{
 		radius = RadToDeg(data.GetFloat());
-		printf("\n - Radius: %f\n", radius);
+		printf("\n - Radius angle: %f\n", radius);
 	}
 	else
 		printf("\n - Error getting light radius !\n");
 
+	// Falloff
 	Float falloff = 0;
 	if (op->GetParameter(LIGHT_DETAILS_OUTERANGLE, data) && data.GetType() == DA_REAL)
 	{
@@ -3532,6 +3533,19 @@ Bool AlienLightObjectData::Execute()
 	}
 	else
 		printf("\n - Error getting light falloff angle !\n");
+
+	// Use inner cone
+	bool use_inner = 0;
+	if (op->GetParameter(LIGHT_DETAILS_INNERCONE, data))
+	{
+		use_inner = data.GetBool();
+		printf("\n - Use inner: %d\n", use_inner);
+	}
+	else
+		printf("\n - Error getting light 'use inner' option !\n");
+
+	if (!use_inner)
+		radius = falloff;
 
 	// Area size
 	Vector area_axis = Vector(2,2,0);
@@ -3554,19 +3568,10 @@ Bool AlienLightObjectData::Execute()
 	// Using default number of lights: 2 x 2, unless light tag is not present
 	Vector area_size = Vector(2,2,0);
 
-  // Use falloff : QQ
-	/*
-	bool falloff = false;
-	if (op->GetParameter(LIGHT_DETAILS_FALLOFF, data) && data.GetType() == DA_LONG)
-	{
-		falloff = RadToDeg(data.GetFloat());
-		printf("\n - Falloff type: %f\n", falloff);
-	}
-	else
-		printf("\n - Error getting light falloff type !\n");
-  */
-	// Write
   /*
+	//
+	// TODO: Get params from tag
+	//
 	// Type
 	LIGHT_TYPE = 90002, // LONG
 		LIGHT_TYPE_OMNI = 0,
@@ -3596,8 +3601,23 @@ Bool AlienLightObjectData::Execute()
 	// Area
 	LIGHT_AREADETAILS_SIZEX
 	LIGHT_AREADETAILS_SIZEY
+
+  // Looks like 
+		fprintf(o.fh,['#declare Pointlight_Shape =\n'...
+									'         union {sphere { <0, 0, 0>, 0.25 }\n'...
+									'                cone { <0, 0, 0>, 0.15, <0.6,  0, 0>,0 }\n'...
+									'                cone { <0, 0, 0>, 0.15, <-0.6, 0, 0>,0 }\n'...
+									'                cone { <0, 0, 0>, 0.15, <0,  0.6, 0>,0 }\n'...
+									'                cone { <0, 0 ,0>, 0.15, <0, -0.6, 0>,0 }\n'...
+									'                cone { <0, 0, 0>, 0.15, <0,  0, 0.6>,0 }\n'...
+									'                cone { <0, 0, 0>, 0.15, <0,  0,-0.6>,0 }\n'...
+									'                texture { Lightsource_Shape_Tex }\n'...
+									'                scale %0.2f}\n'], shape_scale);
+
+	// fprintf(o.fh,'#declare Spotlight_Shape = union { sphere { <0, 0, 0>, 0.25 } cone { <0,0,0>,0,<%0.2f, %0.2f, %0.2f>,0.3 } texture {Lightsource_Shape_Tex}}\n', ...
+	// fprintf(o.fh,'#declare Cylinder_Shape = union { sphere { <0, 0, 0>, 0.25 } cylinder { <0,0,0>,<%0.2f, %0.2f, %0.2f>,0.15 } texture {Lightsource_Shape_Tex}}\n', ...
+  // fprintf(o.fh,'#declare Area_Shape = union { plane { <0,0,1>, 0 clipped_by {box {<-0.5,-0.5,-0.5>, <0.5,0.5,0.5>}}} cylinder { <0,0,0>, <0,0,-0.8>, 0.05 } cone { <0,0,-0.6>,0.1,<0,0,-1>, 0 } texture {Lightsource_Shape_Tex}}\n');
 	*/
-	// TODO: Get params from tag
 
 	if (type == LIGHT_TYPE_OMNI)
 	{
