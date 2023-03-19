@@ -72,7 +72,7 @@ void MakeValidName(Char* objName)
 void WriteMatrix(BaseObject* op)
 {
 	Matrix m = op->GetMg();
-	fprintf(file, "  matrix\n\
+	fprintf(file, "\n  matrix\n\
  <%lf, %lf, %lf,\n\
   %lf, %lf, %lf,\n\
   %lf, %lf, %lf,\n\
@@ -2165,15 +2165,19 @@ Bool AlienFFDObjectData::Execute()
 	return false;
 }
 
-// Execute function for the self defined Null object
+// 
+// Null
+//
 Bool AlienNullObjectData::Execute()
 {
+	printf("----------------- NULL: EXPORT START ------------------");
 	BaseObject* op = (BaseObject*)GetNode();
-	Char *pChar = op->GetName().GetCStringCopy();
-	if (pChar)
+	Char* objName = op->GetName().GetCStringCopy();
+	if (objName)
 	{
-		printf("\n - AlienNullObjectData (%d): \"%s\"\n", (int)op->GetType(), pChar);
-		DeleteMem(pChar);
+		MakeValidName(objName);
+		printf("\n - AlienNullObjectData (%d): \"%s\"\n", (int)op->GetType(), objName);
+		DeleteMem(objName);
 	}
 	else
 		printf("\n - AlienNullObjectData (%d): <noname>\n", (int)op->GetType());
@@ -2186,6 +2190,7 @@ Bool AlienNullObjectData::Execute()
 
 	PrintTagInfo(op);
 
+	printf("^---------------- NULL: EXPORT END -------------------^\n");
 	return true;
 }
 
@@ -3165,7 +3170,7 @@ Bool AlienCameraObjectData::Execute()
 	fprintf(file, "camera{\
 	%s\n\
 	location  <0, 0, 0>\n\
-	angle %f\n\n", ptojStr.c_str(), fov);
+	angle %f\n", ptojStr.c_str(), fov);
 
 	WriteMatrix(op);
 	fprintf(file, "}\n\n");
@@ -3300,7 +3305,7 @@ Bool AlienSplineObject::Execute()
 }
 
 //
-// Primitive
+// Primitives
 //
 Bool AlienPrimitiveObjectData::Execute()
 {
@@ -3528,6 +3533,27 @@ Bool AlienLightObjectData::Execute()
 	else
 		printf("\n - Error getting light falloff angle !\n");
 
+	// Area size
+	Vector area_axis = Vector(2,2,0);
+	if (op->GetParameter(LIGHT_AREADETAILS_SIZEX, data) && data.GetType() == DA_REAL)
+	{
+		area_axis.x = data.GetFloat();
+		printf("\n - Area X: %f\n", area_axis.x);
+	}
+	else
+		printf("\n - Error getting light area_axis !\n");
+
+	if (op->GetParameter(LIGHT_AREADETAILS_SIZEY, data) && data.GetType() == DA_REAL)
+	{
+		area_axis.y = data.GetFloat();
+		printf("\n - Area Y: %f\n", area_axis.y);
+	}
+	else
+		printf("\n - Error getting light area_axis !\n");
+
+	// Using default number of lights: 2 x 2, unless light tag is not present
+	Vector area_size = Vector(2,2,0);
+
   // Use falloff : QQ
 	/*
 	bool falloff = false;
@@ -3540,19 +3566,8 @@ Bool AlienLightObjectData::Execute()
 		printf("\n - Error getting light falloff type !\n");
   */
 	// Write
-	/* light_source {<0,  10, 0>, rgb <1,1,1> * luminosity shadowless}
-	  falloff   0
-    tightness  0
-
-	LIGHT_DETAILS_FALLOFF = 90014, // LONG
-	LIGHT_DETAILS_FALLOFF_NONE = 0,
-	LIGHT_DETAILS_FALLOFF_STEP = 5,
-	LIGHT_DETAILS_FALLOFF_INVERSE_CLAMPED = 6,
-	LIGHT_DETAILS_FALLOFF_INVERSESQUARE_CLAMPED = 7,
-	LIGHT_DETAILS_FALLOFF_LINEAR = 8,
-	LIGHT_DETAILS_FALLOFF_INVERSE = 9,
-	LIGHT_DETAILS_FALLOFF_INVERSESQUARE = 10,
-
+  /*
+	// Type
 	LIGHT_TYPE = 90002, // LONG
 		LIGHT_TYPE_OMNI = 0,
 		LIGHT_TYPE_SPOT = 1,
@@ -3565,11 +3580,24 @@ Bool AlienLightObjectData::Execute()
 		LIGHT_TYPE_AREA = 8,
 		LIGHT_TYPE_PHOTOMETRIC = 9,
 
+	LIGHT_DETAILS_FALLOFF = 90014, // LONG
+	LIGHT_DETAILS_FALLOFF_NONE = 0,
+	LIGHT_DETAILS_FALLOFF_STEP = 5,
+	LIGHT_DETAILS_FALLOFF_INVERSE_CLAMPED = 6,
+	LIGHT_DETAILS_FALLOFF_INVERSESQUARE_CLAMPED = 7,
+	LIGHT_DETAILS_FALLOFF_LINEAR = 8,
+	LIGHT_DETAILS_FALLOFF_INVERSE = 9,
+	LIGHT_DETAILS_FALLOFF_INVERSESQUARE = 10,
+
+	// Spot
 	LIGHT_DETAILS_INNERANGLE = 90010, // REAL
 	LIGHT_DETAILS_OUTERANGLE = 90011, // REAL
-	 */
-	 // TODO: Get params from tag
 
+	// Area
+	LIGHT_AREADETAILS_SIZEX
+	LIGHT_AREADETAILS_SIZEY
+	*/
+	// TODO: Get params from tag
 
 	if (type == LIGHT_TYPE_OMNI)
 	{
@@ -3591,9 +3619,9 @@ Bool AlienLightObjectData::Execute()
 	{
 		fprintf(file, "light_source {<0, 0, 0>\n\
   rgb<%f, %f, %f> * %f%s\n\
-  area_light <5, 0, 0>, <0, 0, 5>, 2, 2\n\
+  area_light <%f, 0, 0>, <0, %f, 0>, %f, %f\n\
 	looks_like{ sphere { 0, 0.3 pigment{rgb <0,1,0>}}}\n",
-			color.x, color.y, color.z, brightness, shadows_str.c_str());
+			color.x, color.y, color.z, brightness, shadows_str.c_str(), area_axis.x, area_axis.y, area_size.x, area_size.y);
 	}
 
 	WriteMatrix(op);
@@ -4301,13 +4329,17 @@ int main(int argc, Char* argv[])
 //////////////////////////////////////////////////
 // QQ: TODO
 // 
-// 1. Pack tag into folder
-// 2. Check if object enabled on export
-// 3. Null - export all childer in 'union'
-// 4. Check mesh - smooth normals 
-// 5. Metaballs (blobs)
-// 6. Remove default matrixes (?)
-// 7. Check objects's local coordinates (?)
+// 1. Lights:
+//    Looks like, area size, spot falloff
+// 2. Pack tag into folder
+// 3. Check if object enabled on export
+// 4. Null - export all childer in 'union'
+// 5. Check mesh - smooth normals 
+// 6. Metaballs (blobs)
+// 7. Remove default matrixes (?)
+// 8. Check objects's local coordinates (?)
+// 9. Primitives logging adjust 
+// 10. Macros as tags or userdata (on splines at least) (?)
 // 
 // -- Errors
 // 1. Empty extrude
