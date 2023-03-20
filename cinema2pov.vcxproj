@@ -66,16 +66,16 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug MT|x64'">$(SolutionDir)cinema2pov\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug MT|x64'">$(SolutionDir)</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug MT|x64'">$(SolutionDir)__obj\$(ProjectName)\$(Platform)_$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug MT|x64'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release MT|x64'">$(SolutionDir)cinema2pov\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release MT|x64'">$(SolutionDir)</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release MT|x64'">$(SolutionDir)__obj\$(ProjectName)\$(Platform)_$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release MT|x64'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release MD|x64'">$(SolutionDir)cinema2pov\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release MD|x64'">$(SolutionDir)</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release MD|x64'">$(SolutionDir)__obj\$(ProjectName)\$(Platform)_$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release MD|x64'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug MD|x64'">$(SolutionDir)cinema2pov\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug MD|x64'">$(SolutionDir)</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug MD|x64'">$(SolutionDir)__obj\$(ProjectName)\$(Platform)_$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug MD|x64'">true</LinkIncremental>
   </PropertyGroup>
