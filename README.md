@@ -1,10 +1,8 @@
-# POV Tools
+# Cinema4D to POV
 
 [POV Ray](http://www.povray.org) is a great rendering tool with support of solids ([CSG](https://wiki.povray.org/content/Reference:Constructive_Solid_Geometry)), can produce high-quality realistic images, by processing scenes, written on [SDL](https://wiki.povray.org/content/Documentation:Tutorial_Section_3.9) - simple and flexible macro-language, and moreover - it's free. At the same time POV Ray has one serious drawback - lack of convenient modelling tools for effective working with objects and scene composing.
 
-This leads me to starting this project - set of exporting plugins for most popular 3D modelling software.
-
-## Cinema 4D
+This leads me to starting this project - data converter from Cinema4D format to POV's SDL.
 
 **cinema2pov** - is a command line tool for exporting data from C4D format to POV Ray SDL, code is based on [Cineware SDK](https://developers.maxon.net/docs/CinewareSDK/html/index.html), now supports following objects:
 
