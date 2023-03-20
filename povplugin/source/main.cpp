@@ -32,6 +32,9 @@ Bool PluginStart()
 
 	if (!RegisterPOVSplineTag())
 		return false;
+ 
+	if (!RegisterPOVLightTag())
+		return false;
 
 	return true;
 }

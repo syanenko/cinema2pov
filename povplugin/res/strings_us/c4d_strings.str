@@ -149,5 +149,6 @@ STRINGTABLE
 
   // POV strings
   IDS_POV_SPLINE "POV - Spline";
-  IDS_POV_SWEEP "POV - Sweep";
+  IDS_POV_LIGHT  "POV - Light";
+  IDS_POV_SWEEP  "POV - Sweep";
 }

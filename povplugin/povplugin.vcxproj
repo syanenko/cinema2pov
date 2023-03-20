@@ -106,15 +106,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\tags\pov_light.cpp" />
     <ClCompile Include="source\tags\pov_spline.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="res\c4d_symbols.h" />
+    <ClInclude Include="res\description\povlight.h" />
+    <ClInclude Include="res\description\povspline.h" />
     <ClInclude Include="source\main.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\..\Program Files\MAXON\Cinema 4D R19\frameworks\cinema.framework\project\cinema.framework.vcxproj">
       <Project>{69bf9b7d-7eb2-7fc5-0009-38cb8c5cdea3}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\strings_us\c4d_strings.str" />
+    <None Include="res\strings_us\description\povlight.str" />
+    <None Include="res\strings_us\description\povspline.str" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
