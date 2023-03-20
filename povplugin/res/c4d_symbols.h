@@ -172,7 +172,6 @@ enum
         // POV
         IDS_POV_SPLINE,
         IDS_POV_LIGHT,
-        IDS_POV_SWEEP,
 // End of symbol definition
 	_DUMMY_ELEMENT_
 };

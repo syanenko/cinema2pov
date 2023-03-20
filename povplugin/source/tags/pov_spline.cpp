@@ -7,8 +7,9 @@
 
 #include "povspline.h"
 
-//////////////////////////////////////////////////////////////////////////
-
+//
+// POVSplineTag
+//
 class POVSplineTag : public TagData
 {
 	INSTANCEOF(POVSplineTag, TagData)
@@ -18,16 +19,11 @@ public:
 	virtual void Free(GeListNode* node) {};
 
 	static NodeData* Alloc() { return NewObjClear(POVSplineTag); }
-
-	//////////////////////////////////////////////////////////////////////////
-
-	Int32 m_SplineType; // 1:linear_spline | 2:quadratic_spline | 3:cubic_spline |	4:bezier_spline
-	Float m_SweepFrom;
-	Float m_SweepTo;
 };
 
-//////////////////////////////////////////////////////////////////////////
-
+//
+// Init
+//
 Bool POVSplineTag::Init(GeListNode* node)
 {
 	BaseContainer* bc = ((BaseList2D*)node)->GetDataInstance();
@@ -38,8 +34,9 @@ Bool POVSplineTag::Init(GeListNode* node)
 	return true;
 }
 
-//////////////////////////////////////////////////////////////////////////
-
+//
+// Register
+//
 #define ID_POV_SPLINE 1018985
 
 Bool RegisterPOVSplineTag()
