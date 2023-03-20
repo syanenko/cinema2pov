@@ -1,0 +1,16 @@
+STRINGTABLE POVSpline
+{
+	POVSpline "Spline export options";
+
+	POV_SPLINE_SPLINE_TYPE "Spline type";
+	
+        POV_SPLINE_SPLINE_LINEAR    "Linear";
+        POV_SPLINE_SPLINE_QUADRATIC "Qadratic";
+        POV_SPLINE_SPLINE_CUBIC     "Cubic";
+        POV_SPLINE_SPLINE_NATURAL   "Natural";
+ 
+        POV_SPLINE_EXPORT_AS "Export as";
+        POV_SPLINE_AS_SPLINE "Spline";
+        POV_SPLINE_AS_ARRAY  "Array";
+        POV_SPLINE_BOTH      "Spline & Array";
+}
