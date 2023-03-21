@@ -99,10 +99,9 @@ void WriteMaterial(BaseObject* op)
 		Char* pChar = pMat->GetName().GetCStringCopy();
 		fprintf(file, "  material { %s }\n\}\n\n", pChar);
 		DeleteMem(pChar);
-	}
-	else
+	} else
 	{
-		fprintf(file, "  material { mat_default }\n\}\n\n"); // Closes object here 
+		fprintf(file, "}\n\n"); // Closes object here. TODO: Close in Execute()
 	}
 }
 
@@ -3757,7 +3756,7 @@ Bool AlienLightObjectData::Execute()
 		    scale %0.2f}\n\n", icon_scale);
 
 	fprintf(file, "#declare Spotlight_Shape =\n\
-  union { sphere { <0, 0, 0>, 0.25 }\n\
+  union { sphere { <0, 0, 0>, 0.1 }\n\
 		cone { <0,0,0>,0,<0, 0, 1.5>, 0.3 }\n\
 		texture {Lightsource_Shape_Tex}\n\
     scale %0.2f}\n\n", icon_scale);
