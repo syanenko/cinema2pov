@@ -79,6 +79,7 @@ class AlienNullObjectData : public NodeData
 {
 	INSTANCEOF(AlienNullObjectData, NodeData)
 
+	bool exported = false;
 public:
 
 	virtual Bool Execute();
@@ -158,7 +159,7 @@ public:
 class AlienCameraObjectData : public CameraObjectData
 {
 	INSTANCEOF(AlienCameraObjectData, CameraObjectData)
-  bool exported = false;
+		bool exported = false;
 public:
 	float horizontalFieldOfView;
 

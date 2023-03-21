@@ -71,7 +71,7 @@ void MakeValidName(Char* objName)
 // 
 void WriteMatrix(BaseObject* op)
 {
-	Matrix m = op->GetMg();
+	Matrix m = op->GetMl();
 	fprintf(file, "\n  matrix\n\
  <%lf, %lf, %lf,\n\
   %lf, %lf, %lf,\n\
@@ -2177,19 +2177,47 @@ Bool AlienNullObjectData::Execute()
 	{
 		MakeValidName(objName);
 		printf("\n - AlienNullObjectData (%d): \"%s\"\n", (int)op->GetType(), objName);
-		DeleteMem(objName);
 	}
 	else
 		printf("\n - AlienNullObjectData (%d): <noname>\n", (int)op->GetType());
 
+	if (exported)
+	{
+		printf("\n^---------------- NULL: Already exported -----------------^\n");
+		return true;
+	}
+
 	PrintUniqueIDs(this);
-
 	Matrix m = op->GetMg();
-
 	PrintMatrix(m);
-
 	PrintTagInfo(op);
 
+	// Write header 
+	char declare[MAX_OBJ_NAME] = { 0 };
+	if (op->GetUp() == NULL)
+	{
+		sprintf(declare, "#declare %s = ", objName);
+		objects.push_back(objName);
+	}
+
+	fprintf(file, "%sunion {\n\n", declare);
+
+	// Children
+	BaseObject* ch = op->GetDown();
+	while (ch != NULL)
+	{
+		Char* chName = ch->GetName().GetCStringCopy();
+		printf("\n   - Child - AlienNullObjectData (%d): %s\n", (int)ch->GetType(), chName);
+		DeleteMem(chName);
+		ch->Execute();
+		ch = ch->GetNext();
+	}
+
+	WriteMatrix(op);
+	WriteMaterial(op);
+
+	DeleteMem(objName);
+	exported = true;
 	printf("^---------------- NULL: EXPORT END -------------------^\n");
 	return true;
 }
@@ -4363,16 +4391,14 @@ int main(int argc, Char* argv[])
 // QQ: TODO
 // 
 // 1. Lights:
-//    Paralles, cylinder
-// 2. Pack tag into folder
+//    Paralles, cylinder (?)
 // 3. Check if object enabled on export
 // 4. Null - export all childer in 'union'
 // 5. Check mesh - smooth normals 
 // 6. Metaballs (blobs)
 // 7. Remove default matrixes (?)
 // 8. Check objects's local coordinates (?)
-// 9. Primitives logging adjust 
-// 10. Macros as tags or userdata (on splines at least) (?)
+// 9. Primitives logging adjust
 // 
 // -- Errors
 // 1. Empty extrude
