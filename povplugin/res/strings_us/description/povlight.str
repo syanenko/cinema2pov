@@ -1,0 +1,20 @@
+STRINGTABLE POVLight
+{
+	POVLight "Light properties";
+
+	POV_LIGHT_LIGHT_TYPE "Light type";
+	
+        POV_LIGHT_TIGHTNESS         "Tightness";
+	      POV_LIGHT_FADE_DISTANCE     "Fade distance";
+        POV_LIGHT_FADE_POWER        "Fade power";
+        POV_LIGHT_AREA_NUM_X        "Area size X";
+        POV_LIGHT_AREA_NUM_Y        "Area size Y";
+
+        POV_LIGHT_PROJECTED_THROUGH "Projected through";
+
+        POV_LIGHT_PARALLEL          "Parallel";
+        POV_LIGHT_MEDIA_ATTENUATION "Media attenuation";
+        POV_LIGHT_MEDIA_INTERACTION "Media interaction";
+        POV_LIGHT_DISPLAY_ICON      "Display icon";
+        POV_LIGHT_ICON_TRANSPARENCY "Icon transparency";
+}
