@@ -107,25 +107,28 @@ void WriteMaterial(BaseObject* op)
 }
 
 //
-// Check for POV tag on object
+// Check for Spline tag on object
 //
 enum
 {
 	ID_POV_SPLINE = 1018985,
 
-	POV_SPLINE_SPLINE_TYPE      = 2000,
-	POV_SPLINE_SPLINE_LINEAR    = 1,
+	POV_SPLINE_SPLINE_TYPE = 2000,
+	POV_SPLINE_SPLINE_LINEAR = 1,
 	POV_SPLINE_SPLINE_QUADRATIC = 2,
-	POV_SPLINE_SPLINE_CUBIC     = 3,
-	POV_SPLINE_SPLINE_NATURAL   = 4,
+	POV_SPLINE_SPLINE_CUBIC = 3,
+	POV_SPLINE_SPLINE_NATURAL = 4,
 
 	POV_SPLINE_EXPORT_AS = 2100,
 	POV_SPLINE_AS_SPLINE = 1,
-	POV_SPLINE_AS_ARRAY  = 2,
-	POV_SPLINE_BOTH      = 3,
+	POV_SPLINE_AS_ARRAY = 2,
+	POV_SPLINE_BOTH = 3,
 };
 
-bool HasPovTag(BaseObject* obj, int& export_as, int& spline_type)
+//
+// HasSplineTag
+// 
+bool HasSplineTag(BaseObject* obj, int& export_as, int& spline_type)
 {
 	GeData data;
 	BaseTag* btag = obj->GetFirstTag();
@@ -136,18 +139,128 @@ bool HasPovTag(BaseObject* obj, int& export_as, int& spline_type)
 			if (btag->GetParameter(POV_SPLINE_EXPORT_AS, data))
 			{
 				export_as = data.GetInt32();
-				printf("- HasPovTag: EXPORT_AS=%d\n", export_as);
+				printf("- HasSplineTag: EXPORT_AS=%d\n", export_as);
 			}
 
 			if (btag->GetParameter(POV_SPLINE_SPLINE_TYPE, data))
 			{
 				spline_type = data.GetInt32();
-				printf("- HasPovTag: SPLINE_TYPE=%d\n", spline_type);
+				printf("- HasSplineTag: SPLINE_TYPE=%d\n", spline_type);
 			}
 
 			return true;
 		}
 	}
+	return false;
+}
+
+//
+// Check for Light tag on object
+//
+enum
+{
+	ID_POV_LIGHT = 1018986,
+
+	POV_LIGHT_PARALLEL = 2101,
+	POV_LIGHT_MEDIA_ATTENUATION = 2102,
+	POV_LIGHT_MEDIA_INTERACTION = 2103,
+	POV_LIGHT_DISPLAY_ICON = 2104,
+
+	POV_LIGHT_FADE_DISTANCE = 2105,
+	POV_LIGHT_FADE_POWER = 2106,
+	POV_LIGHT_PROJECTED_THROUGH = 2107,
+	POV_LIGHT_AREA_NUM_X = 2108,
+	POV_LIGHT_AREA_NUM_Y = 2109,
+	POV_LIGHT_ICON_TRANSPARENCY = 2110,
+	POV_LIGHT_TIGHTNESS = 2111,
+};
+
+//
+// HasLightTag
+// 
+bool HasLightTag( BaseObject* obj, Float& tightness,
+	                Float& fade_distance, Float& fade_power,
+                  Int32& area_num_x, Int32& area_num_y,
+                  String& projected_throw, Float& icon_tranparency,
+								  bool& disply_icon, bool& parallel,
+								  bool& media_attenuation, bool& media_interaction )
+{
+	GeData data;
+	BaseTag* btag = obj->GetFirstTag();
+	for (; btag; btag = (BaseTag*)btag->GetNext())
+	{
+		if (btag->GetType() == ID_POV_LIGHT)
+		{
+			if (btag->GetParameter(POV_SPLINE_EXPORT_AS, data))
+			{
+				tightness = data.GetFloat();
+				printf(" - HasLightTag: tightness=%f\n", tightness);
+			}
+
+			if (btag->GetParameter(POV_LIGHT_FADE_DISTANCE, data))
+			{
+				fade_distance = data.GetFloat();
+				printf(" - HasLightTag: fade_distance=%f\n", fade_distance);
+			}
+
+			if (btag->GetParameter(POV_LIGHT_FADE_POWER, data))
+			{
+				fade_power = data.GetFloat();
+				printf(" - HasLightTag: fade_power=%f\n", fade_power);
+			}
+
+			if (btag->GetParameter(POV_LIGHT_AREA_NUM_X, data))
+			{
+				area_num_x = data.GetInt32();
+				printf(" - HasLightTag: area_num_x=%d\n", area_num_x);
+			}
+
+			if (btag->GetParameter(POV_LIGHT_AREA_NUM_Y, data))
+			{
+				area_num_y = data.GetInt32();
+				printf(" - HasLightTag: area_num_y=%d\n", area_num_y);
+			}
+
+			if (btag->GetParameter(POV_LIGHT_PROJECTED_THROUGH, data))
+			{
+				projected_throw = data.GetString();
+				printf(" - HasLightTag: projected_throw='%s'\n", projected_throw.GetCStringCopy());
+			}
+
+			if (btag->GetParameter(POV_LIGHT_ICON_TRANSPARENCY, data))
+			{
+				icon_tranparency = data.GetFloat();
+				printf(" - HasLightTag: icon_tranparencyr=%f\n", icon_tranparency);
+			}
+
+			if (btag->GetParameter(POV_LIGHT_DISPLAY_ICON, data))
+			{
+				disply_icon = data.GetBool();
+				printf(" - HasLightTag: disply_icon=%d\n", disply_icon);
+			}
+
+			if (btag->GetParameter(POV_LIGHT_PARALLEL, data))
+			{
+				parallel = data.GetBool();
+				printf(" - HasLightTag: parallel=%d\n", parallel);
+			}
+
+			if (btag->GetParameter(POV_LIGHT_MEDIA_ATTENUATION, data))
+			{
+				media_attenuation = data.GetBool();
+				printf(" - HasLightTag: media_attenuation=%d\n", media_attenuation);
+			}
+
+			if (btag->GetParameter(POV_LIGHT_MEDIA_INTERACTION, data))
+			{
+				media_interaction = data.GetBool();
+				printf(" - HasLightTag: media_interaction=%d\n", media_interaction);
+			}
+
+			return true;
+		}
+	}
+
 	return false;
 }
 
@@ -3238,7 +3351,7 @@ Bool AlienSplineObject::Execute()
 	int export_as;
 	int spline_type;
 	printf("-- Check for POV Tag ---\n");
-	if (HasPovTag(this, export_as, spline_type))
+	if (HasSplineTag(this, export_as, spline_type))
 	{
 		printf("-- POV Tag: export_as=%d, spline_type=%d\n", export_as, spline_type);
 	}
@@ -3477,7 +3590,10 @@ Bool AlienPrimitiveObjectData::Execute()
 	-------------------------------------------------------------------------*/
 	return true;
 }
-// Execute function for the self defined light objects
+
+// 
+// Light
+//
 Bool AlienLightObjectData::Execute()
 {
 	printf("----------------- LIGHT: EXPORT START -----------------\n");
@@ -3486,11 +3602,11 @@ Bool AlienLightObjectData::Execute()
 	Char* pChar = op->GetName().GetCStringCopy();
 	if (pChar)
 	{
-		printf("\n - AlienLightObjectData (%d): \"%s\"\n", (int)op->GetType(), pChar);
+		printf(" - AlienLightObjectData (%d): \"%s\"\n", (int)op->GetType(), pChar);
 		DeleteMem(pChar);
 	}
 	else
-		printf("\n - AlienLightObjectData (%d): <noname>\n", (int)op->GetType());
+		printf(" - AlienLightObjectData (%d): <noname>\n", (int)op->GetType());
 
 	// General info
 	PrintUniqueIDs(this);
@@ -3503,40 +3619,40 @@ Bool AlienLightObjectData::Execute()
 	if (op->GetParameter(LIGHT_TYPE, data) && data.GetType() == DA_LONG)
 	{
 		type = data.GetInt32();
-		printf("\n - Type: (%d)\n", type);
+		printf(" - Type: (%d)\n", type);
 	}
 	else
-		printf("\n - Error getting light type !\n");
+		printf(" - Error getting light type !\n");
 
 	// Color
 	Vector color = Vector(1, 1, 1);
 	if (op->GetParameter(LIGHT_COLOR, data) && data.GetType() == DA_VECTOR)
 	{
 		color = data.GetVector();
-		printf("\n - Color: <%f, %f, %f>\n", color.x, color.y, color.z);
+		printf(" - Color: <%f, %f, %f>\n", color.x, color.y, color.z);
 	}
 	else
-		printf("\n - Error getting light color !\n");
+		printf(" - Error getting light color !\n");
 
 	// Brightness
 	Float brightness;
 	if (op->GetParameter(LIGHT_BRIGHTNESS, data) && data.GetType() == DA_REAL)
 	{
 		brightness = data.GetFloat();
-		printf("\n - Brightness: (%f)\n", brightness);
+		printf(" - Brightness: (%f)\n", brightness);
 	}
 	else
-		printf("\n - Error getting light brightness !\n");
+		printf(" - Error getting light brightness !\n");
 
 	// Shadows
 	Int32 shadows = LIGHT_SHADOWTYPE_HARD;
 	if (op->GetParameter(LIGHT_SHADOWTYPE, data) && data.GetType() == DA_LONG)
 	{
 		shadows = data.GetInt32();
-		printf("\n - Shadows type : (%f)\n", shadows);
+		printf(" - Shadows type : (%f)\n", shadows);
 	}
 	else
-		printf("\n - Error getting light shadows type !\n");
+		printf(" - Error getting light shadows type !\n");
 
 	string shadows_str;
 	if (shadows == LIGHT_SHADOWTYPE_NONE)
@@ -3547,30 +3663,30 @@ Bool AlienLightObjectData::Execute()
 	if (op->GetParameter(LIGHT_DETAILS_INNERANGLE, data) && data.GetType() == DA_REAL)
 	{
 		radius = RadToDeg(data.GetFloat());
-		printf("\n - Radius angle: %f\n", radius);
+		printf(" - Radius angle: %f\n", radius);
 	}
 	else
-		printf("\n - Error getting light radius !\n");
+		printf(" - Error getting light radius !\n");
 
 	// Falloff
 	Float falloff = 0;
 	if (op->GetParameter(LIGHT_DETAILS_OUTERANGLE, data) && data.GetType() == DA_REAL)
 	{
 		falloff = RadToDeg(data.GetFloat());
-		printf("\n - Falloff angle: %f\n", falloff);
+		printf(" - Falloff angle: %f\n", falloff);
 	}
 	else
-		printf("\n - Error getting light falloff angle !\n");
+		printf(" - Error getting light falloff angle !\n");
 
 	// Use inner cone
 	bool use_inner = 0;
 	if (op->GetParameter(LIGHT_DETAILS_INNERCONE, data))
 	{
 		use_inner = data.GetBool();
-		printf("\n - Use inner: %d\n", use_inner);
+		printf(" - Use inner: %d\n", use_inner);
 	}
 	else
-		printf("\n - Error getting light 'use inner' option !\n");
+		printf(" - Error getting light 'use inner' option !\n");
 
 	if (!use_inner)
 		radius = falloff;
@@ -3580,46 +3696,47 @@ Bool AlienLightObjectData::Execute()
 	if (op->GetParameter(LIGHT_AREADETAILS_SIZEX, data) && data.GetType() == DA_REAL)
 	{
 		area_axis.x = data.GetFloat();
-		printf("\n - Area X: %f\n", area_axis.x);
+		printf(" - Area X: %f\n", area_axis.x);
 	}
 	else
-		printf("\n - Error getting light area_axis !\n");
+		printf(" - Error getting light area_axis !\n");
 
 	if (op->GetParameter(LIGHT_AREADETAILS_SIZEY, data) && data.GetType() == DA_REAL)
 	{
 		area_axis.y = data.GetFloat();
-		printf("\n - Area Y: %f\n", area_axis.y);
+		printf(" - Area Y: %f\n", area_axis.y);
 	}
 	else
-		printf("\n - Error getting light area_axis !\n");
+		printf(" - Error getting light area_axis !\n");
 
 	// Using default number of lights: 2 x 2, unless light tag is not present
 	Vector area_size = Vector(2,2,0);
 
-  /*
 	//
-	// TODO: Get params from tag
+	// Get params from tag
 	//
-	// Type
-	LIGHT_TYPE = 90002, // LONG
-		LIGHT_TYPE_OMNI = 0,
-		LIGHT_TYPE_SPOT = 1,
-		LIGHT_TYPE_SPOTRECT = 2,
-		LIGHT_TYPE_DISTANT = 3,
-		LIGHT_TYPE_PARALLEL = 4,
-		LIGHT_TYPE_PARSPOT = 5,
-		LIGHT_TYPE_PARSPOTRECT = 6,
-		LIGHT_TYPE_TUBE = 7,
-		LIGHT_TYPE_AREA = 8,
-		LIGHT_TYPE_PHOTOMETRIC = 9,
+	Float tightness = 0;
+	Float fade_distance = 0;
+	Float fade_power = 0;
+	Int32 area_num_x = 2;
+	Int32 area_num_y = 2;
+	String projected_throw = "";
+	Float icon_tranparency = 0.9;
+	bool disply_icon = true;
+	bool parallel = false;
+	bool media_attenuation = false;
+	bool media_interaction = true;
 
-  // Looks like 
-	// TODO: Write it (?)
+	HasLightTag( op, tightness,
+							 fade_distance, fade_power,
+							 area_num_x, area_num_y,
+							 projected_throw, icon_tranparency,
+							 disply_icon, parallel,
+							 media_attenuation, media_interaction );
 	//
+	// TODO: Check cylinder
 	// fprintf(o.fh,'#declare Cylinder_Shape = union { sphere { <0, 0, 0>, 0.25 } cylinder { <0,0,0>,<%0.2f, %0.2f, %0.2f>,0.15 } texture {Lightsource_Shape_Tex}}\n', ...
 	//
-	// TODO: Check parallel
-	*/
 
 	// Icons
 	Float icon_scale = 2.0;
@@ -4391,14 +4508,16 @@ int main(int argc, Char* argv[])
 // QQ: TODO
 // 
 // 1. Lights:
-//    Paralles, cylinder (?)
-// 3. Check if object enabled on export
-// 4. Null - export all childer in 'union'
-// 5. Check mesh - smooth normals 
-// 6. Metaballs (blobs)
-// 7. Remove default matrixes (?)
-// 8. Check objects's local coordinates (?)
-// 9. Primitives logging adjust
+//    Use tag
+//    Icon transparency
+//    Cylinder (?)
+// 3. Check mesh - smooth normals
+// 4. Check if object enabled on export
+// 5. Metaballs (blobs)
+// 6. Remove default matrixes (?)
+// 7. Check objects's local coordinates (?)
+// 8. Logging cleanup
+// 9. Materials 
 // 
 // -- Errors
 // 1. Empty extrude

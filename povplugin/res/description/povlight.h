@@ -13,6 +13,8 @@ enum
   POV_LIGHT_PROJECTED_THROUGH = 2107,
 	POV_LIGHT_AREA_NUM_X        = 2108,
 	POV_LIGHT_AREA_NUM_Y        = 2109,
+	POV_LIGHT_ICON_TRANSPARENCY = 2110,
+	POV_LIGHT_TIGHTNESS         = 2111,
 
 	//////////////////////////////////////////////////////////////////////////
 
