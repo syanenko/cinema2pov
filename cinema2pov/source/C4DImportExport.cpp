@@ -180,7 +180,7 @@ enum
 bool HasLightTag( BaseObject* obj, Float& tightness,
 	                Float& fade_distance, Float& fade_power,
                   Int32& area_num_x, Int32& area_num_y,
-                  String& projected_throw, Float& icon_tranparency,
+                  string& projected_through , Float& icon_tranparency,
 								  bool& disply_icon, bool& parallel,
 								  bool& media_attenuation, bool& media_interaction )
 {
@@ -222,8 +222,9 @@ bool HasLightTag( BaseObject* obj, Float& tightness,
 
 			if (btag->GetParameter(POV_LIGHT_PROJECTED_THROUGH, data))
 			{
-				projected_throw = data.GetString();
-				printf(" - HasLightTag: projected_throw='%s'\n", projected_throw.GetCStringCopy());
+				projected_through  = data.GetString().GetCStringCopy();
+				//printf(" - HasLightTag: projected_through ='%s'\n", projected_through.GetCStringCopy());
+				printf(" - HasLightTag: projected_through ='%s'\n", projected_through.c_str());
 			}
 
 			if (btag->GetParameter(POV_LIGHT_ICON_TRANSPARENCY, data))
@@ -3711,22 +3712,22 @@ Bool AlienLightObjectData::Execute()
 	//
 	// Get params from tag
 	//
-	Float tightness = 0; // +
+	Float tightness = 0;
 	Float fade_distance = 0;
 	Float fade_power = 0;
-	Int32 area_num_x = 2;  // +
-	Int32 area_num_y = 2;  // +
-	String projected_throw = "";
-	Float icon_tranparency = 0.9;
-	bool disply_icon = true; // +
-	bool parallel = false;  // +
-	bool media_attenuation = false; // +
-	bool media_interaction = true; // +
+	Int32 area_num_x = 2;
+	Int32 area_num_y = 2;
+	string projected_through  = "";
+	Float icon_tranparency = 0.99;
+	bool disply_icon = true;
+	bool parallel = false;
+	bool media_attenuation = false;
+	bool media_interaction = true;
 
 	HasLightTag( op, tightness,
 							 fade_distance, fade_power,
 							 area_num_x, area_num_y,
-							 projected_throw, icon_tranparency,
+							 projected_through , icon_tranparency,
 							 disply_icon, parallel,
 							 media_attenuation, media_interaction );
 
@@ -3736,12 +3737,11 @@ Bool AlienLightObjectData::Execute()
 	// fprintf(o.fh,'#declare Cylinder_Shape = union { sphere { <0, 0, 0>, 0.25 } cylinder { <0,0,0>,<%0.2f, %0.2f, %0.2f>,0.15 } texture {Lightsource_Shape_Tex}}\n', ...
 	//
 
-	// Icons
 	if (disply_icon)
 	{
 		fprintf(file, "#declare Lightsource_Shape_Tex =\n\
 		texture { pigment{ rgbt <%0.2f, %0.2f, %0.2f, %0.2f>}\n\
-			finish { phong 1 reflection {0.1 metallic 0.2}}}\n\n", 1.0, 1.0, 1.0, 0.9);
+			finish { phong 1 reflection {0.1 metallic 0.2}}}\n\n", 1.0, 1.0, 1.0, icon_tranparency);
 	}
 
 	char parallel_str[MAX_OBJ_NAME] = { 0 };
@@ -3762,12 +3762,18 @@ Bool AlienLightObjectData::Execute()
 		sprintf(media_interaction_str, " media_interaction off");
 	}
 
+	if (projected_through != "")
+	{
+		projected_through = "projected_through { " + projected_through +	" }\n";
+	}
+
 	char looks_like[MAX_OBJ_NAME] = { 0 };
 
 	if (type == LIGHT_TYPE_OMNI)
 	{
 		if (disply_icon)
 		{
+			// Icon
 			fprintf(file, "#declare Pointlight_Shape =\n\
 	union {sphere { <0, 0, 0>, 0.25 }\n\
 		    cone { <0, 0, 0>, 0.15, <0.6,  0, 0>,0 }\n\
@@ -3782,13 +3788,17 @@ Bool AlienLightObjectData::Execute()
 			sprintf(looks_like, "looks_like {Pointlight_Shape}");
 		}
 
+		// Light
 		fprintf(file, "light_source {<0, 0, 0>\n\
   rgb<%f, %f, %f> * %f%s%s%s%s\n\
-	%s\n",
-		color.x, color.y, color.z, brightness, shadows_str.c_str(), parallel_str, media_interaction_str, media_attenuation_str, looks_like);
+  fade_distance %f\n\
+  fade_power %f\n\
+	%s%s\n",
+		color.x, color.y, color.z, brightness, shadows_str.c_str(), parallel_str, media_interaction_str, media_attenuation_str, fade_distance, fade_power, projected_through.c_str(), looks_like);
 
 	} else if (type == LIGHT_TYPE_SPOT)
 	{
+		// Icon
 		if (disply_icon)
 		{
 			fprintf(file, "#declare Spotlight_Shape =\n\
@@ -3800,16 +3810,20 @@ Bool AlienLightObjectData::Execute()
 			sprintf(looks_like, "looks_like {Spotlight_Shape}");
 		}
 
+		// Light
 		fprintf(file, "light_source {<0, 0, 0>\n\
   rgb<%f, %f, %f> * %f%s%s%s%s spotlight\n\
   radius %f\n\
   falloff %f\n\
   tightness %f\n\
-	%s\n",
-			color.x, color.y, color.z, brightness, shadows_str.c_str(), parallel_str, media_interaction_str, media_attenuation_str, radius, falloff, tightness, looks_like);
+  fade_distance %f\n\
+  fade_power %f\n\
+  %s%s\n",
+			color.x, color.y, color.z, brightness, shadows_str.c_str(), parallel_str, media_interaction_str, media_attenuation_str, radius, falloff, tightness, fade_distance, fade_power, projected_through.c_str(), looks_like);
 
 	} else if (type == LIGHT_TYPE_AREA)
 	{
+		// Icon
 		if (disply_icon)
 		{
 			fprintf(file, "#declare Area_Shape =\n\
@@ -3822,11 +3836,14 @@ Bool AlienLightObjectData::Execute()
 			sprintf(looks_like, "looks_like {Area_Shape}");
 		}
 
+		// Light
 		fprintf(file, "light_source {<0, 0, 0>\n\
   rgb<%f, %f, %f> * %f%s%s%s%s\n\
   area_light <%f, 0, 0>, <0, %f, 0>, %d, %d\n\
-	%s\n",
-		color.x, color.y, color.z, brightness, shadows_str.c_str(), parallel_str, media_interaction_str, media_attenuation_str, area_axis.x, area_axis.y, area_num_x, area_num_y, looks_like);
+  fade_distance %f\n\
+  fade_power %f\n\
+	%s%s\n",
+		color.x, color.y, color.z, brightness, shadows_str.c_str(), parallel_str, media_interaction_str, media_attenuation_str, area_axis.x, area_axis.y, area_num_x, area_num_y, fade_distance, fade_power, projected_through.c_str(), looks_like);
 	}
 
 	WriteMatrix(op);
