@@ -9,7 +9,7 @@ This leads me to starting this project - data converter from Cinema4D format to 
 1. Primitives: [Sphere](https://wiki.povray.org/content/Reference:Sphere), Cube ([Box](https://wiki.povray.org/content/Reference:Box)), [Cone](https://wiki.povray.org/content/Reference:Cone), [Cylinder](https://wiki.povray.org/content/Reference:Cylinder), [Plane](https://wiki.povray.org/content/Reference:Plane), [Spline](https://wiki.povray.org/content/Reference:Spline), Mesh (as [Mesh2](https://wiki.povray.org/content/Reference:Mesh2)).
 2. Constructive operations: Extrude ([Prism](https://wiki.povray.org/content/Reference:Prism)), Sweep ([Sphere sweep](https://wiki.povray.org/content/Reference:Sphere_Sweep)). 
 3. Boolean ([CSG](https://wiki.povray.org/content/Reference:Constructive_Solid_Geometry)) operations: [Union](https://wiki.povray.org/content/Reference:Union), [Difference](https://wiki.povray.org/content/Reference:Difference), [Intersection](https://wiki.povray.org/content/Reference:Intersection).
-4. Lights: all POV light sources [types](https://wiki.povray.org/content/Reference:Light_Source#Area_Lights).
+4. Lights: all POV light sources [types](https://wiki.povray.org/content/Reference:Light_Source#Area_Lights) are supported.
 5. Materials: POV materials defined in *'scenes/include/materials.inc'* file and linked by C4D material name. Materials library can be easely extended by defining user's own materials, as described here:
 [Materials](https://wiki.povray.org/content/Reference:Material), 
 [Textures](https://wiki.povray.org/content/Reference:Texture), 
