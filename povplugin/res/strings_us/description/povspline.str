@@ -1,9 +1,9 @@
 STRINGTABLE POVSpline
 {
-	POVSpline "Spline export options";
+  POVSpline "Spline export options";
 
-	POV_SPLINE_SPLINE_TYPE "Spline type";
-	
+  POV_SPLINE_SPLINE_TYPE "Spline type";
+  
         POV_SPLINE_SPLINE_LINEAR    "Linear";
         POV_SPLINE_SPLINE_QUADRATIC "Qadratic";
         POV_SPLINE_SPLINE_CUBIC     "Cubic";
