@@ -3,11 +3,11 @@
 // Persistence of Vision Ray Tracer version 3.7
 // Scene Description Language (SDL)
 // 
-// Spline data, obtained from C4D to POV converter usage example
+// Test c4d exported scenes
 //
-// File: spline_usage.pov
+// File: c4d_test.pov
 // Version: 1.0
-// Last updated: 03-Mar-2023
+// Last updated: 22-Mar-2023
 //
 // Author: Sergey Yanenko "Yesbird", 2023
 // e-mail: See posts in news.povray.org
@@ -16,15 +16,16 @@
 #version 3.7;
 global_settings { assumed_gamma 1 }
 
-#include "math.inc"
 
 #declare luminosity = 1;
-#include "playground.inc"
-#include "colormaps.inc"
-#include "textures.inc"
+#include "include/playground.inc"
+#include "include/colormaps.inc"
+
+#include "include/materials.inc"
+
 
 // Axis
-axis (15,15,14,0.1)
+// axis (15,15,14,0.1)
 
 //
 // Camera
@@ -124,14 +125,34 @@ background {color srgb<13,17,23> / 256}
               translate -2}}}
 */
 
-#include "glass.inc"
+
+/*
+// Materials
+
+M_NB_Winebottle_Glass
+M_Green_Glass
+M_NB_Glass
+M_Ruby_Glass
+M_Dark_Green_Glass
+M_Orange_Glass
+
 
 #declare Orange_Glass = material{ texture { Orange_Glass }
-                        interior{ I_Glass }}
+                                  interior{ I_Glass }}
 
 #declare Ruby_Glass = material{ texture { Ruby_Glass }
-                      interior{ I_Glass }}
+                                interior{ I_Glass }}
 
+#declare Winebottle_Glass = material{ texture { NBwinebottle }
+                                      interior{ I_Glass }}
+
+#declare Blood_Marble = material{ texture { pigment {Blood_Marble}
+                                  // normal { bumps 1.9 scale 0.02}
+                                  finish { phong 1 } 
+                                  scale 2.0 }
+                                  interior{ I_Glass }
+                                }
+*/
 
 //
 // Include exported data
@@ -142,8 +163,38 @@ background {color srgb<13,17,23> / 256}
 // #include "sweep_test.inc"
 // #include "lathe_test.inc"
 // #include "spline_test.inc"
-
-
 #include "lights_test.inc"
 
+
+/* Extrude test
+camo (<0,45,0>, <0,0,0>, 45) // +Y
+#declare Extrude = prism { linear_sweep bezier_spline 0, 3.000000, 16
+
+  // -----------
+  <15.000000, 0.000000>   // P1
+  <15.000000, 3.750000>   // T2
+  <5.625000, 10.000000>   // T3
+  <0.000000, 10.000000>   // P2
+  // -----------
+  <0.000000, 10.000000>   // P2
+  <-5.625000, 10.000000>  // T4
+  <-15.000000, 3.750000>  // T5
+  <-15.000000, 0.000000>  // P3
+  // -----------
+  <-15.000000, 0.000000>  // P3
+  <-15.000000, -3.750000> // T6
+  <-5.625000, -10.000000> // T7
+  <0.000000, -10.000000>  // P4
+  // -----------
+  <0.000000, -10.000000>  // P4
+  <5.625000, -10.000000>  // T8
+  <15.000000, -3.750000>  // T1
+  <15.000000, 0.000000>   // P1
+  // -----------
+  
+  material { texture {pigment {rgb <1,1,1> }}}
+}
+
+object{ Extrude }
+*/
 
