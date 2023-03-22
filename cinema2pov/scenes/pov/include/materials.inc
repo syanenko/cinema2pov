@@ -45,27 +45,27 @@
 #declare Bright_Orange_Glass = material { texture { NBglass pigment { rgbf <0.96, 0.33, 0, 0.5> }}
                                           interior {Glass_Interior}}
 
-#declare Glossy_Green_Glass  = material { texture { pigment { rgbf <0, 1, 0, 3.2> }
-                                                    finish  { ambient 0
-                                                              diffuse 0
-                                                              reflection 0.5
-                                                              phong 0.3
-                                                              phong_size 60}}}
+#declare Glossy_Green_Glass  = material { texture { pigment { rgbf <0, 1, 0, 2.2> }
+                                                    finish  { ambient 0.01
+                                                              diffuse 0.01
+                                                              reflection 0.4
+                                                              phong 1
+                                                              phong_size 80}}}
 
-#declare Glossy_Pink_Glass   = material { texture { pigment { rgbf <0.95, 0.37, 0.79, 3.2> }
-                                                    finish  { ambient 0
-                                                              diffuse 0
-                                                              reflection 0.5
-                                                              phong 0.3
-                                                              phong_size 60}}}
+#declare Glossy_Pink_Glass   = material { texture { pigment { rgbf <0.95, 0.37, 0.79, 2.2> }
+                                                    finish  { ambient 0.005
+                                                              diffuse 0.005
+                                                              reflection 0.3
+                                                              phong 8
+                                                              phong_size 80}}}
 
 
-#declare Glossy_Orange_Glass = material { texture { pigment { rgbf <0.96, 0.33, 0, 3.2> }
-                                                    finish  { ambient 0
-                                                              diffuse 0
-                                                              reflection 0.5
-                                                              phong 0.3
-                                                              phong_size 60}}}
+#declare Glossy_Orange_Glass = material { texture { pigment { rgbf <0.96, 0.33, 0, 2.2> }
+                                                    finish  { ambient 0.005
+                                                              diffuse 0.005
+                                                              reflection 0.3
+                                                              phong 8
+                                                              phong_size 80}}}
 //
 // Stone
 //

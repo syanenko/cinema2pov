@@ -14,7 +14,7 @@
 //
 //------------------------------------------------------------------------
 #version 3.7;
-global_settings { assumed_gamma 1 }
+global_settings { assumed_gamma 1.5 }
 
 
 #declare luminosity = 0;
@@ -39,15 +39,15 @@ global_settings { assumed_gamma 1 }
 //
 // Light
 // 
-//light_source {<800,200,800>,  rgb <1,1,1> * luminosity}
-light_source {<-800,200,800>, rgb <1,1,1> * luminosity}
+// light_source {<800,200,800>,  rgb <1,1,1> * luminosity}
+// light_source {<-800,200,800>, rgb <1,1,1> * luminosity}
 // light_source {<800,200,-800>, rgb <1,1,1> * luminosity}
 
 //
 // Background
 //
-//background {color srgb<13,17,23> / 256}
-background {color srgb<15,15,15> / 256}
+background {color srgb<13,17,23> / 256}
+// background {color srgb<15,15,15> / 256}
 
 //
 // Colormap

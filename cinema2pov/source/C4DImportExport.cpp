@@ -4560,6 +4560,7 @@ int main(int argc, Char* argv[])
 // QQ: TODO
 // 
 // 1. Lights: Cylinder (?)
+//    Tag - help: https://wiki.povray.org/content/Reference:Light_Source#Area_Lights  
 // 3. Check mesh - smooth normals
 // 4. Check if object enabled on export
 // 5. Metaballs (blobs)
