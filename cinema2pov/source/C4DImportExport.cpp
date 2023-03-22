@@ -190,7 +190,7 @@ bool HasLightTag( BaseObject* obj, Float& tightness,
 	{
 		if (btag->GetType() == ID_POV_LIGHT)
 		{
-			if (btag->GetParameter(POV_SPLINE_EXPORT_AS, data))
+			if (btag->GetParameter(POV_LIGHT_TIGHTNESS, data))
 			{
 				tightness = data.GetFloat();
 				printf(" - HasLightTag: tightness=%f\n", tightness);
@@ -3714,7 +3714,7 @@ Bool AlienLightObjectData::Execute()
 	//
 	// Get params from tag
 	//
-	Float tightness = 0;
+	Float tightness = 0; // +
 	Float fade_distance = 0;
 	Float fade_power = 0;
 	Int32 area_num_x = 2;
@@ -3732,19 +3732,28 @@ Bool AlienLightObjectData::Execute()
 							 projected_throw, icon_tranparency,
 							 disply_icon, parallel,
 							 media_attenuation, media_interaction );
+
+	Float icon_scale = 2.0; // TODO: Include in tag
 	//
 	// TODO: Check cylinder
 	// fprintf(o.fh,'#declare Cylinder_Shape = union { sphere { <0, 0, 0>, 0.25 } cylinder { <0,0,0>,<%0.2f, %0.2f, %0.2f>,0.15 } texture {Lightsource_Shape_Tex}}\n', ...
 	//
 
 	// Icons
-	Float icon_scale = 2.0;
+	if (disply_icon)
+	{
+		fprintf(file, "#declare Lightsource_Shape_Tex =\n\
+		texture { pigment{ rgbt <%0.2f, %0.2f, %0.2f, %0.2f>}\n\
+			finish { phong 1 reflection {0.1 metallic 0.2}}}\n\n", 1.0, 1.0, 1.0, 0.9);
+	}
 
-	fprintf(file, "#declare Lightsource_Shape_Tex =\n\
-	texture { pigment{ rgbt <%0.2f, %0.2f, %0.2f, %0.2f>}\n\
-		finish { phong 1 reflection {0.1 metallic 0.2}}}\n\n", 1.0, 1.0, 1.0, 0.9);
+	char looks_like[MAX_OBJ_NAME] = {0};
 
-	fprintf(file, "#declare Pointlight_Shape =\n\
+	if (type == LIGHT_TYPE_OMNI)
+	{
+		if (disply_icon)
+		{
+			fprintf(file, "#declare Pointlight_Shape =\n\
 	union {sphere { <0, 0, 0>, 0.25 }\n\
 		    cone { <0, 0, 0>, 0.15, <0.6,  0, 0>,0 }\n\
 		    cone { <0, 0, 0>, 0.15, <-0.6, 0, 0>,0 }\n\
@@ -3755,25 +3764,9 @@ Bool AlienLightObjectData::Execute()
 		    texture { Lightsource_Shape_Tex }\n\
 		    scale %0.2f}\n\n", icon_scale);
 
-	fprintf(file, "#declare Spotlight_Shape =\n\
-  union { sphere { <0, 0, 0>, 0.1 }\n\
-		cone { <0,0,0>,0,<0, 0, 1.5>, 0.3 }\n\
-		texture {Lightsource_Shape_Tex}\n\
-    scale %0.2f}\n\n", icon_scale);
+			sprintf(looks_like, "looks_like {Pointlight_Shape}");
+		}
 
-	fprintf(file, "#declare Area_Shape =\n\
-	union {\n\
-		plane { <0,0,1>, 0 clipped_by {box {<-0.5,-0.5,-0.5>, <0.5,0.5,0.5>}}}\n\
-		cylinder { <0,0,0>, <0,0,0.8>, 0.05 } cone { <0,0,0.6>,0.1,<0,0,1>, 0 }\n\
-		texture {Lightsource_Shape_Tex}\n\
-		scale %0.2f}\n\n", icon_scale);
-
-	char looks_like[MAX_OBJ_NAME];
-
-	if (type == LIGHT_TYPE_OMNI)
-	{
-		// TODO: Check visibility
-		sprintf(looks_like, "looks_like {Pointlight_Shape}");
 		fprintf(file, "light_source {<0, 0, 0>\n\
   rgb<%f, %f, %f> * %f%s\n\
 	%s\n",
@@ -3781,19 +3774,39 @@ Bool AlienLightObjectData::Execute()
 
 	} else if (type == LIGHT_TYPE_SPOT)
 	{
-		// TODO: Check visibility
-		sprintf(looks_like, "looks_like {Spotlight_Shape}");
+		if (disply_icon)
+		{
+			fprintf(file, "#declare Spotlight_Shape =\n\
+  union { sphere { <0, 0, 0>, 0.1 }\n\
+		cone { <0,0,0>,0,<0, 0, 1.5>, 0.3 }\n\
+		texture {Lightsource_Shape_Tex}\n\
+    scale %0.2f}\n\n", icon_scale);
+
+			sprintf(looks_like, "looks_like {Spotlight_Shape}");
+		}
+
 		fprintf(file, "light_source {<0, 0, 0>\n\
   rgb<%f, %f, %f> * %f%s spotlight\n\
   radius %f\n\
   falloff %f\n\
+  tightness %f\n\
 	%s\n",
-			color.x, color.y, color.z, brightness, shadows_str.c_str(), radius, falloff, looks_like);
+			color.x, color.y, color.z, brightness, shadows_str.c_str(), radius, falloff, tightness, looks_like);
 
 	} else if (type == LIGHT_TYPE_AREA)
 	{
-		// TODO: Check visibility
-		sprintf(looks_like, "looks_like {Area_Shape}");
+		if (disply_icon)
+		{
+			fprintf(file, "#declare Area_Shape =\n\
+	union {\n\
+		plane { <0,0,1>, 0 clipped_by {box {<-0.5,-0.5,-0.5>, <0.5,0.5,0.5>}}}\n\
+		cylinder { <0,0,0>, <0,0,0.8>, 0.05 } cone { <0,0,0.6>,0.1,<0,0,1>, 0 }\n\
+		texture {Lightsource_Shape_Tex}\n\
+		scale %0.2f}\n\n", icon_scale);
+
+			sprintf(looks_like, "looks_like {Area_Shape}");
+		}
+
 		fprintf(file, "light_source {<0, 0, 0>\n\
   rgb<%f, %f, %f> * %f%s\n\
   area_light <%f, 0, 0>, <0, %f, 0>, %f, %f\n\
