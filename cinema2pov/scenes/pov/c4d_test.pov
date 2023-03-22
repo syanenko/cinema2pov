@@ -46,7 +46,8 @@ light_source {<-800,200,800>, rgb <1,1,1> * luminosity}
 //
 // Background
 //
-background {color srgb<13,17,23> / 256}
+//background {color srgb<13,17,23> / 256}
+background {color srgb<15,15,15> / 256}
 
 //
 // Colormap
@@ -72,89 +73,6 @@ background {color srgb<13,17,23> / 256}
 //----------------------------------------------------------------------
 
 //
-// C4D Material
-//
-#declare mat_cylinder = material {
-  texture {
-    pigment { gradient -y
-              color_map  { hot }
-              scale 3 
-              translate 1.1}}}
-
-#declare mat_cone = material {
-  texture {
-    pigment { gradient -y
-              color_map  { hot }
-              scale 3 
-              translate 1.1}}}
-
-#declare mat_cube = material {
-  texture {
-    pigment { gradient -y
-              color_map  { cool }
-              scale 3 
-              translate 2.1}}}
-
-#declare mat_sphere = material {
-  texture {
-    pigment { gradient -y
-              color_map  { autumn }
-              scale 3 
-              translate 1}}}
-
-/*
-#declare mat_default = material {
-  texture {pigment {rgb <1,1,1> }}}
-*/
-
-#declare Default = material {
-  texture {pigment {rgb <1,1,1> }}}
-/*
-#declare mat_default = material {
-  texture {
-    pigment { gradient y
-              color_map  { ext_kindlmann }
-              scale 23
-              translate -2}}}
-
-#declare mat_default = material {
-  texture {
-    pigment { gradient y
-              color_map  { ext_kindlmann }
-              scale 23
-              translate -2}}}
-*/
-
-
-/*
-// Materials
-
-M_NB_Winebottle_Glass
-M_Green_Glass
-M_NB_Glass
-M_Ruby_Glass
-M_Dark_Green_Glass
-M_Orange_Glass
-
-
-#declare Orange_Glass = material{ texture { Orange_Glass }
-                                  interior{ I_Glass }}
-
-#declare Ruby_Glass = material{ texture { Ruby_Glass }
-                                interior{ I_Glass }}
-
-#declare Winebottle_Glass = material{ texture { NBwinebottle }
-                                      interior{ I_Glass }}
-
-#declare Blood_Marble = material{ texture { pigment {Blood_Marble}
-                                  // normal { bumps 1.9 scale 0.02}
-                                  finish { phong 1 } 
-                                  scale 2.0 }
-                                  interior{ I_Glass }
-                                }
-*/
-
-//
 // Include exported data
 //
 // #include "c4d_test.inc"
@@ -164,21 +82,10 @@ M_Orange_Glass
 // #include "lathe_test.inc"
 // #include "spline_test.inc"
 // #include "lights_test.inc"
+// #include "materials_demo.inc"
+// #include "stone_demo.inc"
+#include "glass_demo.inc"
 
-
-#declare obj = cone { <0.000000, -1.000000, 0.000000>, 1.000000, <0.000000, 1.000000, 0.000000>, 0.000000
-
-  matrix
- <1.000000, 0.000000, 0.000000,
-  0.000000, 1.000000, 0.000000,
-  0.000000, 0.000000, 1.000000,
-  0.000000, 0.000000, 0.000000>
-
-  material { M_NB_Winebottle_Glass }
-}
-
-
-#include "materials_demo.inc"
 
 /* Extrude test
 camo (<0,45,0>, <0,0,0>, 45) // +Y

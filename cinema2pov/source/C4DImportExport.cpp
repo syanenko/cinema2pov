@@ -4570,4 +4570,5 @@ int main(int argc, Char* argv[])
 // 
 // -- Errors
 // 1. Empty extrude
+// 2. Not defined material
 //////////////////////////////////////////////////

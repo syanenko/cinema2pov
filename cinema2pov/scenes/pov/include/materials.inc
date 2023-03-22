@@ -30,6 +30,8 @@
 
 #include "textures.inc"
 #include "glass.inc"
+                              
+#declare Default = material { texture {pigment {rgb <1,1,1> }}}
 
 
 #declare Blood_Marble = material{ texture { pigment {Blood_Marble}

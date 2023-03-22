@@ -12,5 +12,5 @@ REM cinema2pov.exe scenes\c4d\spline_test.c4d scenes\pov\spline_test.inc > cinem
 REM cinema2pov.exe scenes\c4d\lights_test.c4d scenes\pov\lights_test.inc > cinema2pov.log
 REM "C:\Program Files\POV-Ray\v3.8-beta\bin\pvengine64.exe" /RENDER C:\Projects\pov-tools\22.008_RBCinewaresdk22.0_355130\projects\cinema2pov\scenes\pov\c4d_test.pov
 
-cinema2pov.exe scenes\c4d\materials_demo.c4d scenes\pov\materials_demo.inc > cinema2pov.log
+cinema2pov.exe scenes\c4d\glass_demo.c4d scenes\pov\glass_demo.inc > cinema2pov.log
 "C:\Program Files\POV-Ray\v3.8-beta\bin\pvengine64.exe" /RENDER C:\Projects\pov-tools\22.008_RBCinewaresdk22.0_355130\projects\cinema2pov\scenes\pov\c4d_test.pov
