@@ -221,8 +221,9 @@ bool HasLightTag( BaseObject* obj, Float& tightness,
 
       if (btag->GetParameter(POV_LIGHT_PROJECTED_THROUGH, data))
       {
-        projected_through  = data.GetString().GetCStringCopy();
-        //printf(" - HasLightTag: projected_through ='%s'\n", projected_through.GetCStringCopy());
+        String str = data.GetString();
+        if(str.GetLength())
+          projected_through  = str.GetCStringCopy();
         printf(" - HasLightTag: projected_through ='%s'\n", projected_through.c_str());
       }
 
