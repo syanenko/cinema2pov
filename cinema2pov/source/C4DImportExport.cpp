@@ -3708,23 +3708,20 @@ Bool AlienLightObjectData::Execute()
 	else
 		printf(" - Error getting light area_axis !\n");
 
-	// Using default number of lights: 2 x 2, unless light tag is not present
-	Vector area_size = Vector(2,2,0);
-
 	//
 	// Get params from tag
 	//
 	Float tightness = 0; // +
 	Float fade_distance = 0;
 	Float fade_power = 0;
-	Int32 area_num_x = 2;
-	Int32 area_num_y = 2;
+	Int32 area_num_x = 2;  // +
+	Int32 area_num_y = 2;  // +
 	String projected_throw = "";
 	Float icon_tranparency = 0.9;
-	bool disply_icon = true;
-	bool parallel = false;
-	bool media_attenuation = false;
-	bool media_interaction = true;
+	bool disply_icon = true; // +
+	bool parallel = false;  // +
+	bool media_attenuation = false; // +
+	bool media_interaction = true; // +
 
 	HasLightTag( op, tightness,
 							 fade_distance, fade_power,
@@ -3747,7 +3744,25 @@ Bool AlienLightObjectData::Execute()
 			finish { phong 1 reflection {0.1 metallic 0.2}}}\n\n", 1.0, 1.0, 1.0, 0.9);
 	}
 
-	char looks_like[MAX_OBJ_NAME] = {0};
+	char parallel_str[MAX_OBJ_NAME] = { 0 };
+	if (parallel)
+	{
+		sprintf(parallel_str, " parallel");
+	}
+
+	char media_attenuation_str[MAX_OBJ_NAME] = { 0 };
+	if (media_attenuation)
+	{
+		sprintf(media_attenuation_str, " media_attenuation on");
+	}
+
+	char media_interaction_str[MAX_OBJ_NAME] = { 0 };
+	if (!media_interaction)
+	{
+		sprintf(media_interaction_str, " media_interaction off");
+	}
+
+	char looks_like[MAX_OBJ_NAME] = { 0 };
 
 	if (type == LIGHT_TYPE_OMNI)
 	{
@@ -3768,9 +3783,9 @@ Bool AlienLightObjectData::Execute()
 		}
 
 		fprintf(file, "light_source {<0, 0, 0>\n\
-  rgb<%f, %f, %f> * %f%s\n\
+  rgb<%f, %f, %f> * %f%s%s%s%s\n\
 	%s\n",
-		color.x, color.y, color.z, brightness, shadows_str.c_str(), looks_like);
+		color.x, color.y, color.z, brightness, shadows_str.c_str(), parallel_str, media_interaction_str, media_attenuation_str, looks_like);
 
 	} else if (type == LIGHT_TYPE_SPOT)
 	{
@@ -3786,12 +3801,12 @@ Bool AlienLightObjectData::Execute()
 		}
 
 		fprintf(file, "light_source {<0, 0, 0>\n\
-  rgb<%f, %f, %f> * %f%s spotlight\n\
+  rgb<%f, %f, %f> * %f%s%s%s%s spotlight\n\
   radius %f\n\
   falloff %f\n\
   tightness %f\n\
 	%s\n",
-			color.x, color.y, color.z, brightness, shadows_str.c_str(), radius, falloff, tightness, looks_like);
+			color.x, color.y, color.z, brightness, shadows_str.c_str(), parallel_str, media_interaction_str, media_attenuation_str, radius, falloff, tightness, looks_like);
 
 	} else if (type == LIGHT_TYPE_AREA)
 	{
@@ -3808,10 +3823,10 @@ Bool AlienLightObjectData::Execute()
 		}
 
 		fprintf(file, "light_source {<0, 0, 0>\n\
-  rgb<%f, %f, %f> * %f%s\n\
-  area_light <%f, 0, 0>, <0, %f, 0>, %f, %f\n\
+  rgb<%f, %f, %f> * %f%s%s%s%s\n\
+  area_light <%f, 0, 0>, <0, %f, 0>, %d, %d\n\
 	%s\n",
-		color.x, color.y, color.z, brightness, shadows_str.c_str(), area_axis.x, area_axis.y, area_size.x, area_size.y, looks_like);
+		color.x, color.y, color.z, brightness, shadows_str.c_str(), parallel_str, media_interaction_str, media_attenuation_str, area_axis.x, area_axis.y, area_num_x, area_num_y, looks_like);
 	}
 
 	WriteMatrix(op);
