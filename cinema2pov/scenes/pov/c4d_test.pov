@@ -32,7 +32,8 @@ axis (15,15,14,0.1)
 // camo (<0,20,0>, <0,0,0>,  45)     // +Y
 // camo (<8,0,0> * 1, <0,0,0>, 45)   // +X
 // camo (<0,8,0>, <0,0,0>, 45) // +Y
-// camp (<8,8,8> * 1, <0,0,0>,  45) // +XYZ
+// camp (<8,8,8> * 1, <0,0,0>,  45) // +XYZ       
+
 
 //
 // Light
@@ -102,6 +103,20 @@ background {color srgb<13,17,23> / 256}
 
 /*
 #declare mat_default = material {
+  texture {pigment {rgb <1,1,1> }}}
+*/
+
+#declare Default = material {
+  texture {pigment {rgb <1,1,1> }}}
+/*
+#declare mat_default = material {
+  texture {
+    pigment { gradient y
+              color_map  { ext_kindlmann }
+              scale 23
+              translate -2}}}
+
+#declare mat_default = material {
   texture {
     pigment { gradient y
               color_map  { ext_kindlmann }
@@ -109,8 +124,14 @@ background {color srgb<13,17,23> / 256}
               translate -2}}}
 */
 
-#declare mat_default = material {
-  texture {pigment {rgb <1,1,1> }}}
+#include "glass.inc"
+
+#declare Orange_Glass = material{ texture { Orange_Glass }
+                        interior{ I_Glass }}
+
+#declare Ruby_Glass = material{ texture { Ruby_Glass }
+                      interior{ I_Glass }}
+
 
 //
 // Include exported data
@@ -121,9 +142,6 @@ background {color srgb<13,17,23> / 256}
 // #include "sweep_test.inc"
 // #include "lathe_test.inc"
 // #include "spline_test.inc"
-
-// looks_like { sphere { 0, 0.3 pigment{rgb <0,1,0>}}}
-//  material { texture {pigment {rgb <1,1,1> }}}
 
 
 #include "lights_test.inc"
