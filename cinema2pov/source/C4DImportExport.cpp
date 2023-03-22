@@ -154,36 +154,36 @@ bool HasSplineTag(BaseObject* obj, int& export_as, int& spline_type)
 }
 
 //
-// Check for Light tag on object
-//
-enum
-{
-	ID_POV_LIGHT = 1018986,
-
-	POV_LIGHT_PARALLEL = 2101,
-	POV_LIGHT_MEDIA_ATTENUATION = 2102,
-	POV_LIGHT_MEDIA_INTERACTION = 2103,
-	POV_LIGHT_DISPLAY_ICON = 2104,
-
-	POV_LIGHT_FADE_DISTANCE = 2105,
-	POV_LIGHT_FADE_POWER = 2106,
-	POV_LIGHT_PROJECTED_THROUGH = 2107,
-	POV_LIGHT_AREA_NUM_X = 2108,
-	POV_LIGHT_AREA_NUM_Y = 2109,
-	POV_LIGHT_ICON_TRANSPARENCY = 2110,
-	POV_LIGHT_TIGHTNESS = 2111,
-};
-
-//
-// HasLightTag
+// HasLightTag - Check for Light tag on object
 // 
 bool HasLightTag( BaseObject* obj, Float& tightness,
 	                Float& fade_distance, Float& fade_power,
                   Int32& area_num_x, Int32& area_num_y,
-                  string& projected_through , Float& icon_tranparency,
+                  string& projected_through,
+	                Float& icon_scale,
+	                Float& icon_tranparency,
 								  bool& disply_icon, bool& parallel,
 								  bool& media_attenuation, bool& media_interaction )
 {
+	enum
+	{
+		ID_POV_LIGHT = 1018986,
+
+		POV_LIGHT_PARALLEL = 2101,
+		POV_LIGHT_MEDIA_ATTENUATION = 2102,
+		POV_LIGHT_MEDIA_INTERACTION = 2103,
+		POV_LIGHT_DISPLAY_ICON = 2104,
+
+		POV_LIGHT_FADE_DISTANCE = 2105,
+		POV_LIGHT_FADE_POWER = 2106,
+		POV_LIGHT_PROJECTED_THROUGH = 2107,
+		POV_LIGHT_AREA_NUM_X = 2108,
+		POV_LIGHT_AREA_NUM_Y = 2109,
+		POV_LIGHT_ICON_TRANSPARENCY = 2110,
+		POV_LIGHT_TIGHTNESS = 2111,
+		POV_LIGHT_ICON_SCALE = 2112,
+	};
+
 	GeData data;
 	BaseTag* btag = obj->GetFirstTag();
 	for (; btag; btag = (BaseTag*)btag->GetNext())
@@ -230,7 +230,13 @@ bool HasLightTag( BaseObject* obj, Float& tightness,
 			if (btag->GetParameter(POV_LIGHT_ICON_TRANSPARENCY, data))
 			{
 				icon_tranparency = data.GetFloat();
-				printf(" - HasLightTag: icon_tranparencyr=%f\n", icon_tranparency);
+				printf(" - HasLightTag: icon_tranparency=%f\n", icon_tranparency);
+			}
+
+			if (btag->GetParameter(POV_LIGHT_ICON_SCALE, data))
+			{
+				icon_scale = data.GetFloat();
+				printf(" - HasLightTag: icon_scale=%f\n", icon_scale);
 			}
 
 			if (btag->GetParameter(POV_LIGHT_DISPLAY_ICON, data))
@@ -3718,6 +3724,7 @@ Bool AlienLightObjectData::Execute()
 	Int32 area_num_x = 2;
 	Int32 area_num_y = 2;
 	string projected_through  = "";
+	Float icon_scale = 1.0;
 	Float icon_tranparency = 0.99;
 	bool disply_icon = true;
 	bool parallel = false;
@@ -3727,11 +3734,11 @@ Bool AlienLightObjectData::Execute()
 	HasLightTag( op, tightness,
 							 fade_distance, fade_power,
 							 area_num_x, area_num_y,
-							 projected_through , icon_tranparency,
+							 projected_through,
+		           icon_scale, icon_tranparency,
 							 disply_icon, parallel,
 							 media_attenuation, media_interaction );
 
-	Float icon_scale = 2.0; // TODO: Include in tag
 	//
 	// TODO: Check cylinder
 	// fprintf(o.fh,'#declare Cylinder_Shape = union { sphere { <0, 0, 0>, 0.25 } cylinder { <0,0,0>,<%0.2f, %0.2f, %0.2f>,0.15 } texture {Lightsource_Shape_Tex}}\n', ...

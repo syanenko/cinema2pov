@@ -15,6 +15,7 @@ enum
 	POV_LIGHT_AREA_NUM_Y        = 2109,
 	POV_LIGHT_ICON_TRANSPARENCY = 2110,
 	POV_LIGHT_TIGHTNESS         = 2111,
+	POV_LIGHT_ICON_SCALE        = 2112,
 
 	//////////////////////////////////////////////////////////////////////////
 

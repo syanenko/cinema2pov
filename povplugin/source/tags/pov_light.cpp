@@ -35,6 +35,7 @@ Bool POVLightTag::Init(GeListNode* node)
 	bc->SetFloat(POV_LIGHT_FADE_POWER,        0.0);
 	bc->SetInt32(POV_LIGHT_AREA_NUM_X,          2);
 	bc->SetInt32(POV_LIGHT_AREA_NUM_Y,          2);
+	bc->SetFloat(POV_LIGHT_ICON_SCALE,        1.0);
 	bc->SetFloat(POV_LIGHT_ICON_TRANSPARENCY, 0.99);
 	
 	bc->SetBool(POV_LIGHT_DISPLAY_ICON,      true);

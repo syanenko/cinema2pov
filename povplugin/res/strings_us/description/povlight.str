@@ -16,5 +16,6 @@ STRINGTABLE POVLight
         POV_LIGHT_MEDIA_ATTENUATION "Media attenuation";
         POV_LIGHT_MEDIA_INTERACTION "Media interaction";
         POV_LIGHT_DISPLAY_ICON      "Display icon";
+        POV_LIGHT_ICON_SCALE        "Icon scale";
         POV_LIGHT_ICON_TRANSPARENCY "Icon transparency";
 }
