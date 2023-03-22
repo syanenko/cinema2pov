@@ -11,51 +11,35 @@
 //                       mesh2, prism, sphere sweep, lathe
 //---------------------------------------------------------------
 
-camera{	perspective
-	location  <0, 0, 0>
-	angle 53.130102
+camera{  perspective
+  location  <0, 0, 0>
+  angle 53.130102
 
   matrix
- <-0.584973, -0.000000, 0.811052,
-  -0.086704, 0.994269, -0.062535,
-  -0.806405, -0.106903, -0.581621,
-  15.839967, 0.777770, 6.673322>
+ <-0.685097, -0.000000, 0.728452,
+  -0.093324, 0.991760, -0.087769,
+  -0.722449, -0.128112, -0.679451,
+  17.012373, 0.992139, 9.158566>
 
 }
 
 #declare Lightsource_Shape_Tex =
-	texture { pigment{ rgbt <1.00, 1.00, 1.00, 0.90>}
-		finish { phong 1 reflection {0.1 metallic 0.2}}}
-
-#declare Pointlight_Shape =
-	union {sphere { <0, 0, 0>, 0.25 }
-		    cone { <0, 0, 0>, 0.15, <0.6,  0, 0>,0 }
-		    cone { <0, 0, 0>, 0.15, <-0.6, 0, 0>,0 }
-		    cone { <0, 0, 0>, 0.15, <0,  0.6, 0>,0 }
-		    cone { <0, 0 ,0>, 0.15, <0, -0.6, 0>,0 }
-		    cone { <0, 0, 0>, 0.15, <0,  0, 0.6>,0 }
-		    cone { <0, 0, 0>, 0.15, <0,  0,-0.6>,0 }
-		    texture { Lightsource_Shape_Tex }
-		    scale 2.00}
-
-#declare Spotlight_Shape =
-  union { sphere { <0, 0, 0>, 0.1 }
-		cone { <0,0,0>,0,<0, 0, 1.5>, 0.3 }
-		texture {Lightsource_Shape_Tex}
-    scale 2.00}
+    texture { pigment{ rgbt <1.00, 1.00, 1.00, 0.96>}
+      finish { phong 1 reflection {0.1 metallic 0.2}}}
 
 #declare Area_Shape =
-	union {
-		plane { <0,0,1>, 0 clipped_by {box {<-0.5,-0.5,-0.5>, <0.5,0.5,0.5>}}}
-		cylinder { <0,0,0>, <0,0,0.8>, 0.05 } cone { <0,0,0.6>,0.1,<0,0,1>, 0 }
-		texture {Lightsource_Shape_Tex}
-		scale 2.00}
+  union {
+    plane { <0,0,1>, 0 clipped_by {box {<-0.5,-0.5,-0.5>, <0.5,0.5,0.5>}}}
+    cylinder { <0,0,0>, <0,0,0.8>, 0.05 } cone { <0,0,0.6>,0.1,<0,0,1>, 0 }
+    texture {Lightsource_Shape_Tex}
+    scale 1.20}
 
 light_source {<0, 0, 0>
-  rgb<0.210900, 0.570000, 0.258780> * 0.830000 spotlight
-  radius 71.000000
-  falloff 71.000000
-	looks_like {Spotlight_Shape}
+  rgb<0.210900, 0.570000, 0.258780> * 0.720000
+  area_light <1.000000, 0, 0>, <0, 4.000000, 0>, 1, 1
+  fade_distance 0.000000
+  fade_power 0.000000
+  looks_like {Area_Shape}
 
   matrix
  <0.000000, -0.000000, 1.000000,
@@ -88,7 +72,7 @@ cone { <0.000000, -1.000000, 0.000000>, 1.000000, <0.000000, 1.000000, 0.000000>
   0.000000, 0.000000, 1.000000,
   0.000000, 0.000000, -3.749159>
 
-  material { Pink_Granite }
+  material { M_Ruby_Glass }
 }
 
 cone { <0.000000, -1.000000, 0.000000>, 1.000000, <0.000000, 1.000000, 0.000000>, 0.000000
@@ -99,7 +83,7 @@ cone { <0.000000, -1.000000, 0.000000>, 1.000000, <0.000000, 1.000000, 0.000000>
   0.000000, 0.000000, 1.000000,
   0.000000, 0.000000, 0.000000>
 
-  material { Pine_Wood_02 }
+  material { M_NB_Winebottle_Glass }
 }
 
 cone { <0.000000, -1.000000, 0.000000>, 1.000000, <0.000000, 1.000000, 0.000000>, 0.000000
@@ -110,7 +94,7 @@ cone { <0.000000, -1.000000, 0.000000>, 1.000000, <0.000000, 1.000000, 0.000000>
   0.000000, 0.000000, 1.000000,
   0.000000, 0.000000, 4.014211>
 
-  material { Blood_Marble }
+  material { M_Orange_Glass }
 }
 
 

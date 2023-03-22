@@ -17,7 +17,7 @@
 global_settings { assumed_gamma 1 }
 
 
-#declare luminosity = 1;
+#declare luminosity = 0;
 #include "include/playground.inc"
 #include "include/colormaps.inc"
 
@@ -163,8 +163,22 @@ M_Orange_Glass
 // #include "sweep_test.inc"
 // #include "lathe_test.inc"
 // #include "spline_test.inc"
-#include "lights_test.inc"
+// #include "lights_test.inc"
 
+
+#declare obj = cone { <0.000000, -1.000000, 0.000000>, 1.000000, <0.000000, 1.000000, 0.000000>, 0.000000
+
+  matrix
+ <1.000000, 0.000000, 0.000000,
+  0.000000, 1.000000, 0.000000,
+  0.000000, 0.000000, 1.000000,
+  0.000000, 0.000000, 0.000000>
+
+  material { M_NB_Winebottle_Glass }
+}
+
+
+#include "materials_demo.inc"
 
 /* Extrude test
 camo (<0,45,0>, <0,0,0>, 45) // +Y

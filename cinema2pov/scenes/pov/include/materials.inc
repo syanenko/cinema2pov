@@ -25,6 +25,7 @@
 // M_Orange_Glass
 // M_Vicks_Bottle_Glass
 // M_Water
+//
 //---------------------------------------------------------------
 
 #include "textures.inc"
@@ -34,17 +35,17 @@
 #declare Blood_Marble = material{ texture { pigment {Blood_Marble}
                                   // normal { bumps 1.9 scale 0.02}
                                     finish { phong 1 } 
-                                    scale 2.0 }}
+                                    scale 4.0 }}
 
 #declare Pink_Granite = material{ texture { pigment{ Pink_Granite } 
                                   // normal { bumps 0.5 scale 0.05}
                                    finish { phong 1 } 
-                                   scale 0.5 }}
+                                   scale 0.7 }}
 
 #declare Pine_Wood_01 = material{ texture{ Pine_Wood     
                                     normal { wood 0.5 scale 0.3 turbulence 0.1}
                                     finish { phong 1 } 
-                                    rotate<60,0,45> scale 0.125 }}
+                                    rotate<60,0,45> scale 0.25 }}
 
 #declare Pine_Wood_02 = material{ texture{
                                     pigment{ wood turbulence 0.02 octaves 4 lambda 3
@@ -56,4 +57,4 @@
                                       [1.0 color rgb <1.30, 0.99, 0.64>] }}
                                     // normal { agate 0.5 scale 0.25} 
                                     finish { phong 1 } 
-                                    rotate <0,0, 0>  scale 1  translate <0,0,0> }}
+                                    rotate <0,0, 0>  scale 2  translate <0,0,0> }}
