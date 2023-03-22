@@ -10,7 +10,7 @@ This leads me to starting this project - data converter from Cinema4D format to 
 2. Constructive operations: Extrude ([Prism](https://wiki.povray.org/content/Reference:Prism)), Sweep ([Sphere sweep](https://wiki.povray.org/content/Reference:Sphere_Sweep)). 
 3. Boolean ([CSG](https://wiki.povray.org/content/Reference:Constructive_Solid_Geometry)) operations: [Union](https://wiki.povray.org/content/Reference:Union), [Difference](https://wiki.povray.org/content/Reference:Difference), [Intersection](https://wiki.povray.org/content/Reference:Intersection).
 4. Lights: all POV light sources [types](https://wiki.povray.org/content/Reference:Light_Source#Area_Lights) are supported.
-5. Materials: POV materials defined in *'scenes/include/materials.inc'* file and linked by C4D materials by name. Materials library can be easely extended by defining user's own materials, as described here:
+5. Materials: POV materials defined in *'scenes/include/materials.inc'* file and linked by C4D materials by name. This library can be easely extended by defining user's own materials, as described here:
 [Materials](https://wiki.povray.org/content/Reference:Material), 
 [Textures](https://wiki.povray.org/content/Reference:Texture), 
 [Interior](https://wiki.povray.org/content/Reference:Interior), 
