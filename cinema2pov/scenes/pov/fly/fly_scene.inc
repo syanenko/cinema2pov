@@ -50,7 +50,7 @@ light_source {<0, 0, 0>
     scale 1.20}
 
 light_source {<0, 0, 0>
-  rgb<0.820000, 0.820000, 0.820000> * 2.000000
+  rgb<0.820000, 0.820000, 0.820000> * 1.000000
   area_light <24.000000, 0, 0>, <0, 16.000000, 0>, 2, 2
   fade_distance 0.000000
   fade_power 0.000000
@@ -77,7 +77,33 @@ light_source {<0, 0, 0>
 
 light_source {<0, 0, 0>
   rgb<0.820000, 0.820000, 0.820000> * 1.000000
-  area_light <24.000000, 0, 0>, <0, 16.000000, 0>, 1, 1
+  area_light <24.000000, 0, 0>, <0, 16.000000, 0>, 2, 2
+  fade_distance 0.000000
+  fade_power 0.000000
+  looks_like {Area_Shape}
+
+  matrix
+ <0.770534, 0.605424, -0.199348,
+  -0.294964, 0.615935, 0.730494,
+  0.565043, -0.504070, 0.653177,
+  40.529770, -23.415857, 68.256441>
+
+}
+
+#declare Lightsource_Shape_Tex =
+    texture { pigment{ rgbt <1.00, 1.00, 1.00, 0.96>}
+      finish { phong 1 reflection {0.1 metallic 0.2}}}
+
+#declare Area_Shape =
+  union {
+    plane { <0,0,1>, 0 clipped_by {box {<-0.5,-0.5,-0.5>, <0.5,0.5,0.5>}}}
+    cylinder { <0,0,0>, <0,0,0.8>, 0.05 } cone { <0,0,0.6>,0.1,<0,0,1>, 0 }
+    texture {Lightsource_Shape_Tex}
+    scale 1.20}
+
+light_source {<0, 0, 0>
+  rgb<0.820000, 0.820000, 0.820000> * 0.200000
+  area_light <24.000000, 0, 0>, <0, 16.000000, 0>, 2, 2
   fade_distance 0.000000
   fade_power 0.000000
   looks_like {Area_Shape}
@@ -102,7 +128,7 @@ light_source {<0, 0, 0>
     scale 1.20}
 
 light_source {<0, 0, 0>
-  rgb<0.820000, 0.820000, 0.820000> * 0.500000
+  rgb<0.820000, 0.820000, 0.820000> * 0.200000
   area_light <24.000000, 0, 0>, <0, 16.000000, 0>, 1, 1
   fade_distance 0.000000
   fade_power 0.000000
