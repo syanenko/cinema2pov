@@ -52,6 +52,6 @@ Bool POVLightTag::Init(GeListNode* node)
 Bool RegisterPOVLightTag()
 {
   return RegisterTagPlugin(ID_POV_LIGHT, GeLoadString(IDS_POV_LIGHT),
-                           TAG_MULTIPLE | TAG_VISIBLE, POVLightTag::Alloc,
+                           TAG_VISIBLE, POVLightTag::Alloc,
                            "POVLight", AutoBitmap("pvengine-xp.ico"), 0);
 }

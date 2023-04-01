@@ -42,6 +42,6 @@ Bool POVSplineTag::Init(GeListNode* node)
 Bool RegisterPOVSplineTag()
 {
 	return RegisterTagPlugin(ID_POV_SPLINE, GeLoadString(IDS_POV_SPLINE),
-		                       TAG_MULTIPLE | TAG_VISIBLE, POVSplineTag::Alloc,
+		                       TAG_VISIBLE, POVSplineTag::Alloc,
 		                       "POVSpline", AutoBitmap("pvengine-xp.ico"), 0);
 }
