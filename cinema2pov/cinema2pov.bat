@@ -11,6 +11,11 @@ REM cinema2pov.exe scenes\c4d\lathe_test.c4d scenes\pov\lathe_test.inc > cinema2
 REM cinema2pov.exe scenes\c4d\spline_test.c4d scenes\pov\spline_test.inc > cinema2pov.log
 REM cinema2pov.exe scenes\c4d\lights_test.c4d scenes\pov\lights_test.inc > cinema2pov.log
 REM "C:\Program Files\POV-Ray\v3.8-beta\bin\pvengine64.exe" /RENDER C:\Projects\pov-tools\22.008_RBCinewaresdk22.0_355130\projects\cinema2pov\scenes\pov\c4d_test.pov
+REM cinema2pov.exe scenes\c4d\glass_demo.c4d scenes\pov\glass_demo.inc > cinema2pov.log
+REM "C:\Program Files\POV-Ray\v3.8-beta\bin\pvengine64.exe" /RENDER C:\Projects\pov-tools\22.008_RBCinewaresdk22.0_355130\projects\cinema2pov\scenes\pov\c4d_test.pov
 
-cinema2pov.exe scenes\c4d\glass_demo.c4d scenes\pov\glass_demo.inc > cinema2pov.log
-"C:\Program Files\POV-Ray\v3.8-beta\bin\pvengine64.exe" /RENDER C:\Projects\pov-tools\22.008_RBCinewaresdk22.0_355130\projects\cinema2pov\scenes\pov\c4d_test.pov
+REM Fly
+cinema2pov.exe scenes\c4d\fly_scene.c4d scenes\pov\fly\fly_scene.inc > cinema2pov.log
+"C:\Program Files\POV-Ray\v3.8-beta\bin\pvengine64.exe" /RENDER C:\Projects\pov-tools\22.008_RBCinewaresdk22.0_355130\projects\cinema2pov\scenes\pov\fly\fly.pov
+
+
