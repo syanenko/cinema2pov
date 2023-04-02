@@ -2623,9 +2623,16 @@ Bool AlienExtrudeObjectData::Execute()
   else
     printf("\n - AlienExtrudeObjectData (%d): <noname>\n", (int)op->GetType());
 
+  if (op->GetRenderMode() == MODE_OFF)
+  {
+    printf("\n^----------- EXTRUDE: Not exported - Render off ------^\n");
+    DeleteMem(objName);
+    return true;
+  }
+
   if (exported)
   {
-    printf("\n^--------------- EXTRUDE: ALREADY EXPORTED -----------^\n, objName");
+    printf("\n^--------------- EXTRUDE: Already exported -----------^\n, objName");
     return true;
   }
 
@@ -2756,7 +2763,7 @@ Bool AlienSweepObjectData::Execute()
 
   if (op->GetRenderMode() == MODE_OFF)
   {
-    printf("\n-------------- SWEEP: Non exported - Render off -------\n");
+    printf("\n^------------- SWEEP: Not exported - Render off ------^\n");
     DeleteMem(objName);
     return true;
   }
@@ -3109,7 +3116,7 @@ Bool AlienPolygonObjectData::Execute()
   PolygonObject *op = (PolygonObject*)GetNode();
   if (op->GetRenderMode() == MODE_OFF)
   {
-    printf("\n--------------- MESH: NOT EXPORTED - RENDER OFF -------\n");
+    printf("\n^-------------- MESH: NOT EXPORTED - Render off ------^\n");
     return true;
   }
 
