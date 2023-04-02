@@ -3147,8 +3147,6 @@ Bool AlienPolygonObjectData::Execute()
   if (!vertices || (!faces && fc > 0))
     return false;
 
-  Vector32* normals = op->CreatePhongNormals();
-
   // Get name of object as string copy (free it after usage!)
   Char* objName = op->GetName().GetCStringCopy();
   if (!objName)
@@ -3175,6 +3173,7 @@ Bool AlienPolygonObjectData::Execute()
 
   // Nornals
   Vector32* nvert;
+  Vector32* normals = op->CreatePhongNormals();
   if (normals)
   {
     // Prepare normals array corresponding to vertices
@@ -4652,14 +4651,13 @@ int main(int argc, Char* argv[])
 //////////////////////////////////////////////////
 // TODO
 // 
-// 1. Check mesh - smooth normals
-// 2. Sweep, extrude (?) - check spline type
-// 3. Metaballs (blobs)
+// 1. Sweep, extrude (?) - check spline type
+// 2. Logging cleanup
+// 3. Materials
 // 4. Remove default matrixes (?)
 // 5. Check objects's local coordinates (?)
-// 6. Logging cleanup
-// 7. Materials
-// 8. Lights: Cylinder (?)
+// 6. Metaballs (blobs) (?)
+// 7. Lights: Cylinder (?)
 // 
 // -- Errors
 // 1. Not defined material (?)
