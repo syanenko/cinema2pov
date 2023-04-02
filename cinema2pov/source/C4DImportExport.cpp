@@ -2938,9 +2938,16 @@ Bool AlienLatheObjectData::Execute()
   else
     printf("\n - AlienLatheObjectData (%d): <noname>\n", (int)op->GetType());
 
+  if (op->GetRenderMode() == MODE_OFF)
+  {
+    printf("\n^--------------- LATHE: Not exported - Render off --------^\n");
+    DeleteMem(objName);
+    return true;
+  }
+
   if (exported)
   {
-    printf("\n^--------------- LATHE: ALREADY EXPORTED -----------------^\n, objName");
+    printf("\n^--------------- LATHE: ALREADY EXPORTED -----------------^\n");
     return true;
   }
 
@@ -3391,9 +3398,16 @@ Bool AlienSplineObject::Execute()
   else
     printf("\n - AlienSplineObject (%d): <noname>\n", (int)GetType());
 
+  if (GetRenderMode() == MODE_OFF)
+  {
+    printf("\n^------------ SPLINE: Not exported - Render off ------^\n");
+    DeleteMem(objName);
+    return true;
+  }
+
   if (exported)
   {
-    printf("\n^--------------- SPLINE: Already exported -----------------^\n");
+    printf("\n^--------------- SPLINE: Already exported ------------^\n");
     return true;
   }
 
@@ -3513,6 +3527,13 @@ Bool AlienPrimitiveObjectData::Execute()
 
   printf("\n - AlienPrimitiveObject (%d): %s\n", (int)op->GetType(), objName);
   PrintUniqueIDs(this);
+
+  if (op->GetRenderMode() == MODE_OFF)
+  {
+    printf("\n^-------- PRIMITIVE: '%s' Not exported - Render off---^\n", objName);
+    DeleteMem(objName);
+    return true;
+  }
 
   if (exported)
   {
