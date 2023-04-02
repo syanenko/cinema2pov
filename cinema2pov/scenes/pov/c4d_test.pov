@@ -77,7 +77,7 @@ background {color srgb<13,17,23> / 256}
 //
 // #include "c4d_test.inc"
 // #include "global_test.inc"
-#include "extrude_test.inc"
+// #include "extrude_test.inc"
 // #include "sweep_test.inc"
 // #include "lathe_test.inc"
 // #include "spline_test.inc"
@@ -85,7 +85,7 @@ background {color srgb<13,17,23> / 256}
 // #include "materials_demo.inc"
 // #include "stone_demo.inc"
 // #include "glass_demo.inc"
-
+#include "mesh_test.inc"
 
 /* Extrude test
 camo (<0,45,0>, <0,0,0>, 45) // +Y

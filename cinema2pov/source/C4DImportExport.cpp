@@ -2754,9 +2754,17 @@ Bool AlienSweepObjectData::Execute()
   else
     printf("\n - AlienSweepObjectData (%d): <noname>\n", (int)op->GetType());
 
+  if (op->GetRenderMode() == MODE_OFF)
+  {
+    printf("\n-------------- SWEEP: Non exported - Render off -------\n");
+    DeleteMem(objName);
+    return true;
+  }
+
   if (exported)
   {
     printf("\n^--------------- SWEEP: Already exported -----------------^\n");
+    DeleteMem(objName);
     return true;
   }
 
@@ -3091,16 +3099,18 @@ Bool AlienXRefObjectData::Execute()
 }
 
 // 
-// Polygons
+// Mesh (Polygons)
 // 
 Bool AlienPolygonObjectData::Execute()
 {
+  printf("\n--------------- MESH: RENDER START --------------------\n");
   // Get object pointer
   PolygonObject *op = (PolygonObject*)GetNode();
 
   // Get point and polygon array pointer and counts
   const Vector *vAdr = op->GetPointR();
   Int32 pc = op->GetPointCount();
+
   const CPolygon *polyAdr = op->GetPolygonR();
   Int32 fc = op->GetPolygonCount();
 
@@ -3118,9 +3128,13 @@ Bool AlienPolygonObjectData::Execute()
   PrintMatrix(op->GetMg());
   PrintUserData(op);
   
-  objects.push_back(objName);
-  
-  // Polygon object with no points/polys allowed
+  if (op->GetRenderMode() == MODE_OFF)
+  {
+    printf("\n--------------- MESH: NOT EXPORTED - RENDER OFF -------\n");
+    return true;
+  }
+
+  // Polygon object with no points/polys not allowed
   if (pc == 0 && fc == 0)
     return true;
 
@@ -3135,9 +3149,6 @@ Bool AlienPolygonObjectData::Execute()
   }
   fprintf(file, "}\n\n");
   
-  if (objName)
-    DeleteMem(objName);
-
   // Faces
   fprintf(file, "face_indices { %d,\n", fc * 2);
   for (int i = 0; i < fc; ++i)
@@ -3149,6 +3160,13 @@ Bool AlienPolygonObjectData::Execute()
 
   WriteMatrix(op);
   WriteMaterial(op);
+
+  objects.push_back(objName);
+  if (objName)
+    DeleteMem(objName);
+
+  printf("\n^-------------- MESH: RENDER END ---------------------^\n");
+  return true;
 
   /*----------------------- Preserved for future use ------------------------
   // Ngons
@@ -3203,8 +3221,6 @@ Bool AlienPolygonObjectData::Execute()
   if (op->GetFirstCTrack())
     PrintAnimInfo(this->GetNode());
   -------------------------------------------------------------------------*/
-
-  return true;
 }
 
 // Execute function for the self defined Layer
@@ -4566,15 +4582,14 @@ int main(int argc, Char* argv[])
 //////////////////////////////////////////////////
 // QQ: TODO
 // 
-// 1. Lights: Cylinder (?)
-//    Tag - help: https://wiki.povray.org/content/Reference:Light_Source#Area_Lights
-// 3. Check mesh - smooth normals
-// 4. Check if object enabled on export
-// 5. Metaballs (blobs)
-// 6. Remove default matrixes (?)
-// 7. Check objects's local coordinates (?)
-// 8. Logging cleanup
-// 9. Materials
+// 1. Check mesh - smooth normals
+// 2. Lights: Cylinder (?)
+// 3. Check if object enabled on export
+// 4. Metaballs (blobs)
+// 5. Remove default matrixes (?)
+// 6. Check objects's local coordinates (?)
+// 7. Logging cleanup
+// 8. Materials
 // 
 // -- Errors
 // 1. Not defined material (?)

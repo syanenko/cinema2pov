@@ -22,7 +22,10 @@ REM Fly
 REM cinema2pov.exe scenes\c4d\fly_scene.c4d scenes\pov\fly\fly_scene.inc > cinema2pov.log
 REM "C:\Program Files\POV-Ray\v3.8-beta\bin\pvengine64.exe" /RENDER C:\Projects\pov-tools\22.008_RBCinewaresdk22.0_355130\projects\cinema2pov\scenes\pov\fly\fly.pov
 
-cinema2pov.exe scenes\c4d\extrude_test.c4d scenes\pov\extrude_test.inc > cinema2pov.log
+REM cinema2pov.exe scenes\c4d\extrude_test.c4d scenes\pov\extrude_test.inc > cinema2pov.log
+REM "C:\Program Files\POV-Ray\v3.8-beta\bin\pvengine64.exe" /RENDER C:\Projects\pov-tools\22.008_RBCinewaresdk22.0_355130\projects\cinema2pov\scenes\pov\c4d_test.pov
+
+cinema2pov.exe scenes\c4d\mesh_test.c4d scenes\pov\mesh_test.inc > cinema2pov.log
 "C:\Program Files\POV-Ray\v3.8-beta\bin\pvengine64.exe" /RENDER C:\Projects\pov-tools\22.008_RBCinewaresdk22.0_355130\projects\cinema2pov\scenes\pov\c4d_test.pov
 
 
