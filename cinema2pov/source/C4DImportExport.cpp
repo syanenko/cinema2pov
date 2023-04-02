@@ -3134,20 +3134,20 @@ Bool AlienPolygonObjectData::Execute()
   }
 
   // Get point and polygon array pointer and counts
-  const Vector *vAdr = op->GetPointR();
-  Int32 pc = op->GetPointCount();
+  const Vector* vertices = op->GetPointR();
+  Int32 vc = op->GetPointCount();
 
-  const CPolygon *polyAdr = op->GetPolygonR();
+  const CPolygon *faces = op->GetPolygonR();
   Int32 fc = op->GetPolygonCount();
 
   // Polygon object with no points/polys not allowed
-  if (pc == 0 && fc == 0)
+  if (vc == 0 && fc == 0)
     return true;
 
-  if (!vAdr || (!polyAdr && fc > 0))
+  if (!vertices || (!faces && fc > 0))
     return false;
 
-  Vector32* vNorm = op->CreatePhongNormals();
+  Vector32* normals = op->CreatePhongNormals();
 
   // Get name of object as string copy (free it after usage!)
   Char* objName = op->GetName().GetCStringCopy();
@@ -3159,26 +3159,40 @@ Bool AlienPolygonObjectData::Execute()
   printf("\n - AlienPolygonObject (%d): %s\n", (int)op->GetType(), objName);
   PrintUniqueIDs(this);
   
-  printf("   - PointCount: %d PolygonCount: %d\n", (int)pc, (int)fc);
+  printf("   - PointCount: %d PolygonCount: %d\n", (int)vc, (int)fc);
   PrintMatrix(op->GetMg());
   PrintUserData(op);
   
   // Mesh
-  fprintf(file, "#declare %s = mesh2 {\nvertex_vectors{ %d,\n", objName, pc);
+  fprintf(file, "#declare %s = mesh2 {\nvertex_vectors{ %d,\n", objName, vc);
+
   // Vertices
-  for (int i = 0; i < pc; ++i)
+  for (int i = 0; i < vc; ++i)
   {
-    fprintf(file, "<%f, %f, %f>\n", vAdr[i].x, vAdr[i].y, vAdr[i].z);
+    fprintf(file, "<%f, %f, %f>\n", vertices[i].x, vertices[i].y, vertices[i].z);
   }
   fprintf(file, "}\n\n");
 
-  // Normals
-  if(vNorm)
+  // Nornals
+  Vector32* nvert;
+  if (normals)
   {
-    fprintf(file, "normal_vectors{ %d,\n", pc);
-    for (int i = 0; i < pc; ++i)
+    // Prepare normals array corresponding to vertices
+    nvert = new Vector32[vc];
+    for (int i = 0; i < fc; ++i)
     {
-      fprintf(file, "<%f, %f, %f>\n", vNorm[i].x, vNorm[i].y, vNorm[i].z);
+      int ni = i * 4;
+      nvert[faces[i].a] = normals[ni];
+      nvert[faces[i].b] = normals[ni + 1];
+      nvert[faces[i].c] = normals[ni + 2];
+      nvert[faces[i].d] = normals[ni + 3];
+    }
+
+    // Wrire
+    fprintf(file, "normal_vectors{ %d,\n", vc);
+    for (int i = 0; i < vc; ++i)
+    {
+      fprintf(file, "<%f, %f, %f>\n", nvert[i].x, nvert[i].y, nvert[i].z);
     }
     fprintf(file, "}\n\n");
   }
@@ -3187,8 +3201,8 @@ Bool AlienPolygonObjectData::Execute()
   fprintf(file, "face_indices { %d,\n", fc * 2);
   for (int i = 0; i < fc; ++i)
   {
-    fprintf(file, "<%d, %d, %d>\n", polyAdr[i].a, polyAdr[i].b, polyAdr[i].c);
-    fprintf(file, "<%d, %d, %d>\n", polyAdr[i].a, polyAdr[i].c, polyAdr[i].d);
+    fprintf(file, "<%d, %d, %d>\n", faces[i].a, faces[i].b, faces[i].c);
+    fprintf(file, "<%d, %d, %d>\n", faces[i].a, faces[i].c, faces[i].d);
   }
   fprintf(file, "}\n\n");
 
@@ -3199,8 +3213,11 @@ Bool AlienPolygonObjectData::Execute()
   if (objName)
     DeleteMem(objName);
 
-  if (vNorm)
-    DeleteMem(vNorm);
+  if (normals)
+  {
+    DeleteMem(normals);
+    delete(nvert);
+  }
 
   printf("\n^-------------- MESH: RENDER END ---------------------^\n");
   return true;
