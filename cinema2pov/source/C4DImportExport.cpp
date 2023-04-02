@@ -2528,12 +2528,20 @@ Bool AlienEnvironmentObjectData::Execute()
 Bool AlienBoolObjectData::Execute()
 {
   printf("\n----------------- BOOL: EXPORT START ------------------\n");
+
+  BaseObject* op = (BaseObject*)GetNode();
+  if (op->GetRenderMode() == MODE_OFF)
+  {
+    printf("\n^-------------- BOOL: Not exported - Render off ------^\n");
+    return true;
+  }
+
   if (exported)
   {
     printf("\n^---------------- BOOL: Already exported -----------------^\n");
     return true;
   }
-  BaseObject* op = (BaseObject*)GetNode();
+
   Char* objName = op->GetName().GetCStringCopy();
   if (objName)
   {
@@ -2613,20 +2621,11 @@ Bool AlienBoolObjectData::Execute()
 Bool AlienExtrudeObjectData::Execute()
 {
   printf("--------------- EXTRUDE: EXPORT START -----------------\n");
-  BaseObject* op = (BaseObject*)GetNode();
-  Char* objName = op->GetName().GetCStringCopy();
-  if (objName)
-  {
-    MakeValidName(objName);
-    printf("\n - AlienExtrudeObjectData (%d): %s\n", (int)op->GetType(), objName);
-  }
-  else
-    printf("\n - AlienExtrudeObjectData (%d): <noname>\n", (int)op->GetType());
 
+  BaseObject* op = (BaseObject*)GetNode();
   if (op->GetRenderMode() == MODE_OFF)
   {
     printf("\n^----------- EXTRUDE: Not exported - Render off ------^\n");
-    DeleteMem(objName);
     return true;
   }
 
@@ -2635,6 +2634,15 @@ Bool AlienExtrudeObjectData::Execute()
     printf("\n^--------------- EXTRUDE: Already exported -----------^\n, objName");
     return true;
   }
+
+  Char* objName = op->GetName().GetCStringCopy();
+  if (objName)
+  {
+    MakeValidName(objName);
+    printf("\n - AlienExtrudeObjectData (%d): %s\n", (int)op->GetType(), objName);
+  }
+  else
+    printf("\n - AlienExtrudeObjectData (%d): <noname>\n", (int)op->GetType());
 
   // Extrude params
   GeData data;
@@ -2752,6 +2760,18 @@ Bool AlienSweepObjectData::Execute()
   printf("--------------- SWEEP: EXPORT START ------------------\n");
 
   BaseObject* op = (BaseObject*)GetNode();
+  if (op->GetRenderMode() == MODE_OFF)
+  {
+    printf("\n^------------- SWEEP: Not exported - Render off ------^\n");
+    return true;
+  }
+
+  if (exported)
+  {
+    printf("\n^--------------- SWEEP: Already exported -----------------^\n");
+    return true;
+  }
+
   Char* objName = op->GetName().GetCStringCopy();
   if (objName)
   {
@@ -2760,20 +2780,6 @@ Bool AlienSweepObjectData::Execute()
   }
   else
     printf("\n - AlienSweepObjectData (%d): <noname>\n", (int)op->GetType());
-
-  if (op->GetRenderMode() == MODE_OFF)
-  {
-    printf("\n^------------- SWEEP: Not exported - Render off ------^\n");
-    DeleteMem(objName);
-    return true;
-  }
-
-  if (exported)
-  {
-    printf("\n^--------------- SWEEP: Already exported -----------------^\n");
-    DeleteMem(objName);
-    return true;
-  }
 
   char declare[MAX_OBJ_NAME] = { 0 };
   if (op->GetUp() == NULL)
@@ -2929,19 +2935,10 @@ Bool AlienLatheObjectData::Execute()
 {
   printf("--------------- LATHE: EXPORT START -------------------\n");
   BaseObject* op = (BaseObject*)GetNode();
-  Char* objName = op->GetName().GetCStringCopy();
-  if (objName)
-  {
-    MakeValidName(objName);
-    printf("\n - AlienLatheObjectData (%d): %s\n", (int)op->GetType(), objName);
-  }
-  else
-    printf("\n - AlienLatheObjectData (%d): <noname>\n", (int)op->GetType());
 
   if (op->GetRenderMode() == MODE_OFF)
   {
     printf("\n^--------------- LATHE: Not exported - Render off --------^\n");
-    DeleteMem(objName);
     return true;
   }
 
@@ -2950,6 +2947,15 @@ Bool AlienLatheObjectData::Execute()
     printf("\n^--------------- LATHE: ALREADY EXPORTED -----------------^\n");
     return true;
   }
+
+  Char* objName = op->GetName().GetCStringCopy();
+  if (objName)
+  {
+    MakeValidName(objName);
+    printf("\n - AlienLatheObjectData (%d): %s\n", (int)op->GetType(), objName);
+  }
+  else
+    printf("\n - AlienLatheObjectData (%d): <noname>\n", (int)op->GetType());
 
   // Declare
   char declare[MAX_OBJ_NAME] = { 0 };
@@ -3389,19 +3395,9 @@ Bool AlienSplineObject::Execute()
 {
   printf("--------------- SPLINE: EXPORT START ------------------\n");
 
-  Char* objName = GetName().GetCStringCopy();
-  if (objName)
-  {
-    MakeValidName(objName);
-    printf("\n - AlienSplineObject (%d): %s\n", (int)GetType(), objName);
-  }
-  else
-    printf("\n - AlienSplineObject (%d): <noname>\n", (int)GetType());
-
   if (GetRenderMode() == MODE_OFF)
   {
     printf("\n^------------ SPLINE: Not exported - Render off ------^\n");
-    DeleteMem(objName);
     return true;
   }
 
@@ -3410,6 +3406,15 @@ Bool AlienSplineObject::Execute()
     printf("\n^--------------- SPLINE: Already exported ------------^\n");
     return true;
   }
+
+  Char* objName = GetName().GetCStringCopy();
+  if (objName)
+  {
+    MakeValidName(objName);
+    printf("\n - AlienSplineObject (%d): %s\n", (int)GetType(), objName);
+  }
+  else
+    printf("\n - AlienSplineObject (%d): <noname>\n", (int)GetType());
 
   PrintUniqueIDs(this);
   PrintTagInfo(this);
@@ -3517,6 +3522,8 @@ Bool AlienSplineObject::Execute()
 //
 Bool AlienPrimitiveObjectData::Execute()
 {
+  printf("^------------ PRIMITIVE: EXPORT START -----------------^\n");
+
   BaseObject* op = (BaseObject*)GetNode();
 
   Char* objName = op->GetName().GetCStringCopy();
@@ -3530,14 +3537,15 @@ Bool AlienPrimitiveObjectData::Execute()
 
   if (op->GetRenderMode() == MODE_OFF)
   {
-    printf("\n^-------- PRIMITIVE: '%s' Not exported - Render off---^\n", objName);
+    printf("^------- PRIMITIVE: '%s' Not exported - Render off ----^\n", objName);
     DeleteMem(objName);
     return true;
   }
 
   if (exported)
   {
-    printf("\n^-------------- PRIMITIVE: '%s' Already exported -----------------^\n", objName);
+    printf("^------- PRIMITIVE: '%s' Already exported -------------^\n", objName);
+    DeleteMem(objName);
     return true;
   }
   
@@ -3545,12 +3553,11 @@ Bool AlienPrimitiveObjectData::Execute()
   if (op->GetUp() == NULL)
   {
     sprintf(declare, "#declare %s = ", objName);
-    objects.push_back(objName);
   }
 
   GeData data;
   if (this->type_id == Ocube) // Cube
-  {  printf("--------------- CUBE: '%s' EXPORT START ------------------\n", objName);
+  {  printf("--------------- CUBE: '%s' EXPORT START ----------------\n", objName);
 
     op->GetParameter(PRIM_CUBE_LEN, data);
     Vector size = data.GetVector();
@@ -3562,7 +3569,7 @@ Bool AlienPrimitiveObjectData::Execute()
     size.z /= 2;
     fprintf(file, "%sbox { <%lf, %lf, %lf>, <%lf, %lf, %lf>\n", declare, -size.x, -size.y, -size.z, size.x, size.y, size.z);
   } else if (this->type_id == Osphere) { // Sphere
-    printf("--------------- SPHERE: '%s' EXPORT START ------------------\n", objName);
+    printf("--------------- SPHERE: '%s' EXPORT START --------------\n", objName);
 
     op->GetParameter(PRIM_SPHERE_RAD, data);
     Float radius = data.GetFloat();
@@ -3571,7 +3578,7 @@ Bool AlienPrimitiveObjectData::Execute()
     fprintf(file, "%ssphere { 0, %lf \n", declare, radius);
     
   } else if (this->type_id == Ocone) { // Cone
-    printf("--------------- CONE: '%s' EXPORT START ------------------\n", objName);
+    printf("--------------- CONE: '%s' EXPORT START ----------------\n", objName);
 
     op->GetParameter(PRIM_CONE_TRAD, data);
     Float TopRadius = data.GetFloat();
@@ -3589,7 +3596,7 @@ Bool AlienPrimitiveObjectData::Execute()
       declare, 0, -Height, 0, BottomRadius, 0, Height, 0, TopRadius);
 
   } else if (this->type_id == Ocylinder) { // Cylinder
-    printf("--------------- CYLINDER: '%s' EXPORT START ------------------\n", objName);
+    printf("--------------- CYLINDER: '%s' EXPORT START ------------\n", objName);
 
     op->GetParameter(PRIM_CYLINDER_RADIUS, data);
     Float Radius = data.GetFloat();
@@ -3603,7 +3610,7 @@ Bool AlienPrimitiveObjectData::Execute()
       declare, 0, -Height, 0, 0, Height, 0, Radius);
     
   } else if (this->type_id == Oplane) { // Plane
-    printf("--------------- PLANE: '%s' EXPORT START ------------------\n", objName);
+    printf("--------------- PLANE: '%s' EXPORT START ---------------\n", objName);
 
     op->GetParameter(PRIM_PLANE_WIDTH, data);
     Float width = data.GetFloat();
@@ -3618,7 +3625,7 @@ Bool AlienPrimitiveObjectData::Execute()
             declare, -width, -0.01, -height, width, 0.01, height);
 
   } else if (this->type_id == Otorus) { // Torus
-    printf("--------------- TORUS: '%s' EXPORT START ------------------\n", objName);
+    printf("--------------- TORUS: '%s' EXPORT START ---------------\n", objName);
 
     op->GetParameter(PRIM_TORUS_OUTERRAD, data);
     Float r_out = data.GetFloat();
@@ -3636,11 +3643,12 @@ Bool AlienPrimitiveObjectData::Execute()
   PrintMatrix(op->GetMg());
   PrintUserData(op);
 
-  printf("^----------- PRIMITIVE: '%s' EXPORT END -----------------^\n", objName);
-  exported = true;
-
+  objects.push_back(objName);
   if (objName)
     DeleteMem(objName);
+  
+  exported = true;
+  printf("^----------- PRIMITIVE: '%s' EXPORT END ---------------^\n", objName);
 
   /*----------------------- Preserved for future use ------------------------
   // Tags
@@ -4625,16 +4633,16 @@ int main(int argc, Char* argv[])
 }
 
 //////////////////////////////////////////////////
-// QQ: TODO
+// TODO
 // 
 // 1. Check mesh - smooth normals
-// 2. Lights: Cylinder (?)
-// 3. Check if object enabled on export
-// 4. Metaballs (blobs)
-// 5. Remove default matrixes (?)
-// 6. Check objects's local coordinates (?)
-// 7. Logging cleanup
-// 8. Materials
+// 2. Sweep, extrude (?) - check spline type
+// 3. Metaballs (blobs)
+// 4. Remove default matrixes (?)
+// 5. Check objects's local coordinates (?)
+// 6. Logging cleanup
+// 7. Materials
+// 8. Lights: Cylinder (?)
 // 
 // -- Errors
 // 1. Not defined material (?)
