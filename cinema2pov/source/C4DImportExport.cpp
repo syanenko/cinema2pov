@@ -2612,7 +2612,7 @@ Bool AlienBoolObjectData::Execute()
 //
 Bool AlienExtrudeObjectData::Execute()
 {
-  printf("--------------- EXTRUDE: EXPORT START ------------------\n");
+  printf("--------------- EXTRUDE: EXPORT START -----------------\n");
   BaseObject* op = (BaseObject*)GetNode();
   Char* objName = op->GetName().GetCStringCopy();
   if (objName)
@@ -2625,7 +2625,7 @@ Bool AlienExtrudeObjectData::Execute()
 
   if (exported)
   {
-    printf("\n^--------------- EXTRUDE: ALREADY EXPORTED -----------------^\n, objName");
+    printf("\n^--------------- EXTRUDE: ALREADY EXPORTED -----------^\n, objName");
     return true;
   }
 
@@ -2643,6 +2643,22 @@ Bool AlienExtrudeObjectData::Execute()
 
   PrintUniqueIDs(this);
 
+  // Child
+  AlienSplineObject* ch1 = (AlienSplineObject*)op->GetDown();
+  if (!ch1)
+  {
+    printf("\n^--------------- EXTRUDE: NOT EXPORTED - NO CHILD ----^\n");
+    DeleteMem(objName);
+    return true;
+  }
+
+  Char* ch1n = ch1->GetName().GetCStringCopy();
+  if (ch1n)
+  {
+    printf("\n   - Child_1: type='%d', name='%s'\n", (int)ch1->GetType(), ch1n);
+    DeleteMem(ch1n);
+  }
+
   char declare[MAX_OBJ_NAME] = { 0 };
   if (op->GetUp() == NULL)
   {
@@ -2650,15 +2666,6 @@ Bool AlienExtrudeObjectData::Execute()
     objects.push_back(objName);
   }
 
-  // Child
-  AlienSplineObject* ch1 = (AlienSplineObject*)op->GetDown();
-  Char* ch1n = ch1->GetName().GetCStringCopy();
-  if (ch1n)
-  {
-    printf("\n   - Child_1: type='%d', name='%s'\n", (int)ch1->GetType(), ch1n);
-    DeleteMem(ch1n);
-  }
-  
   float height = movement.y;
 
   // Spline type
@@ -2721,7 +2728,7 @@ Bool AlienExtrudeObjectData::Execute()
   WriteMatrix(op);
   WriteMaterial(op);
 
-  printf("^-------------- EXTRUDE: EXPORT END -------------------^\n", objName);
+  printf("^-------------- EXTRUDE: EXPORT END ------------------^\n", objName);
   exported = true;
 
   DeleteMem(objName);
@@ -4560,7 +4567,7 @@ int main(int argc, Char* argv[])
 // QQ: TODO
 // 
 // 1. Lights: Cylinder (?)
-//    Tag - help: https://wiki.povray.org/content/Reference:Light_Source#Area_Lights  
+//    Tag - help: https://wiki.povray.org/content/Reference:Light_Source#Area_Lights
 // 3. Check mesh - smooth normals
 // 4. Check if object enabled on export
 // 5. Metaballs (blobs)
@@ -4570,6 +4577,5 @@ int main(int argc, Char* argv[])
 // 9. Materials
 // 
 // -- Errors
-// 1. Empty extrude
-// 2. Not defined material
+// 1. Not defined material (?)
 //////////////////////////////////////////////////

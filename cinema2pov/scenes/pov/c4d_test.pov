@@ -77,14 +77,14 @@ background {color srgb<13,17,23> / 256}
 //
 // #include "c4d_test.inc"
 // #include "global_test.inc"
-// #include "extrude_test.inc"
+#include "extrude_test.inc"
 // #include "sweep_test.inc"
 // #include "lathe_test.inc"
 // #include "spline_test.inc"
 // #include "lights_test.inc"
 // #include "materials_demo.inc"
 // #include "stone_demo.inc"
-#include "glass_demo.inc"
+// #include "glass_demo.inc"
 
 
 /* Extrude test
