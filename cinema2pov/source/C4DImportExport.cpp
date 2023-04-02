@@ -3104,8 +3104,14 @@ Bool AlienXRefObjectData::Execute()
 Bool AlienPolygonObjectData::Execute()
 {
   printf("\n--------------- MESH: RENDER START --------------------\n");
+
   // Get object pointer
   PolygonObject *op = (PolygonObject*)GetNode();
+  if (op->GetRenderMode() == MODE_OFF)
+  {
+    printf("\n--------------- MESH: NOT EXPORTED - RENDER OFF -------\n");
+    return true;
+  }
 
   // Get point and polygon array pointer and counts
   const Vector *vAdr = op->GetPointR();
@@ -3113,6 +3119,15 @@ Bool AlienPolygonObjectData::Execute()
 
   const CPolygon *polyAdr = op->GetPolygonR();
   Int32 fc = op->GetPolygonCount();
+
+  // Polygon object with no points/polys not allowed
+  if (pc == 0 && fc == 0)
+    return true;
+
+  if (!vAdr || (!polyAdr && fc > 0))
+    return false;
+
+  Vector32* vNorm = op->CreatePhongNormals();
 
   // Get name of object as string copy (free it after usage!)
   Char* objName = op->GetName().GetCStringCopy();
@@ -3128,27 +3143,26 @@ Bool AlienPolygonObjectData::Execute()
   PrintMatrix(op->GetMg());
   PrintUserData(op);
   
-  if (op->GetRenderMode() == MODE_OFF)
-  {
-    printf("\n--------------- MESH: NOT EXPORTED - RENDER OFF -------\n");
-    return true;
-  }
-
-  // Polygon object with no points/polys not allowed
-  if (pc == 0 && fc == 0)
-    return true;
-
-  if (!vAdr || (!polyAdr && fc > 0))
-    return false;
-
-  // Vertices
+  // Mesh
   fprintf(file, "#declare %s = mesh2 {\nvertex_vectors{ %d,\n", objName, pc);
+  // Vertices
   for (int i = 0; i < pc; ++i)
   {
     fprintf(file, "<%f, %f, %f>\n", vAdr[i].x, vAdr[i].y, vAdr[i].z);
   }
   fprintf(file, "}\n\n");
-  
+
+  // Normals
+  if(vNorm)
+  {
+    fprintf(file, "normal_vectors{ %d,\n", pc);
+    for (int i = 0; i < pc; ++i)
+    {
+      fprintf(file, "<%f, %f, %f>\n", vNorm[i].x, vNorm[i].y, vNorm[i].z);
+    }
+    fprintf(file, "}\n\n");
+  }
+
   // Faces
   fprintf(file, "face_indices { %d,\n", fc * 2);
   for (int i = 0; i < fc; ++i)
@@ -3164,6 +3178,9 @@ Bool AlienPolygonObjectData::Execute()
   objects.push_back(objName);
   if (objName)
     DeleteMem(objName);
+
+  if (vNorm)
+    DeleteMem(vNorm);
 
   printf("\n^-------------- MESH: RENDER END ---------------------^\n");
   return true;
