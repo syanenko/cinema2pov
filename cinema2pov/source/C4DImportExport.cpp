@@ -2935,12 +2935,9 @@ Bool AlienSweepObjectData::Execute()
   // Control 1  
   if ((spType == SPLINEOBJECT_TYPE_CUBIC) || (spType == SPLINEOBJECT_TYPE_BSPLINE))
     if (closed)
-    {
       fprintf(file, "  <%f, %f, %f>, %f\n", p[pc - 1].x, p[pc - 1].y, p[pc - 1].z, r);
-    } else
-    {
+    else
       fprintf(file, "  <%f, %f, %f>, %f,\n", p[0].x, p[0].y, p[0].z, r);
-    }
 
   for (int i = 0; i < pc; i++)
   {
@@ -2954,9 +2951,7 @@ Bool AlienSweepObjectData::Execute()
 
   // Close
   if (closed)
-  {
     fprintf(file, "  <%f, %f, %f>, %f,\n", p[0].x, p[0].y, p[0].z, r);
-  }
 
   // Control 2
   if ((spType == SPLINEOBJECT_TYPE_CUBIC) || (spType == SPLINEOBJECT_TYPE_BSPLINE))
@@ -3006,7 +3001,6 @@ Bool AlienLatheObjectData::Execute()
   if (op->GetUp() == NULL)
   {
     sprintf(declare, "#declare %s = ", objName);
-    objects.push_back(objName);
   }
   DeleteMem(objName);
 
@@ -3075,7 +3069,7 @@ Bool AlienLatheObjectData::Execute()
   }
 
   ch1->SetExported();
-  WriteMatrix(op);
+  SaveObject(op);
   WriteMaterial(op);
 
   printf("^-------------- LATHE: EXPORT END -------------------^\n", objName);
@@ -3693,13 +3687,12 @@ Bool AlienPrimitiveObjectData::Execute()
     fprintf(file, "%storus { %f, %f\n", declare, r_out, r_in);
   }
 
-  WriteMatrix(op);
+  SaveObject(op);
   WriteMaterial(op);
 
   PrintMatrix(op->GetMg());
   PrintUserData(op);
 
-  objects.push_back(objName);
   if (objName)
     DeleteMem(objName);
   
@@ -3737,6 +3730,12 @@ Bool AlienLightObjectData::Execute()
   printf("----------------- LIGHT: EXPORT START -----------------\n");
 
   BaseObject* op = (BaseObject*)GetNode();
+  if (op->GetRenderMode() == MODE_OFF)
+  {
+    printf("\n^------------- LIGHT: Not exported - Render off ------^\n");
+    return true;
+  }
+
   Char* pChar = op->GetName().GetCStringCopy();
   if (pChar)
   {
@@ -4697,7 +4696,6 @@ int main(int argc, Char* argv[])
 // 
 // 0. Light: turn off/on
 // 1. Sweep, extrude (?) - check spline type
-// 2. Sweep - close path (check "Close spline")
 // 3. Logging cleanup
 // 4. Materials
 // 5. Write matrixes at the end
