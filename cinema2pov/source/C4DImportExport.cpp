@@ -2823,7 +2823,7 @@ Bool AlienExtrudeObjectData::Execute()
 //
 Bool AlienSweepObjectData::Execute()
 {
-  printf("--------------- SWEEP: EXPORT START ------------------\n");
+  printf("---------------- SWEEP: EXPORT START ------------------\n");
 
   BaseObject* op = (BaseObject*)GetNode();
   if (op->GetRenderMode() == MODE_OFF)
@@ -2869,7 +2869,7 @@ Bool AlienSweepObjectData::Execute()
   int ch1Type = ch1->GetType();
   if (ch1Type != Osplinecircle)
   {
-    printf("\n^----------- SWEEP: cat't sweep object of type '%d' -----------------^\n", ch1Type);
+    printf("\n^------- SWEEP: cat't sweep object of type '%d' ----^\n", ch1Type);
     ch1->SetExported();
     exported = true;
     return true;
@@ -2885,11 +2885,21 @@ Bool AlienSweepObjectData::Execute()
 
   // Child 2 - path
   AlienSplineObject* ch2 = (AlienSplineObject*)op->GetDownLast();
+
   pChar = ch2->GetName().GetCStringCopy();
   if (pChar)
   {
     printf("\nCh2 - AlienSweepObjectData (%d): %s\n", (int)ch2->GetType(), pChar);
     DeleteMem(pChar);
+  }
+
+  int ch2Type = ch2->GetType();
+  if (ch2Type != Ospline)
+  {
+    printf("\n^- SWEEP: cat't use object of type '%d' as path-----^\n", ch2Type);
+    ch2->SetExported();
+    exported = true;
+    return true;
   }
 
   // Path points
@@ -3010,7 +3020,7 @@ Bool AlienSweepObjectData::Execute()
 
   ch2->SetExported();
   exported = true;
-  printf("\n^-------------- SWEEP: EXPORT END ------------------^\n");
+  printf("\n^---------------- SWEEP: EXPORT END ------------------^\n");
 
   return true;
 }
@@ -4770,9 +4780,8 @@ int main(int argc, Char* argv[])
 // TODO
 // 
 // 0. Light: turn off/on (+) - Enabled ?
-// 1. Sweep, extrude (?) - check spline type
-// 3. Logging cleanup
-// 4. Materials
+// 1. Logging cleanup
+// 2. Materials
 // 
 // 5. Check objects's local coordinates (v. 1.1)
 // 6. Metaballs (blobs) (v. 1.1)
