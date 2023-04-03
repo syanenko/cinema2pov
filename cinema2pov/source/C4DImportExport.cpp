@@ -31,9 +31,7 @@ Char* version;
 // POV export globals
 //
 const size_t MAX_OBJ_NAME = 1024;
-
-// vector<string> objects;
-vector<vector<string>> objs;
+vector<vector<string>> objects;
 FILE* file = 0;
 
 //
@@ -107,7 +105,7 @@ void SaveObject(BaseObject* op)
   vector<string> item ;
   item.push_back(name);
   item.push_back(matrix);
-  objs.push_back(item);
+  objects.push_back(item);
 
   DeleteMem(name);
 }
@@ -4713,7 +4711,7 @@ int main(int argc, Char* argv[])
   for (string name : objects)
     fprintf(file, "object{ %s }\n", name.c_str());
  */
-  for (auto item : objs)
+  for (auto item : objects)
     fprintf(file, "object{ %s %s}\n\n", item[0].c_str(), item[1].c_str());
 
   printf(" # Done\n");
