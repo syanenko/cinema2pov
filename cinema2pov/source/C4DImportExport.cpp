@@ -83,12 +83,15 @@ void WriteMatrix(BaseObject* op)
 }
 
 //
-// Save matrix
+// Save object
 //
 void SaveObject(BaseObject* op)
 {
+  vector<string> item;
+
   Char* name = op->GetName().GetCStringCopy();
   MakeValidName(name);
+  item.push_back(name);
 
   char matrix[MAX_OBJ_NAME] = { 0 };
   Matrix m = op->GetMl();
@@ -102,9 +105,24 @@ void SaveObject(BaseObject* op)
     m.v3.x, m.v3.y, m.v3.z,
     m.off.x, m.off.y, m.off.z);
 
-  vector<string> item ;
-  item.push_back(name);
   item.push_back(matrix);
+
+  char material[MAX_OBJ_NAME] = { 0 };
+  BaseTag* pTex = op->GetTag(Ttexture);
+  if (pTex)
+  {
+    GeData data;
+    AlienMaterial* pMat = nullptr;
+    if (pTex->GetParameter(TEXTURETAG_MATERIAL, data))
+      pMat = (AlienMaterial*)data.GetLink();
+
+    Char* pChar = pMat->GetName().GetCStringCopy();
+    sprintf(material, "\n  material { %s }\n", pChar);
+    DeleteMem(pChar);
+  }
+  
+  item.push_back(material);
+
   objects.push_back(item);
 
   DeleteMem(name);
@@ -113,6 +131,8 @@ void SaveObject(BaseObject* op)
 //
 // Wtite material
 // 
+// Closes object here. TODO: Close in Execute()
+//
 void WriteMaterial(BaseObject* op)
 {
   BaseTag* pTex = op->GetTag(Ttexture);
@@ -123,12 +143,9 @@ void WriteMaterial(BaseObject* op)
     if (pTex->GetParameter(TEXTURETAG_MATERIAL, data))
       pMat = (AlienMaterial*)data.GetLink();
 
-    Char* pChar = pMat->GetName().GetCStringCopy();
-    fprintf(file, "  material { %s }\n\}\n\n", pChar);
-    DeleteMem(pChar);
-  } else
-  {
-    fprintf(file, "}\n\n"); // Closes object here. TODO: Close in Execute()
+    Char* name = pMat->GetName().GetCStringCopy();
+    fprintf(file, "\n  material { %s }\n", name);
+    DeleteMem(name);
   }
 }
 
@@ -2361,8 +2378,13 @@ Bool AlienNullObjectData::Execute()
   }
 
   if (!at_root)
+  {
     WriteMatrix(op);
-  WriteMaterial(op);
+    WriteMaterial(op);
+  }
+
+  // Close object  
+  fprintf(file, "}\n\n");
 
   DeleteMem(objName);
   exported = true;
@@ -2624,9 +2646,14 @@ Bool AlienBoolObjectData::Execute()
   }
 
   if(!at_root)
+  {
     WriteMatrix(op);
-  WriteMaterial(op);
- 
+    WriteMaterial(op);
+  }
+
+  // Close object  
+  fprintf(file, "}\n\n");
+
   // fprintf(file, "}\n\n");
 
   /*
@@ -2774,9 +2801,13 @@ Bool AlienExtrudeObjectData::Execute()
 
   ch1->SetExported();
   if(!at_root)
+  {
     WriteMatrix(op);
+    WriteMaterial(op);
+  }
 
-  WriteMaterial(op);
+  // Close object  
+  fprintf(file, "}\n\n");
 
   printf("^-------------- EXTRUDE: EXPORT END ------------------^\n", objName);
   exported = true;
@@ -2969,9 +3000,13 @@ Bool AlienSweepObjectData::Execute()
     fprintf(file, "  <%f, %f, %f>, %f\n", p[pc - 1].x, p[pc - 1].y, p[pc - 1].z, r);
 
   if(!at_root)
+  {
     WriteMatrix(op);
+    WriteMaterial(op);
+  }
 
-  WriteMaterial(op);
+  // Close object  
+  fprintf(file, "}\n\n");
 
   ch2->SetExported();
   exported = true;
@@ -3086,8 +3121,13 @@ Bool AlienLatheObjectData::Execute()
 
   ch1->SetExported();
   if(!at_root)
+  {
     WriteMatrix(op);
-  WriteMaterial(op);
+    WriteMaterial(op);
+  }
+
+  // Close object  
+  fprintf(file, "}\n\n");
 
   printf("^-------------- LATHE: EXPORT END -------------------^\n", objName);
   exported = true;
@@ -3269,9 +3309,14 @@ Bool AlienPolygonObjectData::Execute()
   fprintf(file, "}\n");
 
   if (!at_root)
+  {
     WriteMatrix(op);
-  WriteMaterial(op);
-   
+    WriteMaterial(op);
+  }
+
+  // Close object  
+  fprintf(file, "}\n\n");
+
   if (normals)
   {
     DeleteMem(normals);
@@ -3716,9 +3761,14 @@ Bool AlienPrimitiveObjectData::Execute()
   }
 
   if(!at_root)
+  {
     WriteMatrix(op);
+    WriteMaterial(op);
+  }
 
-  WriteMaterial(op);
+  // Close object  
+  fprintf(file, "}\n\n");
+
   PrintMatrix(op->GetMg());
   PrintUserData(op);
 
@@ -4707,12 +4757,8 @@ int main(int argc, Char* argv[])
   Bool res = LoadSaveC4DScene(fnLoad, nullptr);
 
   // Write objects instances 
-  /*
-  for (string name : objects)
-    fprintf(file, "object{ %s }\n", name.c_str());
- */
   for (auto item : objects)
-    fprintf(file, "object{ %s %s}\n\n", item[0].c_str(), item[1].c_str());
+    fprintf(file, "object{ %s %s %s}\n\n", item[0].c_str(), item[1].c_str(), item[2].c_str());
 
   printf(" # Done\n");
   fclose(file);
@@ -4723,10 +4769,11 @@ int main(int argc, Char* argv[])
 //////////////////////////////////////////////////
 // TODO
 // 
-// 0. Light: turn off/on (+/-) - Enabled ?
+// 0. Light: turn off/on (+) - Enabled ?
 // 1. Sweep, extrude (?) - check spline type
 // 3. Logging cleanup
 // 4. Materials
+// 
 // 5. Check objects's local coordinates (v. 1.1)
 // 6. Metaballs (blobs) (v. 1.1)
 // 7. Lights: Cylinder (v. 1.1)
