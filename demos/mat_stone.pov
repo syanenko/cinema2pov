@@ -1,5 +1,4 @@
 //------------------------------------------------------------------------
-//
 // Persistence of Vision Ray Tracer version 3.7
 // Scene Description Language (SDL)
 // 
@@ -11,21 +10,11 @@
 //
 // Author: Sergey Yanenko "Yesbird", 2023
 // e-mail: See posts in news.povray.org
-//
 //------------------------------------------------------------------------
 #version 3.7;
 global_settings { assumed_gamma 1.5 }
-
-#include "include/materials.inc"
-
-//
-// Background
-//
 background {color srgb<13,17,23> / 256}
 
-//
-// Materials
-//
-#include "stone_demo.inc"
-// #include "glass_demo.inc"
-// #include "wood_demo.inc"
+#include "include/materials.inc"
+#include "mat_stone.inc"
+
