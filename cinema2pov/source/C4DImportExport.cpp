@@ -4779,9 +4779,10 @@ int main(int argc, Char* argv[])
 //////////////////////////////////////////////////
 // TODO
 // 
-// 0. Light: turn off/on (+) - Enabled ?
-// 1. Logging cleanup
-// 2. Materials
+// 1. Materials
+// 2. Examples
+// 3. Light, etc: Enabled ?
+// 4. Logging cleanup (+/-)
 // 
 // 5. Check objects's local coordinates (v. 1.1)
 // 6. Metaballs (blobs) (v. 1.1)

@@ -7,12 +7,46 @@
 // Sorces: github.com/syanenko/pov-utils
 // POV-Ray site: www.povray.org
 //
-// Supported primitives: sphere, cube, cone, cylinder, spline, mesh
+// Supported primitives: camera, sphere, cube, cone, cylinder, spline
+//                       mesh2, prism, sphere sweep, lathe
 //---------------------------------------------------------------
 
-#declare Sweep = sphere_sweep  { cubic_spline 23
+#declare Lightsource_Shape_Tex =
+    texture { pigment{ rgbt <1.00, 1.00, 1.00, 0.99>}
+      finish { phong 1 reflection {0.1 metallic 0.2}}}
 
-  <4.000000, 0.000000, 0.000000>, 0.000000,
+#declare Area_Shape =
+  union {
+    plane { <0,0,1>, 0 clipped_by {box {<-0.5,-0.5,-0.5>, <0.5,0.5,0.5>}}}
+    cylinder { <0,0,0>, <0,0,0.8>, 0.05 } cone { <0,0,0.6>,0.1,<0,0,1>, 0 }
+    texture {Lightsource_Shape_Tex}
+    scale 1.00}
+
+light_source {<0, 0, 0>
+  rgb<1.000000, 1.000000, 1.000000> * 1.000000 shadowless
+  area_light <4.000000, 0, 0>, <0, 4.000000, 0>, 2, 2
+  fade_distance 0.000000
+  fade_power 0.000000
+  looks_like {Area_Shape}
+  matrix
+ <1.000000, 0.000000, 0.000000,
+  0.000000, 1.000000, 0.000000,
+  0.000000, 0.000000, 1.000000,
+  0.000000, 2.228468, 3.758976>
+}
+
+camera{  perspective
+  location  <0, 0, 0>
+  angle 53.130102
+  matrix
+ <-0.908086, -0.000000, -0.418785,
+  0.031280, 0.997207, -0.067827,
+  0.417615, -0.074692, -0.905549,
+  -1.348864, 3.426211, 9.042847>
+}
+
+#declare Sweep = sphere_sweep  { linear_spline 21
+
   <4.000000, 0.000000, 0.000000>, 0.000000,
   <3.988662, 0.322600, 0.000000>, 0.000481,
   <3.953807, 0.630629, 0.000000>, 0.002692,
@@ -34,14 +68,14 @@
   <0.630629, 3.953807, 0.000000>, 0.118077,
   <0.322600, 3.988662, 0.000000>, 0.082283,
   <0.000001, 4.000000, 0.000000>, 0.085915,
-  <0.000001, 4.000000, 0.000000>, 0.085915
+  material { Default }
+}
+
+object{ Sweep 
   matrix
  <1.000000, 0.000000, 0.000000,
   0.000000, 1.000000, 0.000000,
   0.000000, 0.000000, 1.000000,
   0.000000, 0.000000, 0.000000>
-
-  material { mat_default }
 }
 
-object{ Sweep }

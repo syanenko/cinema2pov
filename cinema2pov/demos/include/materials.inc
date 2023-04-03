@@ -27,16 +27,15 @@
 // M_Water
 //
 //---------------------------------------------------------------
+
 #include "textures.inc"
 #include "glass.inc"
-#include "colormaps.inc"
                               
 #declare Default = material { texture {pigment {rgb <1,1,1> }}}
 
 //
 // Glass
 //
-//---------------------------------------------------------------
 #declare Bright_Green_Glass  = material { texture { NBglass pigment { rgbf <0, 1, 0, 0.5> }}
                                           interior {Glass_Interior}}
 
@@ -70,7 +69,6 @@
 //
 // Stone
 //
-//---------------------------------------------------------------
 #declare Blood_Marble = material{ texture { pigment {Blood_Marble}
                                   // normal { bumps 1.9 scale 0.02}
                                     finish { phong 1 } 
@@ -83,7 +81,6 @@
 //
 // Wood
 //
-//---------------------------------------------------------------
 #declare Pine_Wood_01 = material{ texture{ Pine_Wood     
                                     normal { wood 0.5 scale 0.3 turbulence 0.1}
                                     finish { phong 1 } 
