@@ -32,7 +32,7 @@ Char* version;
 //
 const size_t MAX_OBJ_NAME = 1024;
 
-vector<string> objects;
+// vector<string> objects;
 vector<vector<string>> objs;
 FILE* file = 0;
 
@@ -2342,9 +2342,11 @@ Bool AlienNullObjectData::Execute()
 
   // Write header
   char declare[MAX_OBJ_NAME] = { 0 };
-  if (op->GetUp() == NULL)
+  bool at_root = (op->GetUp() == NULL);
+  if (at_root)
   {
     sprintf(declare, "#declare %s = ", objName);
+    SaveObject(op);
   }
 
   fprintf(file, "%sunion {\n\n", declare);
@@ -2360,7 +2362,8 @@ Bool AlienNullObjectData::Execute()
     ch = ch->GetNext();
   }
 
-  SaveObject(op);
+  if (!at_root)
+    WriteMatrix(op);
   WriteMaterial(op);
 
   DeleteMem(objName);
@@ -2602,12 +2605,13 @@ Bool AlienBoolObjectData::Execute()
 
   // Write header 
   char declare[MAX_OBJ_NAME] = { 0 };
-  if (op->GetUp() == NULL)
+  bool at_root = (op->GetUp() == NULL);
+  if (at_root)
   {
     sprintf(declare, "#declare %s = ", objName);
-    objects.push_back(objName);
+    SaveObject(op);
   }
-
+ 
   fprintf(file, "%s%s {\n\n", declare, boolTypeStr.c_str());
 
   // Children
@@ -2621,8 +2625,11 @@ Bool AlienBoolObjectData::Execute()
     ch = ch->GetNext();
   }
 
-  fprintf(file, "}\n\n");
-  DeleteMem(objName);
+  if(!at_root)
+    WriteMatrix(op);
+  WriteMaterial(op);
+ 
+  // fprintf(file, "}\n\n");
 
   /*
   // if you KNOW a "bool object" you have to handle the necessary children by yourself (this is for all generator object!)
@@ -2633,11 +2640,10 @@ Bool AlienBoolObjectData::Execute()
   if (op2) op2->DelBit(BIT_CONTROLOBJECT);
   return true;
   */
-
-  printf("\n^--------------- BOOL: EXPORT END ------------------^\n");
-  exported = true;
-
+  
   DeleteMem(objName);
+  exported = true;
+  printf("\n^--------------- BOOL: EXPORT END ------------------^\n");
   // returning false means we couldn't tranform the object to our own objects
   // we will be called again in AlienPolygonObjectData::Execute() to get the same objects as mesh (only if the scene was written with polygon caches of course)
   return true;
@@ -2703,9 +2709,11 @@ Bool AlienExtrudeObjectData::Execute()
   }
 
   char declare[MAX_OBJ_NAME] = { 0 };
-  if (op->GetUp() == NULL)
+  bool at_root = (op->GetUp() == NULL);
+  if (at_root)
   {
     sprintf(declare, "#declare %s = ", objName);
+    SaveObject(op);
   }
 
   float height = movement.y;
@@ -2767,7 +2775,9 @@ Bool AlienExtrudeObjectData::Execute()
   }
 
   ch1->SetExported();
-  SaveObject(op);
+  if(!at_root)
+    WriteMatrix(op);
+
   WriteMaterial(op);
 
   printf("^-------------- EXTRUDE: EXPORT END ------------------^\n", objName);
@@ -2809,10 +2819,13 @@ Bool AlienSweepObjectData::Execute()
     printf("\n - AlienSweepObjectData (%d): <noname>\n", (int)op->GetType());
 
   char declare[MAX_OBJ_NAME] = { 0 };
-  if (op->GetUp() == NULL)
+  bool at_root = (op->GetUp() == NULL);
+  if (at_root)
   {
     sprintf(declare, "#declare %s = ", objName);
+    SaveObject(op);
   }
+
   DeleteMem(objName);
 
   // Child 1 - profile
@@ -2957,7 +2970,9 @@ Bool AlienSweepObjectData::Execute()
   if ((spType == SPLINEOBJECT_TYPE_CUBIC) || (spType == SPLINEOBJECT_TYPE_BSPLINE))
     fprintf(file, "  <%f, %f, %f>, %f\n", p[pc - 1].x, p[pc - 1].y, p[pc - 1].z, r);
 
-  SaveObject(op);
+  if(!at_root)
+    WriteMatrix(op);
+
   WriteMaterial(op);
 
   ch2->SetExported();
@@ -2998,10 +3013,13 @@ Bool AlienLatheObjectData::Execute()
 
   // Declare
   char declare[MAX_OBJ_NAME] = { 0 };
-  if (op->GetUp() == NULL)
+  bool at_root = (op->GetUp() == NULL);
+  if (at_root)
   {
     sprintf(declare, "#declare %s = ", objName);
+    SaveObject(op);
   }
+
   DeleteMem(objName);
 
   // Child
@@ -3069,7 +3087,8 @@ Bool AlienLatheObjectData::Execute()
   }
 
   ch1->SetExported();
-  SaveObject(op);
+  if(!at_root)
+    WriteMatrix(op);
   WriteMaterial(op);
 
   printf("^-------------- LATHE: EXPORT END -------------------^\n", objName);
@@ -3198,9 +3217,17 @@ Bool AlienPolygonObjectData::Execute()
   printf("   - PointCount: %d PolygonCount: %d\n", (int)vc, (int)fc);
   PrintMatrix(op->GetMg());
   PrintUserData(op);
-  
+
+  char declare[MAX_OBJ_NAME] = { 0 };
+  bool at_root = (op->GetUp() == NULL);
+  if (at_root)
+  {
+    sprintf(declare, "#declare %s = ", objName);
+    SaveObject(op);
+  }
+
   // Mesh
-  fprintf(file, "#declare %s = mesh2 {\n\nvertex_vectors{ %d,\n", objName, vc);
+  fprintf(file, "%smesh2 {\n\nvertex_vectors{ %d,\n", declare, vc);
 
   // Vertices
   for (int i = 0; i < vc; ++i)
@@ -3243,9 +3270,10 @@ Bool AlienPolygonObjectData::Execute()
   }
   fprintf(file, "}\n");
 
+  if (!at_root)
+    WriteMatrix(op);
   WriteMaterial(op);
-  SaveObject(op);
- 
+   
   if (normals)
   {
     DeleteMem(normals);
@@ -3600,9 +3628,11 @@ Bool AlienPrimitiveObjectData::Execute()
   }
   
   char declare[MAX_OBJ_NAME] = { 0 };
-  if (op->GetUp() == NULL)
+  bool at_root = (op->GetUp() == NULL);
+  if (at_root)
   {
     sprintf(declare, "#declare %s = ", objName);
+    SaveObject(op);
   }
 
   GeData data;
@@ -3687,9 +3717,10 @@ Bool AlienPrimitiveObjectData::Execute()
     fprintf(file, "%storus { %f, %f\n", declare, r_out, r_in);
   }
 
-  SaveObject(op);
-  WriteMaterial(op);
+  if(!at_root)
+    WriteMatrix(op);
 
+  WriteMaterial(op);
   PrintMatrix(op->GetMg());
   PrintUserData(op);
 
@@ -4694,14 +4725,13 @@ int main(int argc, Char* argv[])
 //////////////////////////////////////////////////
 // TODO
 // 
-// 0. Light: turn off/on
+// 0. Light: turn off/on (+/-) - Enabled ?
 // 1. Sweep, extrude (?) - check spline type
 // 3. Logging cleanup
 // 4. Materials
-// 5. Write matrixes at the end
-// 6. Check objects's local coordinates (v. 1.1)
-// 7. Metaballs (blobs) (v. 1.1)
-// 8. Lights: Cylinder (v. 1.1)
+// 5. Check objects's local coordinates (v. 1.1)
+// 6. Metaballs (blobs) (v. 1.1)
+// 7. Lights: Cylinder (v. 1.1)
 // 
 // -- Errors
 // 1. Not defined material (?)
