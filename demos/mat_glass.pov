@@ -17,4 +17,3 @@ background {color srgb<13,17,23> / 256}
 
 #include "include/materials.inc"
 #include "mat_glass.inc"
-

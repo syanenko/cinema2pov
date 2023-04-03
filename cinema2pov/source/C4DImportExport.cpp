@@ -1,4 +1,4 @@
-//---------------------------------------------------------------
+//------------------------------------------------------------------------
 // Data exporter from C4D to POV-Ray (SDL) format
 // Based on Cineware SDK 22.008 Commandline Tool
 //
@@ -7,9 +7,9 @@
 // Sorces: github.com/syanenko/pov-utils
 // POV-Ray site: www.povray.org
 //
-// Supported objects: camera, sphere, cube, cone, cylinder, spline, 
-//                    mesh2, prism, sphere sweep, lathe
-//---------------------------------------------------------------
+// Supported objects: camera, light, sphere, cube, cone, cylinder, plane,
+//                    spline, mesh2, prism, sweep(sphere), lathe, booleans
+//------------------------------------------------------------------------
 #include "C4DImportExport.h"
 #include "c4d_browsecontainer.h"
 #include "parameter_ids/material/mbase.h"
@@ -2653,24 +2653,10 @@ Bool AlienBoolObjectData::Execute()
 
   // Close object  
   fprintf(file, "}\n\n");
-
-  // fprintf(file, "}\n\n");
-
-  /*
-  // if you KNOW a "bool object" you have to handle the necessary children by yourself (this is for all generator object!)
-  // you have to delete the control bit of the 2 first children to get a execute() call of these objects!
-  BaseObject *op1 = op ? op->GetDown() : nullptr;
-  BaseObject *op2 = op1 ? op1->GetNext() : nullptr;
-  if (op1) op1->DelBit(BIT_CONTROLOBJECT);
-  if (op2) op2->DelBit(BIT_CONTROLOBJECT);
-  return true;
-  */
   
   DeleteMem(objName);
   exported = true;
   printf("\n^--------------- BOOL: EXPORT END ------------------^\n");
-  // returning false means we couldn't tranform the object to our own objects
-  // we will be called again in AlienPolygonObjectData::Execute() to get the same objects as mesh (only if the scene was written with polygon caches of course)
   return true;
 }
 
@@ -2813,8 +2799,6 @@ Bool AlienExtrudeObjectData::Execute()
   exported = true;
 
   DeleteMem(objName);
-  // returning false means we couldn't tranform the object to our own objects
-  // we will be called again in AlienPolygonObjectData::Execute() to get the same objects as mesh (only if the scene was written with polygon caches of course)
   return true;
 }
 
@@ -3143,8 +3127,6 @@ Bool AlienLatheObjectData::Execute()
   exported = true;
 
   DeleteMem(objName);
-  // returning false means we couldn't tranform the object to our own objects
-  // we will be called again in AlienPolygonObjectData::Execute() to get the same objects as mesh (only if the scene was written with polygon caches of course)
   return true;
 }
 
