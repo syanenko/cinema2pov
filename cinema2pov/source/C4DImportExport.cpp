@@ -3653,7 +3653,7 @@ Bool AlienSplineObject::Execute()
 //
 Bool AlienPrimitiveObjectData::Execute()
 {
-  printf("^------------ PRIMITIVE: EXPORT START -----------------^\n");
+  printf("------------ PRIMITIVE: EXPORT START ----------------\n");
 
   BaseObject* op = (BaseObject*)GetNode();
 
@@ -3788,26 +3788,6 @@ Bool AlienPrimitiveObjectData::Execute()
   exported = true;
   printf("^----------- PRIMITIVE: '%s' EXPORT END ---------------^\n", objName);
 
-  /*----------------------- Preserved for future use ------------------------
-  // Tags
-  PrintTagInfo(op);
-
-  // Detect the layer
-  AlienLayer *pLay = (AlienLayer*)op->GetLayerObject();
-  if (pLay)
-  {
-    pChar = pLay->GetName().GetCStringCopy();
-    if (pChar)
-    {
-      printf("   - Layer: \"%s\"\n", pChar);
-      DeleteMem(pChar);
-    }
-    else
-      printf("   - Layer: <noname>\n");
-  }
-
-  PrintAnimInfo(op);
-  -------------------------------------------------------------------------*/
   return true;
 }
 
