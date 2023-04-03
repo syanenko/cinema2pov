@@ -30,9 +30,10 @@ Char* version;
 ///
 // POV export globals
 //
-const size_t MAX_OBJ_NAME = 64;
+const size_t MAX_OBJ_NAME = 1024;
 
 vector<string> objects;
+vector<vector<string>> objs;
 FILE* file = 0;
 
 //
@@ -68,19 +69,47 @@ void MakeValidName(Char* objName)
 
 //
 // Wtite matrix
-// 
+//
 void WriteMatrix(BaseObject* op)
 {
   Matrix m = op->GetMl();
-  fprintf(file, "\n  matrix\n\
+  fprintf(file, "  matrix\n\
  <%lf, %lf, %lf,\n\
   %lf, %lf, %lf,\n\
   %lf, %lf, %lf,\n\
-  %lf, %lf, %lf>\n\n",
-  m.v1.x, m.v1.y, m.v1.z,
-  m.v2.x, m.v2.y, m.v2.z,
-  m.v3.x, m.v3.y, m.v3.z,
-  m.off.x, m.off.y, m.off.z);
+  %lf, %lf, %lf>\n",
+    m.v1.x, m.v1.y, m.v1.z,
+    m.v2.x, m.v2.y, m.v2.z,
+    m.v3.x, m.v3.y, m.v3.z,
+    m.off.x, m.off.y, m.off.z);
+}
+
+//
+// Save matrix
+//
+void SaveObject(BaseObject* op)
+{
+  Char* name = op->GetName().GetCStringCopy();
+  MakeValidName(name);
+
+  char matrix[MAX_OBJ_NAME] = { 0 };
+  Matrix m = op->GetMl();
+  sprintf(matrix, "\n  matrix\n\
+ <%lf, %lf, %lf,\n\
+  %lf, %lf, %lf,\n\
+  %lf, %lf, %lf,\n\
+  %lf, %lf, %lf>\n",
+    m.v1.x, m.v1.y, m.v1.z,
+    m.v2.x, m.v2.y, m.v2.z,
+    m.v3.x, m.v3.y, m.v3.z,
+    m.off.x, m.off.y, m.off.z);
+
+  vector<string> item ;
+  item.push_back(name);
+  item.push_back(matrix);
+  objs.push_back(item);
+
+  DeleteMem(name);
 }
 
 //
@@ -2311,12 +2340,11 @@ Bool AlienNullObjectData::Execute()
   PrintMatrix(m);
   PrintTagInfo(op);
 
-  // Write header 
+  // Write header
   char declare[MAX_OBJ_NAME] = { 0 };
   if (op->GetUp() == NULL)
   {
     sprintf(declare, "#declare %s = ", objName);
-    objects.push_back(objName);
   }
 
   fprintf(file, "%sunion {\n\n", declare);
@@ -2332,7 +2360,7 @@ Bool AlienNullObjectData::Execute()
     ch = ch->GetNext();
   }
 
-  WriteMatrix(op);
+  SaveObject(op);
   WriteMaterial(op);
 
   DeleteMem(objName);
@@ -2678,7 +2706,6 @@ Bool AlienExtrudeObjectData::Execute()
   if (op->GetUp() == NULL)
   {
     sprintf(declare, "#declare %s = ", objName);
-    objects.push_back(objName);
   }
 
   float height = movement.y;
@@ -2740,7 +2767,7 @@ Bool AlienExtrudeObjectData::Execute()
   }
 
   ch1->SetExported();
-  WriteMatrix(op);
+  SaveObject(op);
   WriteMaterial(op);
 
   printf("^-------------- EXTRUDE: EXPORT END ------------------^\n", objName);
@@ -2785,7 +2812,6 @@ Bool AlienSweepObjectData::Execute()
   if (op->GetUp() == NULL)
   {
     sprintf(declare, "#declare %s = ", objName);
-    objects.push_back(objName);
   }
   DeleteMem(objName);
 
@@ -2886,24 +2912,35 @@ Bool AlienSweepObjectData::Execute()
   if (ch2->GetParameter(SPLINEOBJECT_TYPE, data))
     spType = data.GetInt32();
 
+  int pn = pc;
   string spTypeStr = "linear_spline";
   switch (spType)
   {
     case SPLINEOBJECT_TYPE_LINEAR:  spTypeStr = "linear_spline" ; break;
-    case SPLINEOBJECT_TYPE_CUBIC:   spTypeStr = "cubic_spline"  ; break;
-    case SPLINEOBJECT_TYPE_BSPLINE: spTypeStr = "b_spline"      ; break;
+    case SPLINEOBJECT_TYPE_CUBIC:   spTypeStr = "cubic_spline"  ; pn += 2; break;
+    case SPLINEOBJECT_TYPE_BSPLINE: spTypeStr = "b_spline"      ; pn += 2; break;
   }
-
+  
   // Wrire
   Float r = 0;
-  fprintf(file, "%ssphere_sweep  { %s %d\n\n", declare, spTypeStr.c_str(), pc + 2);
+  bool closed = ch2->GetIsClosed();
+  if(closed)
+    pn++;
+  fprintf(file, "%ssphere_sweep  { %s %d\n\n", declare, spTypeStr.c_str(), pn);
 
   double pscale = profile(0);
   pscale > 1 ? pscale = 1 : pscale;
   r = radius * scale * pscale;
 
+  // Control 1  
   if ((spType == SPLINEOBJECT_TYPE_CUBIC) || (spType == SPLINEOBJECT_TYPE_BSPLINE))
-    fprintf(file, "  <%f, %f, %f>, %f,\n", p[0].x, p[0].y, p[0].z, r); // Control 1
+    if (closed)
+    {
+      fprintf(file, "  <%f, %f, %f>, %f\n", p[pc - 1].x, p[pc - 1].y, p[pc - 1].z, r);
+    } else
+    {
+      fprintf(file, "  <%f, %f, %f>, %f,\n", p[0].x, p[0].y, p[0].z, r);
+    }
 
   for (int i = 0; i < pc; i++)
   {
@@ -2915,10 +2952,17 @@ Bool AlienSweepObjectData::Execute()
     fprintf(file, "  <%f, %f, %f>, %f,\n", p[i].x, p[i].y, p[i].z, r);
   }
 
-  if ((spType == SPLINEOBJECT_TYPE_CUBIC) || (spType == SPLINEOBJECT_TYPE_BSPLINE))
-    fprintf(file, "  <%f, %f, %f>, %f\n", p[pc-1].x, p[pc-1].y, p[pc-1].z, r); // Control 2
+  // Close
+  if (closed)
+  {
+    fprintf(file, "  <%f, %f, %f>, %f,\n", p[0].x, p[0].y, p[0].z, r);
+  }
 
-  WriteMatrix(op);
+  // Control 2
+  if ((spType == SPLINEOBJECT_TYPE_CUBIC) || (spType == SPLINEOBJECT_TYPE_BSPLINE))
+    fprintf(file, "  <%f, %f, %f>, %f\n", p[pc - 1].x, p[pc - 1].y, p[pc - 1].z, r);
+
+  SaveObject(op);
   WriteMaterial(op);
 
   ch2->SetExported();
@@ -3205,13 +3249,9 @@ Bool AlienPolygonObjectData::Execute()
   }
   fprintf(file, "}\n");
 
-  WriteMatrix(op);
   WriteMaterial(op);
-
-  objects.push_back(objName);
-  if (objName)
-    DeleteMem(objName);
-
+  SaveObject(op);
+ 
   if (normals)
   {
     DeleteMem(normals);
@@ -4639,8 +4679,12 @@ int main(int argc, Char* argv[])
   Bool res = LoadSaveC4DScene(fnLoad, nullptr);
 
   // Write objects instances 
+  /*
   for (string name : objects)
     fprintf(file, "object{ %s }\n", name.c_str());
+ */
+  for (auto item : objs)
+    fprintf(file, "object{ %s %s}\n\n", item[0].c_str(), item[1].c_str());
 
   printf(" # Done\n");
   fclose(file);
@@ -4650,16 +4694,16 @@ int main(int argc, Char* argv[])
 
 //////////////////////////////////////////////////
 // TODO
-//-1. Mesh: normals: <0.0000000000, 0.0000000000, 0.0000000000> - fix it
+// 
 // 0. Light: turn off/on
 // 1. Sweep, extrude (?) - check spline type
-// 2. Logging cleanup
-// 3. Materials
-// 4. Remove default matrixes (?)
-// 
-// 5. Check objects's local coordinates (v. 1.1)
-// 6. Metaballs (blobs) (v. 1.1)
-// 7. Lights: Cylinder (v. 1.1)
+// 2. Sweep - close path (check "Close spline")
+// 3. Logging cleanup
+// 4. Materials
+// 5. Write matrixes at the end
+// 6. Check objects's local coordinates (v. 1.1)
+// 7. Metaballs (blobs) (v. 1.1)
+// 8. Lights: Cylinder (v. 1.1)
 // 
 // -- Errors
 // 1. Not defined material (?)
