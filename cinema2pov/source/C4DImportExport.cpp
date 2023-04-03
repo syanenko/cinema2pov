@@ -3162,18 +3162,19 @@ Bool AlienPolygonObjectData::Execute()
   PrintUserData(op);
   
   // Mesh
-  fprintf(file, "#declare %s = mesh2 {\nvertex_vectors{ %d,\n", objName, vc);
+  fprintf(file, "#declare %s = mesh2 {\n\nvertex_vectors{ %d,\n", objName, vc);
 
   // Vertices
   for (int i = 0; i < vc; ++i)
   {
-    fprintf(file, "<%f, %f, %f>\n", vertices[i].x, vertices[i].y, vertices[i].z);
+    fprintf(file, "<%4.10f, %4.10f, %4.10f>\n", vertices[i].x, vertices[i].y, vertices[i].z);
   }
   fprintf(file, "}\n\n");
 
   // Nornals
   Vector32* nvert;
   Vector32* normals = op->CreatePhongNormals();
+
   if (normals)
   {
     // Prepare normals array corresponding to vertices
@@ -3184,14 +3185,13 @@ Bool AlienPolygonObjectData::Execute()
       nvert[faces[i].a] = normals[ni];
       nvert[faces[i].b] = normals[ni + 1];
       nvert[faces[i].c] = normals[ni + 2];
-      nvert[faces[i].d] = normals[ni + 3];
     }
 
     // Wrire
     fprintf(file, "normal_vectors{ %d,\n", vc);
     for (int i = 0; i < vc; ++i)
     {
-      fprintf(file, "<%f, %f, %f>\n", nvert[i].x, nvert[i].y, nvert[i].z);
+      fprintf(file, "<%4.10f, %4.10f, %4.10f>\n", nvert[i].x, nvert[i].y, nvert[i].z);
     }
     fprintf(file, "}\n\n");
   }
@@ -3203,7 +3203,7 @@ Bool AlienPolygonObjectData::Execute()
     fprintf(file, "<%d, %d, %d>\n", faces[i].a, faces[i].b, faces[i].c);
     fprintf(file, "<%d, %d, %d>\n", faces[i].a, faces[i].c, faces[i].d);
   }
-  fprintf(file, "}\n\n");
+  fprintf(file, "}\n");
 
   WriteMatrix(op);
   WriteMaterial(op);
@@ -3334,11 +3334,11 @@ Bool AlienCameraObjectData::Execute()
   Char* objName = op->GetName().GetCStringCopy();
   if (objName)
   {
-    printf("\n - AlienCameraObjectData (%d): \"%s\"", (int)op->GetType(), objName);
+    printf("\n - AlienCameraObjectData (%d): \"%s\"\n", (int)op->GetType(), objName);
     DeleteMem(objName);
   }
   else
-    printf("\n - AlienCameraObjectData (%d): <noname>", (int)op->GetType());
+    printf("\n - AlienCameraObjectData (%d): <noname>\n", (int)op->GetType());
 
   if (exported)
   {
@@ -4650,14 +4650,16 @@ int main(int argc, Char* argv[])
 
 //////////////////////////////////////////////////
 // TODO
-// 
+//-1. Mesh: normals: <0.0000000000, 0.0000000000, 0.0000000000> - fix it
+// 0. Light: turn off/on
 // 1. Sweep, extrude (?) - check spline type
 // 2. Logging cleanup
 // 3. Materials
 // 4. Remove default matrixes (?)
-// 5. Check objects's local coordinates (?)
-// 6. Metaballs (blobs) (?)
-// 7. Lights: Cylinder (?)
+// 
+// 5. Check objects's local coordinates (v. 1.1)
+// 6. Metaballs (blobs) (v. 1.1)
+// 7. Lights: Cylinder (v. 1.1)
 // 
 // -- Errors
 // 1. Not defined material (?)
