@@ -2335,6 +2335,7 @@ Bool AlienNullObjectData::Execute()
 {
   printf("----------------- NULL: EXPORT START ------------------");
   BaseObject* op = (BaseObject*)GetNode();
+
   Char* objName = op->GetName().GetCStringCopy();
   if (objName)
   {
@@ -2343,6 +2344,12 @@ Bool AlienNullObjectData::Execute()
   }
   else
     printf("\n - AlienNullObjectData (%d): <noname>\n", (int)op->GetType());
+
+  if (op->GetRenderMode() == MODE_OFF)
+  {
+    printf("\n^-------------- NULL: Not exported - Render off ------^\n");
+    return true;
+  }
 
   if (exported)
   {
@@ -2579,8 +2586,16 @@ Bool AlienEnvironmentObjectData::Execute()
 Bool AlienBoolObjectData::Execute()
 {
   printf("\n----------------- BOOL: EXPORT START ------------------\n");
-
   BaseObject* op = (BaseObject*)GetNode();
+
+  GeData data;
+  if (op->GetParameter(ID_BASEOBJECT_GENERATOR_FLAG, data))
+    if (!data.GetBool())
+    {
+      printf("\n^-------------- BOOL: Not exported - Disabled --------^\n");
+      return true;
+    }
+
   if (op->GetRenderMode() == MODE_OFF)
   {
     printf("\n^-------------- BOOL: Not exported - Render off ------^\n");
@@ -2604,8 +2619,6 @@ Bool AlienBoolObjectData::Execute()
 
   PrintUniqueIDs(this);
 
-  // Bool operation
-  GeData data;
   Int32 boolType = 0;
   if (op->GetParameter(BOOLEOBJECT_TYPE, data))
   {
@@ -2666,8 +2679,16 @@ Bool AlienBoolObjectData::Execute()
 Bool AlienExtrudeObjectData::Execute()
 {
   printf("--------------- EXTRUDE: EXPORT START -----------------\n");
-
   BaseObject* op = (BaseObject*)GetNode();
+
+  GeData data;
+  if (op->GetParameter(ID_BASEOBJECT_GENERATOR_FLAG, data))
+    if (!data.GetBool())
+    {
+      printf("\n^----------- EXTRUDE: Not exported - Disabled --------^\n");
+      return true;
+    }
+
   if (op->GetRenderMode() == MODE_OFF)
   {
     printf("\n^----------- EXTRUDE: Not exported - Render off ------^\n");
@@ -2689,8 +2710,7 @@ Bool AlienExtrudeObjectData::Execute()
   else
     printf("\n - AlienExtrudeObjectData (%d): <noname>\n", (int)op->GetType());
 
-  // Extrude params
-  GeData data;
+  // Params
   Vector movement = Vector(0.0, 0.0, 0.0);
   if (op->GetParameter(EXTRUDEOBJECT_MOVE, data))
     movement = data.GetVector();
@@ -2808,8 +2828,16 @@ Bool AlienExtrudeObjectData::Execute()
 Bool AlienSweepObjectData::Execute()
 {
   printf("---------------- SWEEP: EXPORT START ------------------\n");
-
   BaseObject* op = (BaseObject*)GetNode();
+
+  GeData data;
+  if (op->GetParameter(ID_BASEOBJECT_GENERATOR_FLAG, data))
+    if (!data.GetBool())
+    {
+      printf("\n^------------- SWEEP: Not exported - Disabled --------^\n");
+      return true;
+    }
+
   if (op->GetRenderMode() == MODE_OFF)
   {
     printf("\n^------------- SWEEP: Not exported - Render off ------^\n");
@@ -2859,7 +2887,6 @@ Bool AlienSweepObjectData::Execute()
     return true;
   }
 
-  GeData data;
   Float radius = 1;
   if (ch1->GetParameter(PRIM_CIRCLE_RADIUS, data))
   {
@@ -3017,6 +3044,14 @@ Bool AlienLatheObjectData::Execute()
   printf("--------------- LATHE: EXPORT START -------------------\n");
   BaseObject* op = (BaseObject*)GetNode();
 
+  GeData data;
+  if (op->GetParameter(ID_BASEOBJECT_GENERATOR_FLAG, data))
+    if (!data.GetBool())
+    {
+      printf("\n^------------- LATHE: Not exported - Disabled --------^\n");
+      return true;
+    }
+
   if (op->GetRenderMode() == MODE_OFF)
   {
     printf("\n^--------------- LATHE: Not exported - Render off --------^\n");
@@ -3059,7 +3094,6 @@ Bool AlienLatheObjectData::Execute()
   }
 
   // Spline type
-  GeData data;
   Int32 spType = -1;
   if (ch1->GetParameter(SPLINEOBJECT_TYPE, data))
     spType = data.GetInt32();
@@ -3211,9 +3245,8 @@ Bool AlienXRefObjectData::Execute()
 Bool AlienPolygonObjectData::Execute()
 {
   printf("\n--------------- MESH: RENDER START --------------------\n");
+  PolygonObject* op = (PolygonObject*)GetNode();
 
-  // Get object pointer
-  PolygonObject *op = (PolygonObject*)GetNode();
   if (op->GetRenderMode() == MODE_OFF)
   {
     printf("\n^-------------- MESH: NOT EXPORTED - Render off ------^\n");
@@ -3437,6 +3470,12 @@ Bool AlienCameraObjectData::Execute()
   else
     printf("\n - AlienCameraObjectData (%d): <noname>\n", (int)op->GetType());
 
+  if (op->GetRenderMode() == MODE_OFF)
+  {
+    printf("\n^------------ CAMERA: Not exported - Render off ------^\n");
+    return true;
+  }
+
   if (exported)
   {
     printf("\n^---------------- CAMERA: Already exported -----------------^\n");
@@ -3507,6 +3546,25 @@ Bool AlienCameraObjectData::Execute()
 Bool AlienSplineObject::Execute()
 {
   printf("--------------- SPLINE: EXPORT START ------------------\n");
+  Char* objName = GetName().GetCStringCopy();
+  if (objName)
+  {
+    MakeValidName(objName);
+    printf("\n - AlienSplineObject (%d): %s\n", (int)GetType(), objName);
+  }
+  else
+    printf("\n - AlienSplineObject (%d): <noname>\n", (int)GetType());
+
+  PrintUniqueIDs(this);
+  PrintTagInfo(this);
+
+  GeData data; // TODO: Check it when disabled
+  if (GetParameter(ID_BASEOBJECT_GENERATOR_FLAG, data))
+    if (!data.GetBool())
+    {
+      printf("\n^------------ SPLINE: Not exported - Disabled --------^\n");
+      return true;
+    }
 
   if (GetRenderMode() == MODE_OFF)
   {
@@ -3520,18 +3578,6 @@ Bool AlienSplineObject::Execute()
     return true;
   }
 
-  Char* objName = GetName().GetCStringCopy();
-  if (objName)
-  {
-    MakeValidName(objName);
-    printf("\n - AlienSplineObject (%d): %s\n", (int)GetType(), objName);
-  }
-  else
-    printf("\n - AlienSplineObject (%d): <noname>\n", (int)GetType());
-
-  PrintUniqueIDs(this);
-  PrintTagInfo(this);
-
   // POV Tag
   int export_as;
   int spline_type;
@@ -3542,7 +3588,6 @@ Bool AlienSplineObject::Execute()
   }
 
   Int32 iType = -1;
-  GeData data;
   if (GetParameter(SPLINEOBJECT_INTERPOLATION, data))
     iType = data.GetInt32();
   switch (iType)
@@ -3636,8 +3681,15 @@ Bool AlienSplineObject::Execute()
 Bool AlienPrimitiveObjectData::Execute()
 {
   printf("------------ PRIMITIVE: EXPORT START ----------------\n");
-
   BaseObject* op = (BaseObject*)GetNode();
+
+  GeData data;
+  if (op->GetParameter(ID_BASEOBJECT_GENERATOR_FLAG, data))
+    if (!data.GetBool())
+    {
+      printf("\n^--------- PRIMITIVE: Not exported - Disabled --------^\n");
+      return true;
+    }
 
   Char* objName = op->GetName().GetCStringCopy();
   if (!objName)
@@ -3670,7 +3722,6 @@ Bool AlienPrimitiveObjectData::Execute()
     SaveObject(op);
   }
 
-  GeData data;
   if (this->type_id == Ocube) // Cube
   {  printf("--------------- CUBE: '%s' EXPORT START ----------------\n", objName);
 
@@ -3779,8 +3830,16 @@ Bool AlienPrimitiveObjectData::Execute()
 Bool AlienLightObjectData::Execute()
 {
   printf("----------------- LIGHT: EXPORT START -----------------\n");
-
   BaseObject* op = (BaseObject*)GetNode();
+
+  GeData data;
+  if (op->GetParameter(ID_BASEOBJECT_GENERATOR_FLAG, data))
+    if (!data.GetBool())
+    {
+      printf("\n^------------- LIGHT: Not exported - Disabled --------^\n");
+      return true;
+    }
+
   if (op->GetRenderMode() == MODE_OFF)
   {
     printf("\n^------------- LIGHT: Not exported - Render off ------^\n");
@@ -3800,8 +3859,6 @@ Bool AlienLightObjectData::Execute()
   PrintUniqueIDs(this);
   PrintMatrix(op->GetMg());
 
-  // Properties
-  GeData data;
   // Type
   Int32 type;
   if (op->GetParameter(LIGHT_TYPE, data) && data.GetType() == DA_LONG)
@@ -4743,7 +4800,7 @@ int main(int argc, Char* argv[])
 // 
 // 1. Materials
 // 2. Examples
-// 3. Light, etc: Enabled ?
+// 3. Spline: Check when disabled
 // 4. Logging cleanup (+/-)
 // 
 // 5. Check objects's local coordinates (v. 1.1)
