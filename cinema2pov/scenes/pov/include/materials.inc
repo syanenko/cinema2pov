@@ -29,7 +29,7 @@
 //---------------------------------------------------------------
 #include "textures.inc"
 #include "glass.inc"
-#include "colormaps.inc"
+#include "include/colormaps.inc"
                               
 #declare Default = material { texture {pigment {rgb <1,1,1> }}}
 
@@ -44,6 +44,9 @@
                                           interior {Glass_Interior}}
 
 #declare Bright_Orange_Glass = material { texture { NBglass pigment { rgbf <0.96, 0.33, 0, 0.5> }}
+                                          interior {Glass_Interior}}
+
+#declare Bright_Blue_Glass   = material { texture { NBglass pigment { rgbf <0.26, 0.33, 0, 0.95> }}
                                           interior {Glass_Interior}}
 
 #declare Glossy_Green_Glass  = material { texture { pigment { rgbf <0, 1, 0, 2.2> }

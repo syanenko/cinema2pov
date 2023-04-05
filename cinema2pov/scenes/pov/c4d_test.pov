@@ -85,9 +85,9 @@ background {color srgb<13,17,23> / 256}
 // #include "stone_demo.inc"
 // #include "bool_test.inc"
 // #include "sweep_test.inc"
-// #include "mesh_test.inc"
+#include "mesh_test.inc"
 
-#include "wood_demo.inc"
+//#include "wood_demo.inc"
 //#include "glass_demo.inc"
 
 /* Extrude test

@@ -11,6 +11,19 @@
 //                       mesh2, prism, sphere sweep, lathe
 //---------------------------------------------------------------
 
+light_source {<0, 0, 0>
+  rgb<0.570000, 0.570000, 0.570000> * 20.000000 shadowless parallel
+  area_light <30.000000, 0, 0>, <0, 20.000000, 0>, 4, 4
+  fade_distance 0.000000
+  fade_power 0.000000
+  
+  matrix
+ <0.000000, -0.000000, 1.000000,
+  0.000000, 1.000000, 0.000000,
+  -1.000000, 0.000000, 0.000000,
+  -19.898565, 2.416127, -1.296783>
+}
+
 camera{  perspective
   location  <0, 0, 0>
   angle 20.000000
@@ -22,7 +35,7 @@ camera{  perspective
 }
 
 light_source {<0, 0, 0>
-  rgb<0.570000, 0.570000, 0.570000> * 2.000000 shadowless parallel
+  rgb<0.570000, 0.570000, 0.570000> * 1.000000 shadowless parallel
   area_light <30.000000, 0, 0>, <0, 20.000000, 0>, 4, 4
   fade_distance 0.000000
   fade_power 0.000000
@@ -35,7 +48,7 @@ light_source {<0, 0, 0>
 }
 
 light_source {<0, 0, 0>
-  rgb<0.570000, 0.570000, 0.570000> * 7.000000 shadowless parallel
+  rgb<0.570000, 0.570000, 0.570000> * 2.000000 shadowless parallel
   area_light <30.000000, 0, 0>, <0, 20.000000, 0>, 4, 4
   fade_distance 0.000000
   fade_power 0.000000
@@ -81,7 +94,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, -10.000000, -12.500000>
 
-  material { M_NB_Winebottle_Glass }
+  material { M_Green_Glass }
 }
 
 sphere { 0, 2.500000 
@@ -91,7 +104,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, -3.333333, -12.500000>
 
-  material { M_Orange_Glass }
+  material { M_NB_Winebottle_Glass }
 }
 
 sphere { 0, 2.500000 
@@ -101,7 +114,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, 3.333333, -12.500000>
 
-  material { M_Ruby_Glass }
+  material { M_Dark_Green_Glass }
 }
 
 sphere { 0, 2.500000 
@@ -111,7 +124,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, 10.000000, -12.500000>
 
-  material { M_Glass }
+  material { M_Vicks_Bottle_Glass }
 }
 
 sphere { 0, 2.500000 
@@ -121,7 +134,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, -10.000000, -6.250000>
 
-  material { M_Glass2 }
+  material { M_Yellow_Glass }
 }
 
 sphere { 0, 2.500000 
@@ -131,7 +144,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, -3.333333, -6.250000>
 
-  material { M_Glass3 }
+  material { M_NB_Beerbottle_Glass }
 }
 
 sphere { 0, 2.500000 
@@ -141,7 +154,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, 3.333333, -6.250000>
 
-  material { M_Green_Glass }
+  material { M_Orange_Glass }
 }
 
 sphere { 0, 2.500000 
@@ -151,7 +164,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, 10.000000, -6.250000>
 
-  material { M_NB_Glass }
+  material { M_Ruby_Glass }
 }
 
 sphere { 0, 2.500000 
@@ -161,7 +174,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, -10.000000, 0.000000>
 
-  material { M_NB_Old_Glass }
+  material { Pearlescent_Green_Glass }
 }
 
 sphere { 0, 2.500000 
@@ -171,7 +184,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, -3.333333, 0.000000>
 
-  material { M_NB_Beerbottle_Glass }
+  material { Pearlescent_Pink_Glass }
 }
 
 sphere { 0, 2.500000 
@@ -181,7 +194,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, 3.333333, 0.000000>
 
-  material { M_Dark_Green_Glass }
+  material { Pearlescent_Red_Glass }
 }
 
 sphere { 0, 2.500000 
@@ -191,7 +204,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, 10.000000, 0.000000>
 
-  material { M_Yellow_Glass }
+  material { Pearlescent_Blue_Glass }
 }
 
 sphere { 0, 2.500000 
@@ -201,7 +214,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, -10.000000, 6.250000>
 
-  material { M_Vicks_Bottle_Glass }
+  material { Bright_Blue_Glass }
 }
 
 sphere { 0, 2.500000 
@@ -241,7 +254,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, -10.000000, 12.500000>
 
-  material { M_Vicks_Bottle_Glass }
+  material { M_Glass2 }
 }
 
 sphere { 0, 2.500000 
@@ -251,7 +264,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, -3.333333, 12.500000>
 
-  material { Glossy_Green_Glass }
+  material { M_NB_Old_Glass }
 }
 
 sphere { 0, 2.500000 
@@ -261,7 +274,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, 3.333333, 12.500000>
 
-  material { Glossy_Pink_Glass }
+  material { M_Glass3 }
 }
 
 sphere { 0, 2.500000 
@@ -271,7 +284,7 @@ sphere { 0, 2.500000
   0.000000, 0.000000, 1.000000,
   0.000000, 10.000000, 12.500000>
 
-  material { Glossy_Orange_Glass }
+  material { M_NB_Glass }
 }
 
 }

@@ -27,15 +27,16 @@
 // M_Water
 //
 //---------------------------------------------------------------
-
 #include "textures.inc"
 #include "glass.inc"
+#include "include/colormaps.inc"
                               
 #declare Default = material { texture {pigment {rgb <1,1,1> }}}
 
 //
 // Glass
 //
+//---------------------------------------------------------------
 #declare Bright_Green_Glass  = material { texture { NBglass pigment { rgbf <0, 1, 0, 0.5> }}
                                           interior {Glass_Interior}}
 
@@ -43,6 +44,9 @@
                                           interior {Glass_Interior}}
 
 #declare Bright_Orange_Glass = material { texture { NBglass pigment { rgbf <0.96, 0.33, 0, 0.5> }}
+                                          interior {Glass_Interior}}
+
+#declare Bright_Blue_Glass   = material { texture { NBglass pigment { rgbf <0.16, 0.33, 0.95, 0> }}
                                           interior {Glass_Interior}}
 
 #declare Glossy_Green_Glass  = material { texture { pigment { rgbf <0, 1, 0, 2.2> }
@@ -66,9 +70,96 @@
                                                               reflection 0.3
                                                               phong 8
                                                               phong_size 80}}}
+#declare Pearlescent_Green_Glass =
+  material {
+   texture {
+    pigment { rgb <0,1,0> transmit 0.97 }
+    finish {
+     reflection { .01, .95 fresnel } conserve_energy
+     //big fat phong highlight, to give ethereal sheen to the material.
+     //make phong fade with angle, using pov's metallic effect on black
+     //(because there's no fresnel for phong)
+     phong 30 phong_size 120 metallic 1
+     specular 50 roughness .0004   //layer a sharp highlight on top.
+    }
+   }
+   interior {
+    ior 1.5
+    fade_colour <1,.25,.0>
+    fade_distance .5
+    fade_power 2
+   }
+  }
+
+#declare Pearlescent_Pink_Glass =
+  material {
+   texture {
+    pigment { rgb <0.95, 0.37, 0.79> transmit 0.97 }
+    finish {
+     reflection { .01, .95 fresnel } conserve_energy
+     //big fat phong highlight, to give ethereal sheen to the material.
+     //make phong fade with angle, using pov's metallic effect on black
+     //(because there's no fresnel for phong)
+     phong 30 phong_size 120 metallic 1
+     specular 50 roughness .0004   //layer a sharp highlight on top.
+    }
+   }
+   interior {
+    ior 1.5
+    fade_colour <1,.25,.0>
+    fade_distance .5
+    fade_power 2
+   }
+  }
+
+
+#declare Pearlescent_Red_Glass =
+  material {
+   texture {
+    pigment { rgb <1, 0.1, 0.1> transmit 0.97 }
+    finish {
+     reflection { .01, .95 fresnel } conserve_energy
+     //big fat phong highlight, to give ethereal sheen to the material.
+     //make phong fade with angle, using pov's metallic effect on black
+     //(because there's no fresnel for phong)
+     phong 30 phong_size 120 metallic 1
+     specular 50 roughness .0004   //layer a sharp highlight on top.
+    }
+   }
+   interior {
+    ior 1.5
+    fade_colour <1,.25,.0>
+    fade_distance .5
+    fade_power 2
+   }
+  }
+
+#declare Pearlescent_Blue_Glass =
+  material {
+   texture {
+    pigment { rgb <0.16, 0.33, 0.95> transmit 0.97 }
+    finish {
+     reflection { .01, .95 fresnel } conserve_energy
+     //big fat phong highlight, to give ethereal sheen to the material.
+     //make phong fade with angle, using pov's metallic effect on black
+     //(because there's no fresnel for phong)
+     phong 30 phong_size 120 metallic 1
+     specular 50 roughness .0004   //layer a sharp highlight on top.
+    }
+   }
+   interior {
+    ior 1.5
+    fade_colour <1,.25,.0>
+    fade_distance .5
+    fade_power 2
+   }
+  }
+
+
 //
 // Stone
 //
+//---------------------------------------------------------------
 #declare Blood_Marble = material{ texture { pigment {Blood_Marble}
                                   // normal { bumps 1.9 scale 0.02}
                                     finish { phong 1 } 
@@ -81,6 +172,7 @@
 //
 // Wood
 //
+//---------------------------------------------------------------
 #declare Pine_Wood_01 = material{ texture{ Pine_Wood     
                                     normal { wood 0.5 scale 0.3 turbulence 0.1}
                                     finish { phong 1 } 
