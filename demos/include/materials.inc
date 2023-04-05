@@ -70,6 +70,10 @@
                                                               reflection 0.3
                                                               phong 8
                                                               phong_size 80}}}
+//
+// Author: Tek
+// Description: http://news.povray.org/povray.binaries.images/thread/%3C42c858a2%40news.povray.org%3E/
+//
 #declare Pearlescent_Green_Glass =
   material {
    texture {
@@ -91,17 +95,18 @@
    }
   }
 
+//
+// Author: Tek
+// Description: http://news.povray.org/povray.binaries.images/thread/%3C42c858a2%40news.povray.org%3E/
+//
 #declare Pearlescent_Pink_Glass =
   material {
    texture {
     pigment { rgb <0.95, 0.37, 0.79> transmit 0.97 }
     finish {
      reflection { .01, .95 fresnel } conserve_energy
-     //big fat phong highlight, to give ethereal sheen to the material.
-     //make phong fade with angle, using pov's metallic effect on black
-     //(because there's no fresnel for phong)
      phong 30 phong_size 120 metallic 1
-     specular 50 roughness .0004   //layer a sharp highlight on top.
+     specular 50 roughness .0004
     }
    }
    interior {
@@ -112,18 +117,18 @@
    }
   }
 
-
+//
+// Author: Tek
+// Description: http://news.povray.org/povray.binaries.images/thread/%3C42c858a2%40news.povray.org%3E/
+//
 #declare Pearlescent_Red_Glass =
   material {
    texture {
     pigment { rgb <1, 0.1, 0.1> transmit 0.97 }
     finish {
      reflection { .01, .95 fresnel } conserve_energy
-     //big fat phong highlight, to give ethereal sheen to the material.
-     //make phong fade with angle, using pov's metallic effect on black
-     //(because there's no fresnel for phong)
      phong 30 phong_size 120 metallic 1
-     specular 50 roughness .0004   //layer a sharp highlight on top.
+     specular 50 roughness .0004
     }
    }
    interior {
@@ -134,17 +139,18 @@
    }
   }
 
+//
+// Author: Tek
+// http://news.povray.org/povray.binaries.images/thread/%3C42c858a2%40news.povray.org%3E/
+//
 #declare Pearlescent_Blue_Glass =
   material {
    texture {
     pigment { rgb <0.16, 0.33, 0.95> transmit 0.97 }
     finish {
      reflection { .01, .95 fresnel } conserve_energy
-     //big fat phong highlight, to give ethereal sheen to the material.
-     //make phong fade with angle, using pov's metallic effect on black
-     //(because there's no fresnel for phong)
      phong 30 phong_size 120 metallic 1
-     specular 50 roughness .0004   //layer a sharp highlight on top.
+     specular 50 roughness .0004
     }
    }
    interior {
@@ -156,19 +162,6 @@
   }
 
 
-//
-// Stone
-//
-//---------------------------------------------------------------
-#declare Blood_Marble = material{ texture { pigment {Blood_Marble}
-                                  // normal { bumps 1.9 scale 0.02}
-                                    finish { phong 1 } 
-                                    scale 4.0 }}
-
-#declare Pink_Granite = material{ texture { pigment{ Pink_Granite } 
-                                  // normal { bumps 0.5 scale 0.05}
-                                   finish { phong 1 } 
-                                   scale 0.7 }}
 //
 // Wood
 //
@@ -186,7 +179,6 @@
                                       [0.5 color rgb <0.75, 0.39, 0.17>]
                                       [0.7 color rgb <0.75, 0.39, 0.17>]
                                       [1.0 color rgb <1.30, 0.99, 0.64>] }}
-                                    // normal { agate 0.5 scale 0.25} 
                                     finish { phong 1 } 
                                     rotate <-20,10,0>  scale 0.8  translate <0,0,0> }}
 
@@ -220,3 +212,42 @@
 #declare DMFWood1_06 = material{ texture{ DMFWood6
                                  rotate<80,55,45> scale 2  }}
 
+
+//
+// Stone
+//
+//---------------------------------------------------------------
+#declare Blood_Marble = material{ texture { pigment {Blood_Marble}
+                                  finish { phong 1 } 
+                                  scale 4.2 }}
+
+#declare Pink_Granite = material{ texture { pigment{ Pink_Granite } 
+                                  finish { phong 1 } 
+                                  scale 0.7 }}
+
+#declare Jade = material{ texture { pigment{ Jade }
+                          finish { phong 1 } 
+                          scale 1 }}
+
+#declare Red_Marble = material{ texture { pigment{ Red_Marble }
+                                finish { phong 1 } 
+                                scale 0.7 }}
+
+#declare White_Marble = material{ texture { pigment{ White_Marble }
+                                  finish { phong 1 } 
+                                  scale 0.8 }}
+
+#declare Blue_Agate = material{ texture { pigment{ Blue_Agate }
+                                finish { phong 1 } 
+                                scale 0.8 }}
+
+#declare Sapphire_Agate = material{ texture { pigment{ Sapphire_Agate }
+                                    finish { phong 1 } 
+                                    scale 0.7 }}
+
+#declare Brown_Agate = material{ texture { pigment{ Brown_Agate }
+                                 finish { phong 1 } 
+                                 scale 0.8 }}
+
+#declare PinkAlabaster = material{ texture { PinkAlabaster }
+                                   scale 1 }
