@@ -176,7 +176,7 @@
 #declare Pine_Wood_01 = material{ texture{ Pine_Wood     
                                     normal { wood 0.5 scale 0.3 turbulence 0.1}
                                     finish { phong 1 } 
-                                    rotate<60,0,45> scale 0.25 }}
+                                    rotate<60,0,45> scale 0.3 }}
 
 #declare Pine_Wood_02 = material{ texture{
                                     pigment{ wood turbulence 0.02 octaves 4 lambda 3
@@ -188,4 +188,35 @@
                                       [1.0 color rgb <1.30, 0.99, 0.64>] }}
                                     // normal { agate 0.5 scale 0.25} 
                                     finish { phong 1 } 
-                                    rotate <0,0, 0>  scale 2  translate <0,0,0> }}
+                                    rotate <-20,10,0>  scale 0.8  translate <0,0,0> }}
+
+
+#declare DMFWood1_01 = material{ texture{ 
+                                    pigment {DMFWood1}
+                                    finish { phong 1 } 
+                                    rotate<30,10,35> scale 1.5 }}
+
+#declare DMFWood1_02 = material{ texture{ 
+                                    pigment {DMFWood2}
+                                    finish { phong 1 } 
+                                    rotate<40,10,35> scale 2.5 }}
+
+
+#declare DMFWood1_03 = material{ texture{ 
+                                    pigment {DMFWood3}
+                                    finish { phong 1 } 
+                                    rotate<-30,60,35> scale 2.5 }}
+
+#declare DMFWood1_04 = material{ texture{ 
+                                    pigment {DMFWood4}
+                                    finish { phong 1 } 
+                                    rotate<-60,15,45> scale 2.5 }}
+
+#declare DMFWood1_05 = material{ texture{ 
+                                    pigment {DMFWood5}
+                                    finish { phong 1 } 
+                                    rotate<40,10,35> scale 2.5 }}
+
+#declare DMFWood1_06 = material{ texture{ DMFWood6
+                                 rotate<80,55,45> scale 2  }}
+
