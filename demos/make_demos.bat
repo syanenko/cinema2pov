@@ -17,12 +17,20 @@ REM - Stone
 REM..\cinema2pov\cinema2pov.exe mat_stone.c4d mat_stone.inc >> make_demos.log
 REM%POVRAY% demos.ini /RENDER mat_stone.pov /EXIT
 
+REM - Metal
+REM..\cinema2pov\cinema2pov.exe mat_metal.c4d mat_metal.inc >> make_demos.log
+REM%POVRAY% demos.ini /RENDER mat_metal.pov /EXIT
 
 REM // Test wood
 REM..\cinema2pov\cinema2pov.exe mat_wood.c4d mat_wood.inc >> make_demos.log
 REM%POVRAY% /RENDER mat_wood.pov
 
 REM // Test stone
-..\cinema2pov\cinema2pov.exe mat_stone.c4d mat_stone.inc >> make_demos.log
-%POVRAY% /RENDER mat_stone.pov
+REM..\cinema2pov\cinema2pov.exe mat_stone.c4d mat_stone.inc >> make_demos.log
+REM%POVRAY% /RENDER mat_stone.pov
+
+REM // Test metal
+..\cinema2pov\cinema2pov.exe mat_metal.c4d mat_metal.inc >> make_demos.log
+%POVRAY% /RENDER mat_metal.pov
+
 

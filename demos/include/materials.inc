@@ -251,3 +251,31 @@
 
 #declare PinkAlabaster = material{ texture { PinkAlabaster }
                                    scale 1 }
+
+//
+// Metal
+//
+//---------------------------------------------------------------
+#declare Chrome           = material{ texture { Chrome_Texture   }} 
+#declare Gold             = material{ texture { Gold_Texture     }}    
+#declare Bronze           = material{ texture { Bronze_Texture   }}    
+#declare Copper           = material{ texture { Copper_Texture   }}    
+#declare Silver           = material{ texture { Silver_Texture   }}    
+#declare Polished_Chrome  = material{ texture { Polished_Chrome  }}
+#declare Polished_Brass   = material{ texture { Polished_Brass   }}
+#declare New_Brass        = material{ texture { New_Brass        }}
+#declare Spun_Brass       = material{ texture { Spun_Brass       }}
+#declare Brushed_Aluminum = material{ texture { Brushed_Aluminum }}
+#declare Silver1          = material{ texture { Silver1          }}
+#declare Silver2          = material{ texture { Silver2          }}
+#declare Silver3          = material{ texture { Silver3          }}
+#declare Soft_Silver      = material{ texture { Soft_Silver      }}
+#declare New_Penny        = material{ texture { New_Penny        }}
+#declare Tinny_Brass      = material{ texture { Tinny_Brass      }}
+#declare Gold_Nugget      = material{ texture { Gold_Nugget      }}
+#declare Brass_Valley     = material{ texture { Brass_Valley }
+                                      scale 2 }
+#declare Rust             = material{ texture { Rust }
+                                      scale 2 }
+#declare Rusty_Iron       = material{ texture { Rusty_Iron }
+                                      scale 2.5 }
